@@ -46,6 +46,8 @@ dependencies:
   geocoding: ^2.1.1
   file_picker: ^6.1.1
   mime: ^1.0.4
+  path_provider: ^2.0.2
+  flutter_screenutil: ^5.9.0
   loading_animation_widget:
 
 dev_dependencies:
