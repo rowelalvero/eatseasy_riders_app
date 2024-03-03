@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "681211585450",
+    "project_id": "eatseasy-food-applicatio-b58e6",
+    "storage_bucket": "eatseasy-food-applicatio-b58e6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:681211585450:android:d76d9dc9c65653dc5c41d3",
+        "android_client_info": {
+          "package_name": "com.szacheo.eatseasy_partner_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBpWExxRhfTeKKhbLbfgmx1vK5OEBfSsc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:681211585450:android:dfea8c0b471b5f755c41d3",
+        "android_client_info": {
+          "package_name": "com.szacheo.eatseasy_riders_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBpWExxRhfTeKKhbLbfgmx1vK5OEBfSsc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
