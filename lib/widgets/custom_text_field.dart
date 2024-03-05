@@ -24,11 +24,9 @@ class CustomTextField extends StatelessWidget {
     return Container(
       //box styling
       decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 255, 255, 255),
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(
-            color: const Color.fromARGB(255, 67, 83, 89),
-          )),
+        color: const Color(0xFFE0E3E7),
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: const EdgeInsets.all(4),
       margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
 

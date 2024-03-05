@@ -48,6 +48,8 @@ dependencies:
   mime: ^1.0.4
   path_provider: ^2.0.2
   flutter_screenutil: ^5.9.0
+  country_picker: ^2.0.25
+  csc_picker: ^0.2.7
   loading_animation_widget:
 
 dev_dependencies:
