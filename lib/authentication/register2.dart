@@ -131,36 +131,39 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 
           //spacing
           const SizedBox(
-            height: 30,
+            height: 20,
           ),
 
-          //submit button
-          ElevatedButton(
-            onPressed: () {
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: ElevatedButton(
+              onPressed: () {
 
-            },
-            //register button styling
-            style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 158, vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0))),
-
-            child: const Text(
-              "Submit",
-              style: TextStyle(
-                color: Color.fromARGB(255, 67, 83, 89),
-                fontFamily: "Poppins",
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
+              },
+              // Register button styling
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 242, 198, 65),
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 136, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0))),
+              child: const Text(
+                "Submit",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 67, 83, 89),
+                  fontFamily: "Poppins",
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                ),
               ),
             ),
           ),
+          //submit button
+
 
           //spacing
           const SizedBox(
-            height: 30,
+            height: 20,
           ),
         ],
       ),
@@ -238,25 +241,6 @@ class LinkTile extends StatelessWidget {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class LinkScreen extends StatelessWidget {
-  final String title;
-  final String message;
-
-  const LinkScreen({Key? key, required this.title, required this.message}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: Center(
-        child: Text(message),
       ),
     );
   }

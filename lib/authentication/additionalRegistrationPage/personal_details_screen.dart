@@ -14,6 +14,7 @@ class PersonalDetailsScreen extends StatefulWidget {
 
 class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   late SharedPreferences _prefs;
+  bool exit = false;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController secondaryContactNumberController =
@@ -253,12 +254,12 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   //Save user data locally
   void _saveUserDataToPrefs() async {
     _prefs = await SharedPreferences.getInstance();
-    await _prefs.setString(
-        'secondaryContactNumber', secondaryContactNumberController.text);
+    await _prefs.setString('secondaryContactNumber', secondaryContactNumberController.text);
     await _prefs.setString('nationality', nationalityController.text);
     if (imageXFile != null) {
       await _prefs.setString('user_image_path', imageXFile!.path);
     }
+    exit = true;
   }
 
   late String secondaryContactNumberData;
@@ -268,12 +269,13 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   Future<void> _loadUserDetails() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
-      secondaryContactNumberController.text =
-          _prefs.getString('secondaryContactNumber') ?? '';
-      nationalityController.text =
-          _prefs.getString('nationality') ?? _dropdownItems.first;
+      //Load secondary contact number data
+      secondaryContactNumberController.text = _prefs.getString('secondaryContactNumber') ?? '';
+      //Load nationality data
+      nationalityController.text = _prefs.getString('nationality') ?? _dropdownItems.first;
     });
 
+    //Load image
     String? imagePath = _prefs.getString('user_image_path');
     if (imagePath != null && imagePath.isNotEmpty) {
       setState(() {
@@ -304,7 +306,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope (
-      onWillPop: () => _confirmExitDialogue(context),
+      onWillPop: () => _confirmExitDialogue(context, exit),
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 242, 198, 65),
@@ -494,14 +496,24 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     ),
 
                     //spacing
-                    const SizedBox(height: 10),
-                    const Text("Secondary Contact Number",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 67, 83, 89),
-                          fontFamily: "Poppins",
-                        )),
-                    // Secondary contact number text field
+                    const SizedBox(height: 20),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 18),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Secondary Contact Number",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )),
+                          // Secondary contact number text field
+
+                        ],
+                      ),
+                    ),
                     CustomTextField(
                       keyboardType: TextInputType.number,
                       data: Icons.phone_android_rounded,
@@ -513,6 +525,23 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     //Spacing
                     const SizedBox(height: 10),
 
+                    const Padding(
+                      padding: EdgeInsets.only(left: 18),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Nationality",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )),
+                          // Secondary contact number text field
+
+                        ],
+                      ),
+                    ),
                     // Nationality dropdown
                     Container(
                         padding: const EdgeInsets.all(4),
@@ -548,82 +577,79 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             }).toList(),
                             dropdownColor: Colors.white,
                             // Set the background color of the dropdown list
-                            elevation:
-                                2, // Set the elevation of the dropdown list
+                            elevation: 2, // Set the elevation of the dropdown list
                           ),
                         )),
 
                   ],
                 ),
               ),
-
-
-              // Spacing
-              const SizedBox(
-                height: 10,
-              ),
-
-              // Submit button
-              ElevatedButton(
-                onPressed: () {
-                  _saveUserDataToPrefs();
-                },
-                // Register button styling
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 163, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0))),
-                child: const Text(
-                  "Save",
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 67, 83, 89),
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-
-              // Spacing
-              const SizedBox(
-                height: 30,
-              ),
             ],
+          ),
+        ),
+
+        // Submit button
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: ElevatedButton(
+            onPressed: () {
+              _saveUserDataToPrefs();
+            },
+            // Register button styling
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 242, 198, 65),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 166, vertical: 10),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0))),
+            child: const Text(
+              "Save",
+              style: TextStyle(
+                color: Color.fromARGB(255, 67, 83, 89),
+                fontFamily: "Poppins",
+                fontWeight: FontWeight.w700,
+                fontSize: 20,
+              ),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Future<bool> _confirmExitDialogue(BuildContext context) async {
-    /*if (secondaryContactNumberController.text.isNotEmpty ||
-        nationalityController.text.isNotEmpty) {
-      final result = await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Discard Changes?'),
-          content: const Text('Are you sure you want to discard changes?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: const Text('Discard'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-          ],
-        ),
-      );
-      if (result == true) {
-        setState(() async {
-          //Navigator.of(context).pop();
-        });
+  Future<bool> _confirmExitDialogue(BuildContext context, bool exit) async {
+    if (exit == false) {
+      if (secondaryContactNumberController.text.isNotEmpty ||
+          nationalityController.text.isNotEmpty) {
+        final result = await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Discard Changes?'),
+            content: const Text('Are you sure you want to discard changes?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Discard'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+        );
+        if (result == true) {
+          setState(() async {
+            imageXFile = XFile('');
+            nationalityController.text = _dropdownItems.first;
+            secondaryContactNumberController.text = '';
+            _prefs.clear();
+            Navigator.of(context).pop();
+          });
+        }
+        return result;
       }
-      return result;
-    }*/
+    }
     return true;
   }
 }

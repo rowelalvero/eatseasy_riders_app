@@ -317,8 +317,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               //submit button
               ElevatedButton(
-                onPressed: () => formValidation(),
-                // ignore: sort_child_properties_last
+                onPressed: () {
+                  formValidation();
+                },
+                // Register button styling
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 242, 198, 65),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 166, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0))),
                 child: const Text(
                   "Submit",
                   style: TextStyle(
@@ -328,13 +336,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     fontSize: 20,
                   ),
                 ),
-                //register button styling
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 160, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15.0))),
               ),
 
               //spacing

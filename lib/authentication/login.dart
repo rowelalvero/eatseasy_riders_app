@@ -206,9 +206,9 @@ class _LogInScreenState extends State<LogInScreen> {
             style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 242, 198, 65),
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 166, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 166, vertical: 10),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0))),
+                    borderRadius: BorderRadius.circular(12.0))),
           ),
 
           //Register Button
