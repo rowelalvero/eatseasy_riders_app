@@ -13,13 +13,15 @@ class PersonalDetailsScreen extends StatefulWidget {
 }
 
 class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
-  late SharedPreferences _prefs;
-  bool exit = false;
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  TextEditingController secondaryContactNumberController =
-      TextEditingController();
+  TextEditingController secondaryContactNumberController = TextEditingController();
   TextEditingController nationalityController = TextEditingController();
+
+  late SharedPreferences _prefs;
+  bool changesSaved  = false;
+  String initialSecondaryContactNumber = '';
+  String initialNationality = '';
+  String? initialImagePath;
 
   // Image picker instance
   XFile? imageXFile;
@@ -28,15 +30,14 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   Future<void> _getImage() async {
     _prefs = await SharedPreferences.getInstance();
     final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage =
-        await picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
     if (pickedImage != null) {
       final Directory appDirectory = await getApplicationDocumentsDirectory();
       final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       final String savedImagePath = '${appDirectory.path}/$fileName.png';
 
       await File(savedImagePath).writeAsBytes(await pickedImage.readAsBytes());
-
+      changesSaved = false;
       setState(() {
         imageXFile = XFile(savedImagePath);
       });
@@ -251,15 +252,31 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     'Zimbabwean',
   ];
 
+
+  Future<void> _loadChangesSaved() async {
+    _prefs = await SharedPreferences.getInstance();
+    setState(() {
+      changesSaved = _prefs.getBool('changesSaved') ?? false;
+      initialSecondaryContactNumber = _prefs.getString('secondaryContactNumber') ?? '';
+      initialNationality = _prefs.getString('nationality') ?? '';
+      initialImagePath = _prefs.getString('imagePath');
+    });
+  }
+
   //Save user data locally
   void _saveUserDataToPrefs() async {
     _prefs = await SharedPreferences.getInstance();
     await _prefs.setString('secondaryContactNumber', secondaryContactNumberController.text);
     await _prefs.setString('nationality', nationalityController.text);
+
     if (imageXFile != null) {
       await _prefs.setString('user_image_path', imageXFile!.path);
     }
-    exit = true;
+
+    await _prefs.setBool('changesSaved', true);
+    setState(() {
+      changesSaved  = true;
+    });
   }
 
   late String secondaryContactNumberData;
@@ -273,6 +290,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       secondaryContactNumberController.text = _prefs.getString('secondaryContactNumber') ?? '';
       //Load nationality data
       nationalityController.text = _prefs.getString('nationality') ?? _dropdownItems.first;
+      //
+      changesSaved  = _prefs.getBool('changesSaved') ?? false;
     });
 
     //Load image
@@ -291,6 +310,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
     setState(() {
       imageXFile = XFile('');
+      initialImagePath = '';
     });
   }
 
@@ -301,12 +321,47 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     // Set the initial value of the controller to the first item in the dropdown
     nationalityController.text = _dropdownItems.first;
     _loadUserDetails();
+    _loadChangesSaved();
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope (
-      onWillPop: () => _confirmExitDialogue(context, exit),
+      onWillPop: () async {
+        if (!changesSaved && secondaryContactNumberController.text != initialSecondaryContactNumber ||
+            nationalityController.text != initialNationality || imageXFile?.path != initialImagePath) {
+          final result = await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Discard Changes?'),
+              content: const Text('Are you sure you want to discard changes?'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Discard'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+              ],
+            ),
+          );
+          if (result == true) {
+            setState(() async {
+              imageXFile = XFile('');
+              nationalityController.text = _dropdownItems.first;
+              secondaryContactNumberController.text = '';
+              initialSecondaryContactNumber = '';
+              initialNationality = '';
+              _prefs.clear();
+              Navigator.of(context).pop();
+            });
+          }
+          return result;
+        }
+        return true;
+      },
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 242, 198, 65),
@@ -404,12 +459,14 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       child: CircleAvatar(
                         radius: MediaQuery.of(context).size.width * 0.20,
                         backgroundColor: const Color.fromARGB(255, 230, 229, 229),
-                        backgroundImage: imageXFile == null
-                            ? null
-                            : FileImage(File(imageXFile!.path)),
+                        backgroundImage: imageXFile == null && initialImagePath != null
+                            ? FileImage(File(initialImagePath!))
+                            : imageXFile != null
+                                ? FileImage(File(imageXFile!.path))
+                                : null,
 
                         // Alternative icon
-                        child: imageXFile == null
+                        child: imageXFile == null && initialImagePath == null
                             ? Icon(
                           Icons.add_photo_alternate,
                           size: MediaQuery.of(context).size.width * 0.20,
@@ -418,6 +475,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             : null,
                       ),
                     ),
+
 
 
                     Column(
@@ -520,6 +578,11 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       controller: secondaryContactNumberController,
                       hintText: "",
                       isObsecure: false,
+                      onChanged: (value) {
+                        setState(() {
+                          changesSaved = false;
+                        });
+                      },
                     ),
 
                     //Spacing
@@ -615,41 +678,5 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
         ),
       ),
     );
-  }
-
-  Future<bool> _confirmExitDialogue(BuildContext context, bool exit) async {
-    if (exit == false) {
-      if (secondaryContactNumberController.text.isNotEmpty ||
-          nationalityController.text.isNotEmpty) {
-        final result = await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Discard Changes?'),
-            content: const Text('Are you sure you want to discard changes?'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: const Text('Discard'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-            ],
-          ),
-        );
-        if (result == true) {
-          setState(() async {
-            imageXFile = XFile('');
-            nationalityController.text = _dropdownItems.first;
-            secondaryContactNumberController.text = '';
-            _prefs.clear();
-            Navigator.of(context).pop();
-          });
-        }
-        return result;
-      }
-    }
-    return true;
   }
 }

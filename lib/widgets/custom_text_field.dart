@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final String hintText;
   bool? isObsecure = true;
   bool? enabled = true;
+  final ValueChanged<String>? onChanged;
 
   CustomTextField({
     super.key,
@@ -17,6 +18,7 @@ class CustomTextField extends StatelessWidget {
     this.isObsecure,
     this.enabled,
     this.keyboardType,
+    this.onChanged,
   });
 
   @override
@@ -45,6 +47,7 @@ class CustomTextField extends StatelessWidget {
           focusColor: Theme.of(context).primaryColor,
           hintText: hintText,
         ),
+        onChanged: onChanged,
       ),
     );
   }
