@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'additionalRegistrationPage/personal_details_screen.dart';
+import '../global/global.dart';
 
 class RegisterScreen2 extends StatefulWidget {
   const RegisterScreen2({Key? key}) : super(key: key);
@@ -10,8 +12,6 @@ class RegisterScreen2 extends StatefulWidget {
 }
 
 class _RegisterScreen2State extends State<RegisterScreen2> {
-
-  
 
 
   @override
@@ -107,14 +107,14 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               textAlign: TextAlign.left,
             ),
           ),
-          const LinkTile(title: 'Personal Details', destination: '/personalDetails', isRequired: true),
-          const LinkTile(title: 'Driver License', destination: '/driversLicense', isRequired: true),
-          const LinkTile(title: 'Declarations', destination: '/declarations', isRequired: true),
-          const LinkTile(title: 'Consents', destination: '/consents', isRequired: true),
-          const LinkTile(title: 'EatsEasy Wallet', destination: '/eatsEasyWallet', isRequired: true),
-          const LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true),
-          const LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptional: true),
-          const LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptional: true),
+          const LinkTile(title: 'Personal Details', destination: '/personalDetails', isRequired: true, isCompleted: false),
+          const LinkTile(title: 'Driver License', destination: '/driversLicense', isRequired: true, isCompleted: false),
+          const LinkTile(title: 'Declarations', destination: '/declarations', isRequired: true, isCompleted: false),
+          const LinkTile(title: 'Consents', destination: '/consents', isRequired: true, isCompleted: false),
+          const LinkTile(title: 'EatsEasy Wallet', destination: '/eatsEasyWallet', isRequired: true, isCompleted: false),
+          const LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isCompleted: false),
+          const LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptional: true, isCompleted: false),
+          const LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptional: true, isCompleted: false),
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -129,9 +129,9 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               textAlign: TextAlign.left,
             ),
           ),
-          const LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isRequired: true),
-          const LinkTile(title: 'OR/CR', destination: '/orCr', isRequired: true),
-          const LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptional: true),
+          const LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isRequired: true, isCompleted: false),
+          const LinkTile(title: 'OR/CR', destination: '/orCr', isRequired: true, isCompleted: false),
+          const LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptional: true, isCompleted: false),
 
           //spacing
           const SizedBox(
@@ -180,6 +180,7 @@ class LinkTile extends StatelessWidget {
   final String destination;
   final bool isRequired;
   final bool isOptional;
+  final bool isCompleted;
 
   const LinkTile({
     Key? key,
@@ -187,6 +188,7 @@ class LinkTile extends StatelessWidget {
     required this.destination,
     this.isRequired = false,
     this.isOptional = false,
+    this.isCompleted = false,
   }) : super(key: key);
 
   @override
@@ -240,6 +242,19 @@ class LinkTile extends StatelessWidget {
                     textAlign: TextAlign.right,
                   ),
                 ],
+                if (isCompleted) ...[
+                  const SizedBox(width: 8.0),
+                  const Text(
+                    'Completed',
+                    style: TextStyle(
+                      fontSize: 14.0,
+                      fontFamily: "Poppins",
+                      color: Colors.green,
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ],
+
                 const Icon(Icons.arrow_forward_ios_rounded, color: Color.fromARGB(255, 67, 83, 89)),
               ],
             ),

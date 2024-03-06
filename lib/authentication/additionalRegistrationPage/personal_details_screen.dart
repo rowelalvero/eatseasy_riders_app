@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
+import '../../global/global.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
   const PersonalDetailsScreen({Key? key}) : super(key: key);
@@ -20,7 +21,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   // Image picker instance
   File? imageXFile;
 
-  late SharedPreferences _prefs;
   bool changesSaved = false;
 
 
@@ -242,6 +242,21 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     'Zimbabwean',
   ];
 
+  bool _personalDetailsScreenIsCompleted() {
+    return (sharedPreferences!.containsKey('nationality') &&
+        sharedPreferences!.containsKey('user_image_path') ||
+        sharedPreferences!.containsKey('secondaryContactNumber'));
+  }
+  Future<void> saveBooleanToSharedPreferences(bool value) async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences?.setBool('personal_details_completed', value);
+  }
+
+  // Call this method when you want to save the boolean value
+  void savePersonalDetailsCompletionStatus() async {
+    bool isCompleted = _personalDetailsScreenIsCompleted();
+    await saveBooleanToSharedPreferences(isCompleted);
+  }
 
   //Save user data locally
   void _saveUserDataToPrefs() async {
@@ -255,15 +270,15 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           });
     }
     else {
-      _prefs = await SharedPreferences.getInstance();
-      await _prefs.setString('secondaryContactNumber', secondaryContactNumberController.text);
-      await _prefs.setString('nationality', nationalityController.text);
-
+      sharedPreferences = await SharedPreferences.getInstance();
+      await sharedPreferences?.setString('secondaryContactNumber', secondaryContactNumberController.text);
+      await sharedPreferences?.setString('nationality', nationalityController.text);
+      savePersonalDetailsCompletionStatus();
       if (imageXFile != null) {
-        await _prefs.setString('user_image_path', imageXFile!.path);
+        await sharedPreferences?.setString('user_image_path', imageXFile!.path);
       }
 
-      await _prefs.setBool('changesSaved', true);
+      await sharedPreferences?.setBool('changesSaved', true);
       setState(() {
         changesSaved  = true;
       });
@@ -272,18 +287,18 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
   //Load user data if available
   Future<void> _loadUserDetails() async {
-    _prefs = await SharedPreferences.getInstance();
+    sharedPreferences = await SharedPreferences.getInstance();
     setState(() {
       //Load secondary contact number data
-      secondaryContactNumberController.text = _prefs.getString('secondaryContactNumber') ?? '';
+      secondaryContactNumberController.text = sharedPreferences?.getString('secondaryContactNumber') ?? '';
       //Load nationality data
-      nationalityController.text = _prefs.getString('nationality') ?? _dropdownItems.first;
+      nationalityController.text = sharedPreferences?.getString('nationality') ?? _dropdownItems.first;
       //
-      changesSaved  = _prefs.getBool('changesSaved') ?? false;
+      changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
     });
 
     //Load image
-    String? imagePath = _prefs.getString('user_image_path');
+    String? imagePath = sharedPreferences?.getString('user_image_path');
     if (imagePath != null && imagePath.isNotEmpty) {
       setState(() {
         imageXFile = File(imagePath);
@@ -335,34 +350,34 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           );
           if (result == true) {
             setState(() async {
-              if (_prefs.containsKey('nationality') &&
-                  _prefs.containsKey('user_image_path') ||
-                  _prefs.containsKey('secondaryContactNumber')) {
+              if (sharedPreferences!.containsKey('nationality') &&
+                  sharedPreferences!.containsKey('user_image_path') ||
+                  sharedPreferences!.containsKey('secondaryContactNumber')) {
 
-                _prefs = await SharedPreferences.getInstance();
+                sharedPreferences = await SharedPreferences.getInstance();
                 setState(() {
                   //Load secondary contact number data
-                  secondaryContactNumberController.text = _prefs.getString('secondaryContactNumber') ?? '';
+                  secondaryContactNumberController.text = sharedPreferences?.getString('secondaryContactNumber') ?? '';
                   //Load nationality data
-                  nationalityController.text = _prefs.getString('nationality') ?? _dropdownItems.first;
+                  nationalityController.text = sharedPreferences?.getString('nationality') ?? _dropdownItems.first;
                   //
-                  changesSaved  = _prefs.getBool('changesSaved') ?? false;
+                  changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
                 });
 
                 //Load image
-                String? imagePath = _prefs.getString('user_image_path');
+                String? imagePath = sharedPreferences?.getString('user_image_path');
                 if (imagePath != null && imagePath.isNotEmpty) {
                   setState(() {
                     imageXFile = File(imagePath);
                   });
                 }
+                nationalityController.text = _dropdownItems.first;
                 Navigator.of(context).pop();
               }
               else {
                 imageXFile = File('');
                 nationalityController.text = _dropdownItems.first;
                 secondaryContactNumberController.text = '';
-                _prefs.clear();
                 Navigator.of(context).pop();
               }
             });
@@ -636,8 +651,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                                 nationalityController.text = newValue!;
                                 changesSaved = false;
                               });
-                              // Save the selected value to SharedPreferences when it changes
-                              await _prefs.setString('nationality', newValue!);
                             },
                             items: _dropdownItems.map((String value) {
                               return DropdownMenuItem<String>(
