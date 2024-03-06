@@ -295,8 +295,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     setState(() {
       changesSaved = false;
     });
-    _prefs = await SharedPreferences.getInstance();
-    await _prefs.remove('user_image_path');
 
     setState(() {
       imageXFile = null;
@@ -337,11 +335,36 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           );
           if (result == true) {
             setState(() async {
-              imageXFile = File('');
-              nationalityController.text = _dropdownItems.first;
-              secondaryContactNumberController.text = '';
-              _prefs.clear();
-              Navigator.of(context).pop();
+              if (_prefs.containsKey('nationality') &&
+                  _prefs.containsKey('user_image_path') ||
+                  _prefs.containsKey('secondaryContactNumber')) {
+
+                _prefs = await SharedPreferences.getInstance();
+                setState(() {
+                  //Load secondary contact number data
+                  secondaryContactNumberController.text = _prefs.getString('secondaryContactNumber') ?? '';
+                  //Load nationality data
+                  nationalityController.text = _prefs.getString('nationality') ?? _dropdownItems.first;
+                  //
+                  changesSaved  = _prefs.getBool('changesSaved') ?? false;
+                });
+
+                //Load image
+                String? imagePath = _prefs.getString('user_image_path');
+                if (imagePath != null && imagePath.isNotEmpty) {
+                  setState(() {
+                    imageXFile = File(imagePath);
+                  });
+                }
+                Navigator.of(context).pop();
+              }
+              else {
+                imageXFile = File('');
+                nationalityController.text = _dropdownItems.first;
+                secondaryContactNumberController.text = '';
+                _prefs.clear();
+                Navigator.of(context).pop();
+              }
             });
           }
           return result;
