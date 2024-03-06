@@ -10,6 +10,10 @@ class RegisterScreen2 extends StatefulWidget {
 }
 
 class _RegisterScreen2State extends State<RegisterScreen2> {
+
+  
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

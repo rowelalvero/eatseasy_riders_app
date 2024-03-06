@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/custom_text_field.dart';
+import '../../widgets/error_dialog.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
   const PersonalDetailsScreen({Key? key}) : super(key: key);
@@ -17,33 +17,23 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   TextEditingController secondaryContactNumberController = TextEditingController();
   TextEditingController nationalityController = TextEditingController();
 
-  late SharedPreferences _prefs;
-  bool changesSaved  = false;
-  String initialSecondaryContactNumber = '';
-  String initialNationality = '';
-  String? initialImagePath;
-
   // Image picker instance
-  XFile? imageXFile;
+  File? imageXFile;
+
+  late SharedPreferences _prefs;
+  bool changesSaved = false;
+
 
   // Get image
   Future<void> _getImage() async {
-    _prefs = await SharedPreferences.getInstance();
     final ImagePicker picker = ImagePicker();
     final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      final Directory appDirectory = await getApplicationDocumentsDirectory();
-      final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      final String savedImagePath = '${appDirectory.path}/$fileName.png';
-
-      await File(savedImagePath).writeAsBytes(await pickedImage.readAsBytes());
-      changesSaved = false;
-      setState(() {
-        imageXFile = XFile(savedImagePath);
-      });
-
-      _prefs.setString('image_path', savedImagePath);
-    }
+    setState(() {
+      if (pickedImage != null) {
+        imageXFile = File(pickedImage.path);
+        changesSaved = false;
+      }
+    });
   }
 
   //Nationality dropdown items
@@ -253,34 +243,32 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   ];
 
 
-  Future<void> _loadChangesSaved() async {
-    _prefs = await SharedPreferences.getInstance();
-    setState(() {
-      changesSaved = _prefs.getBool('changesSaved') ?? false;
-      initialSecondaryContactNumber = _prefs.getString('secondaryContactNumber') ?? '';
-      initialNationality = _prefs.getString('nationality') ?? '';
-      initialImagePath = _prefs.getString('imagePath');
-    });
-  }
-
   //Save user data locally
   void _saveUserDataToPrefs() async {
-    _prefs = await SharedPreferences.getInstance();
-    await _prefs.setString('secondaryContactNumber', secondaryContactNumberController.text);
-    await _prefs.setString('nationality', nationalityController.text);
-
-    if (imageXFile != null) {
-      await _prefs.setString('user_image_path', imageXFile!.path);
+    if (imageXFile == null) {
+      showDialog(
+          context: context,
+          builder: (c) {
+            return const ErrorDialog(
+              message: "Please select an image.",
+            );
+          });
     }
+    else {
+      _prefs = await SharedPreferences.getInstance();
+      await _prefs.setString('secondaryContactNumber', secondaryContactNumberController.text);
+      await _prefs.setString('nationality', nationalityController.text);
 
-    await _prefs.setBool('changesSaved', true);
-    setState(() {
-      changesSaved  = true;
-    });
+      if (imageXFile != null) {
+        await _prefs.setString('user_image_path', imageXFile!.path);
+      }
+
+      await _prefs.setBool('changesSaved', true);
+      setState(() {
+        changesSaved  = true;
+      });
+    }
   }
-
-  late String secondaryContactNumberData;
-  String? nationalityData;
 
   //Load user data if available
   Future<void> _loadUserDetails() async {
@@ -298,19 +286,21 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     String? imagePath = _prefs.getString('user_image_path');
     if (imagePath != null && imagePath.isNotEmpty) {
       setState(() {
-        imageXFile = XFile(imagePath);
+        imageXFile = File(imagePath);
       });
     }
   }
 
-  // Remove image
   Future<void> _removeImage() async {
+    setState(() {
+      changesSaved = false;
+    });
     _prefs = await SharedPreferences.getInstance();
     await _prefs.remove('user_image_path');
 
     setState(() {
-      imageXFile = XFile('');
-      initialImagePath = '';
+      imageXFile = null;
+      // Update changesSaved based on other changes
     });
   }
 
@@ -321,15 +311,13 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     // Set the initial value of the controller to the first item in the dropdown
     nationalityController.text = _dropdownItems.first;
     _loadUserDetails();
-    _loadChangesSaved();
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope (
       onWillPop: () async {
-        if (!changesSaved && secondaryContactNumberController.text != initialSecondaryContactNumber ||
-            nationalityController.text != initialNationality || imageXFile?.path != initialImagePath) {
+        if (!changesSaved) {
           final result = await showDialog(
             context: context,
             builder: (context) => AlertDialog(
@@ -349,11 +337,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           );
           if (result == true) {
             setState(() async {
-              imageXFile = XFile('');
+              imageXFile = File('');
               nationalityController.text = _dropdownItems.first;
               secondaryContactNumberController.text = '';
-              initialSecondaryContactNumber = '';
-              initialNationality = '';
               _prefs.clear();
               Navigator.of(context).pop();
             });
@@ -452,28 +438,25 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                     // Image Picker
                     InkWell(
-                      // Get image from gallery
+                      //get image from gallery
                       onTap: () => _getImage(),
 
-                      // Display selected image or alternative icon
+                      //display selected image
                       child: CircleAvatar(
-                        radius: MediaQuery.of(context).size.width * 0.20,
-                        backgroundColor: const Color.fromARGB(255, 230, 229, 229),
-                        backgroundImage: imageXFile == null && initialImagePath != null
-                            ? FileImage(File(initialImagePath!))
-                            : imageXFile != null
-                                ? FileImage(File(imageXFile!.path))
-                                : null,
+                          radius: MediaQuery.of(context).size.width * 0.20,
+                          backgroundColor: const Color.fromARGB(255, 230, 229, 229),
+                          backgroundImage: imageXFile == null
+                              ? null
+                              : FileImage(imageXFile!),
 
-                        // Alternative icon
-                        child: imageXFile == null && initialImagePath == null
-                            ? Icon(
-                          Icons.add_photo_alternate,
-                          size: MediaQuery.of(context).size.width * 0.20,
-                          color: Colors.grey,
-                        )
-                            : null,
-                      ),
+                          //alternative icon
+                          child: imageXFile == null
+                              ? Icon(
+                            Icons.add_photo_alternate,
+                            size: MediaQuery.of(context).size.width * 0.20,
+                            color: Colors.grey,
+                          )
+                              : null),
                     ),
 
 
@@ -628,6 +611,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             onChanged: (String? newValue) async {
                               setState(() {
                                 nationalityController.text = newValue!;
+                                changesSaved = false;
                               });
                               // Save the selected value to SharedPreferences when it changes
                               await _prefs.setString('nationality', newValue!);
@@ -642,8 +626,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             // Set the background color of the dropdown list
                             elevation: 2, // Set the elevation of the dropdown list
                           ),
-                        )),
-
+                        )
+                    ),
                   ],
                 ),
               ),
