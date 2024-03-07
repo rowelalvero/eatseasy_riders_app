@@ -12,7 +12,18 @@ class RegisterScreen2 extends StatefulWidget {
 }
 
 class _RegisterScreen2State extends State<RegisterScreen2> {
+  late Future<bool> _isPersonalDetailsCompleted;
 
+  @override
+  void initState() {
+    super.initState();
+    _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
+  }
+
+  Future<bool> _checkPersonalDetailsCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('personalDetailsCompleted') ?? false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,15 +118,19 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               textAlign: TextAlign.left,
             ),
           ),
-          const LinkTile(title: 'Personal Details', destination: '/personalDetails', isRequired: true, isCompleted: false),
-          const LinkTile(title: 'Driver License', destination: '/driversLicense', isRequired: true, isCompleted: false),
-          const LinkTile(title: 'Declarations', destination: '/declarations', isRequired: true, isCompleted: false),
-          const LinkTile(title: 'Consents', destination: '/consents', isRequired: true, isCompleted: false),
-          const LinkTile(title: 'EatsEasy Wallet', destination: '/eatsEasyWallet', isRequired: true, isCompleted: false),
-          const LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isCompleted: false),
-          const LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptional: true, isCompleted: false),
-          const LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptional: true, isCompleted: false),
-          const SizedBox(height: 20),
+          LinkTile(title: 'Personal Details', destination: '/personalDetails', isRequiredBasedOnCompletion : true, isCompleted: _isPersonalDetailsCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
+            });
+          },),
+          //LinkTile(title: 'Driver License', destination: '/driversLicense', isRequired: true, isCompleted: false),
+          //LinkTile(title: 'Declarations', destination: '/declarations', isRequired: true, isCompleted: false),
+          //LinkTile(title: 'Consents', destination: '/consents', isRequired: true, isCompleted: false),
+          //LinkTile(title: 'EatsEasy Wallet', destination: '/eatsEasyWallet', isRequired: true, isCompleted: false),
+          //LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isCompleted: false),
+          //LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptional: true, isCompleted: false),
+          //LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptional: true, isCompleted: false),
+          //SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: const Text(
@@ -129,9 +144,9 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               textAlign: TextAlign.left,
             ),
           ),
-          const LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isRequired: true, isCompleted: false),
-          const LinkTile(title: 'OR/CR', destination: '/orCr', isRequired: true, isCompleted: false),
-          const LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptional: true, isCompleted: false),
+          //LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isRequired: true, isCompleted: false),
+          //LinkTile(title: 'OR/CR', destination: '/orCr', isRequired: true, isCompleted: false),
+          //LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptional: true, isCompleted: false),
 
           //spacing
           const SizedBox(
@@ -178,89 +193,99 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 class LinkTile extends StatelessWidget {
   final String title;
   final String destination;
-  final bool isRequired;
+  final bool isRequiredBasedOnCompletion ;
   final bool isOptional;
-  final bool isCompleted;
+  final Future<bool> isCompleted;
+  final VoidCallback? updateCompletionStatus;
 
   const LinkTile({
     Key? key,
     required this.title,
     required this.destination,
-    this.isRequired = false,
+    required this.isRequiredBasedOnCompletion,
     this.isOptional = false,
-    this.isCompleted = false,
+    required this.isCompleted,
+    this.updateCompletionStatus,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18.0),
-      child: Card(
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8.0),
-        ),
-        child: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, destination);
-            },
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18.0,
-                      fontFamily: "Poppins",
-                      color: Colors.black54,
+    return FutureBuilder<bool>(
+      future: isCompleted,
+      builder: (context, snapshot) {
+        bool completed = snapshot.data ?? false;
+        bool isRequired = isRequiredBasedOnCompletion && !completed;
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+          child: Card(
+            elevation: 1,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: InkWell(
+              onTap: () {
+                Navigator.pushNamed(context, destination).then((_) {
+                  updateCompletionStatus?.call(); // Call the updateCompletionStatus callback after navigating back
+                });
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 18.0,
+                          fontFamily: "Poppins",
+                          color: Colors.black54,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (isRequired) ...[
+                      const SizedBox(width: 8.0),
+                      const Text(
+                        'Required',
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontFamily: "Poppins",
+                          color: Colors.orange,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                    if (isOptional) ...[
+                      const SizedBox(width: 8.0),
+                      const Text(
+                        'Optional',
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontFamily: "Poppins",
+                          color: Colors.black,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                    if (completed) ...[
+                      const SizedBox(width: 8.0),
+                      const Text(
+                        'Completed',
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontFamily: "Poppins",
+                          color: Colors.green,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                    const Icon(Icons.arrow_forward_ios_rounded, color: Color.fromARGB(255, 67, 83, 89)),
+                  ],
                 ),
-                if (isRequired) ...[
-                  const SizedBox(width: 8.0),
-                  const Text(
-                    'Required',
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontFamily: "Poppins",
-                      color: Colors.orange,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ],
-                if (isOptional) ...[
-                  const SizedBox(width: 8.0),
-                  const Text(
-                    'Optional',
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontFamily: "Poppins",
-                      color: Colors.black,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ],
-                if (isCompleted) ...[
-                  const SizedBox(width: 8.0),
-                  const Text(
-                    'Completed',
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      fontFamily: "Poppins",
-                      color: Colors.green,
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ],
-
-                const Icon(Icons.arrow_forward_ios_rounded, color: Color.fromARGB(255, 67, 83, 89)),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

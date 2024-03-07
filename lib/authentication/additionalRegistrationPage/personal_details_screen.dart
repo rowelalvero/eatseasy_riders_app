@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
 import '../../global/global.dart';
+import '../register2.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
   const PersonalDetailsScreen({Key? key}) : super(key: key);
@@ -22,6 +23,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   File? imageXFile;
 
   bool changesSaved = false;
+  bool isCompleted = false;
 
 
   // Get image
@@ -32,6 +34,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       if (pickedImage != null) {
         imageXFile = File(pickedImage.path);
         changesSaved = false;
+        isCompleted = false;
       }
     });
   }
@@ -281,6 +284,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       await sharedPreferences?.setBool('changesSaved', true);
       setState(() {
         changesSaved  = true;
+        isCompleted = true;
       });
     }
   }
@@ -338,7 +342,12 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
               content: const Text('Are you sure you want to discard changes?'),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context, true),
+                  onPressed: () {
+                    setState(() {
+                      RegisterScreen2();
+                    });
+                    Navigator.pop(context, true);
+                    },
                   child: const Text('Discard'),
                 ),
                 TextButton(
@@ -348,44 +357,36 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
               ],
             ),
           );
+
           if (result == true) {
-            setState(() async {
+            sharedPreferences = await SharedPreferences.getInstance();
+            setState(() {
               if (sharedPreferences!.containsKey('nationality') &&
                   sharedPreferences!.containsKey('user_image_path') ||
                   sharedPreferences!.containsKey('secondaryContactNumber')) {
-
-                sharedPreferences = await SharedPreferences.getInstance();
-                setState(() {
-                  //Load secondary contact number data
-                  secondaryContactNumberController.text = sharedPreferences?.getString('secondaryContactNumber') ?? '';
-                  //Load nationality data
-                  nationalityController.text = sharedPreferences?.getString('nationality') ?? _dropdownItems.first;
-                  //
-                  changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
-                });
-
-                //Load image
+                // Load secondary contact number data
+                secondaryContactNumberController.text = sharedPreferences?.getString('secondaryContactNumber') ?? '';
+                // Load nationality data
+                nationalityController.text = sharedPreferences?.getString('nationality') ?? _dropdownItems.first;
+                // Load image
                 String? imagePath = sharedPreferences?.getString('user_image_path');
                 if (imagePath != null && imagePath.isNotEmpty) {
-                  setState(() {
-                    imageXFile = File(imagePath);
-                  });
+                  imageXFile = File(imagePath);
                 }
-                nationalityController.text = _dropdownItems.first;
-                Navigator.of(context).pop();
-              }
-              else {
+                changesSaved = sharedPreferences?.getBool('changesSaved') ?? false;
+              } else {
                 imageXFile = File('');
                 nationalityController.text = _dropdownItems.first;
                 secondaryContactNumberController.text = '';
-                Navigator.of(context).pop();
               }
             });
+            return true; // Allow pop after changes are discarded
           }
-          return result;
+          return false; // Prevent pop if changes are not discarded
         }
-        return true;
+        return true; // Allow pop if changes are saved
       },
+
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 242, 198, 65),
@@ -602,6 +603,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       onChanged: (value) {
                         setState(() {
                           changesSaved = false;
+                          isCompleted = false;
                         });
                       },
                     ),
@@ -650,6 +652,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                               setState(() {
                                 nationalityController.text = newValue!;
                                 changesSaved = false;
+                                isCompleted = false;
                               });
                             },
                             items: _dropdownItems.map((String value) {
@@ -677,6 +680,15 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           child: ElevatedButton(
             onPressed: () {
               _saveUserDataToPrefs();
+              setState(() {
+                isCompleted = true;
+              });
+
+              // Store completion status in shared preferences
+              SharedPreferences.getInstance().then((sharedPreferences) {
+                sharedPreferences.setBool('personalDetailsCompleted', true);
+              });
+              RegisterScreen2();
             },
             // Register button styling
             style: ElevatedButton.styleFrom(
