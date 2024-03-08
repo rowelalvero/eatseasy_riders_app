@@ -1,8 +1,17 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_storage/firebase_storage.dart' as fStorage;
+import 'package:firebase_auth/firebase_auth.dart';
 
+import '../widgets/error_dialog.dart';
+import '../widgets/loading_dialog.dart';
 import 'additionalRegistrationPage/personal_details_screen.dart';
 import '../global/global.dart';
+import 'auth_screen.dart';
 
 class RegisterScreen2 extends StatefulWidget {
   const RegisterScreen2({Key? key}) : super(key: key);
@@ -14,15 +23,120 @@ class RegisterScreen2 extends StatefulWidget {
 class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isPersonalDetailsCompleted;
 
+  Future<bool> _checkPersonalDetailsCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('personalDetailsCompleted') ?? false;
+  }
+
+  String riderImageUrl = "";
+  Future<void> _uploadRiderImage() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    // Retrieve image bytes from SharedPreferences
+    final String? imageDataString = sharedPreferences?.getString('user_image_path');
+    final String? riderEmail = sharedPreferences?.getString('email');
+    // Decode base64 string to bytes
+    final Uint8List imageBytes = base64Decode(imageDataString!);
+
+    String imageFileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+    // Save the image to reference path and replace image file name with imageFileName
+    fStorage.Reference reference = fStorage.FirebaseStorage.instance
+        .ref()
+        .child("ridersAssets")
+        .child(riderEmail!)
+        .child("profile")
+        .child(imageFileName);
+
+    // Upload the image to the path reference in Firebase storage
+    fStorage.UploadTask uploadTask = reference.putData(imageBytes);
+
+    // Get the download URL of the image after the upload is complete
+    fStorage.TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() async {
+      print("File uploaded");
+    });
+
+    //Store the URL to vendorImageUrl
+    riderImageUrl = await reference.getDownloadURL();
+  }
+
+  //Form validation
+  Future<void> formValidation() async {
+    bool isPersonalDetailsCompleted = await _checkPersonalDetailsCompleted();
+    //check if image is empty
+    if (!isPersonalDetailsCompleted) {
+      showDialog(
+          context: context,
+          builder: (c) {
+            return const ErrorDialog(
+              message: "Please complete the required fields.",
+            );
+          });
+    }
+    //image is selected
+    else {
+      showDialog(
+          context: context,
+          builder: (c) {
+            return const LoadingDialog(
+              message: "Submitting",
+            );
+          });
+      //Authenticate the rider
+      authenticateRiderAndSignUp();
+    }
+  }
+
+  //Authenticate the rider
+  void authenticateRiderAndSignUp() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    String? currentUserUid = sharedPreferences?.getString('currentUserUid');
+    /*String? savedEmail = sharedPreferences!.getString('email');
+    String? savedPassword = sharedPreferences!.getString('password');*/
+
+    //If the rider is authenticated
+    if (currentUserUid != null) {
+      //The business logo will upload to Firestorage
+      await _uploadRiderImage();
+
+      //save rider's credential to Firestore by calling the function
+      await _saveDataToFirestore().then((value) {
+        //Stop the loading screen
+        Navigator.pop(context);
+
+        //To prevent the user to go directly to home screen after restarted the app
+        firebaseAuth.signOut();
+
+        //Going back to Login page to login rider's credentials
+        Route newRoute = MaterialPageRoute(builder: (c) => const AuthScreen());
+        Navigator.pushReplacement(context, newRoute);
+      });
+    }
+  }
+
+  //Saves rider information to Firestore
+  Future<User?> _saveDataToFirestore() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    String? currentUserUid = sharedPreferences?.getString('currentUserUid');
+    String? savedSecondaryContactNumber = sharedPreferences!.getString('secondaryContactNumber');
+    String? savedNationality = sharedPreferences!.getString('nationality');
+
+    // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
+    await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
+      "secondaryContactNumber": savedSecondaryContactNumber,
+      "nationality": savedNationality,
+    });
+
+    //Save rider's data locally
+    sharedPreferences = await SharedPreferences.getInstance();
+
+
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
     _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
-  }
-
-  Future<bool> _checkPersonalDetailsCompleted() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    return sharedPreferences?.getBool('personalDetailsCompleted') ?? false;
   }
 
   @override
@@ -156,9 +270,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: ElevatedButton(
-              onPressed: () {
-
-              },
+              onPressed: () => formValidation(),
               // Register button styling
               style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 242, 198, 65),

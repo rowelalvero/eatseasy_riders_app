@@ -1,11 +1,8 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eatseasy_riders_app/authentication/register2.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fStorage;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mime/mime.dart';
@@ -74,7 +71,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               );
             });
 
-        //Authenticate the Vendor
+        //Authenticate the rider
         authenticateVendorAndSignUp();
       }
       //fill the empty fields
@@ -100,16 +97,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  //Authenticate the vendor
+  //Authenticate the rider
   void authenticateVendorAndSignUp() async {
     User? currentUser;
-
-    //Create or authenticate vendor email and password to Firestore
+    sharedPreferences = await SharedPreferences.getInstance();
+    //Create or authenticate rider email and password to Firestore
     await firebaseAuth.createUserWithEmailAndPassword(
       email: emailController.text.trim(),
       password: passwordController.text.trim(),
     ).then((auth) {
-      //Once authenticated, assign the authenticated vendor to currentUser variable
+      //Once authenticated, assign the authenticated rider to currentUser variable
       currentUser = auth.user;
     }).catchError((error) {
       Navigator.pop(context);
@@ -122,30 +119,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
           });
     });
 
-    //If the vendor is authenticated
     if (currentUser != null) {
+      // Save user's credentials to SharedPreferences
+      await saveCurrentUserToSharedPreferences(currentUser!);
+      // Rest of your code
+    }
 
-
-      //save vendor's credential to Firestore by calling the function
+    //If the rider is authenticated
+    if (currentUser != null) {
+      //save rider's credential to Firestore by calling the function
       await saveDataToFirestore(currentUser!).then((value) {
         //Stop the loading screen
         Navigator.pop(context);
 
         //To prevent the user to go directly to home screen after restarted the app
-        firebaseAuth.signOut();
+        //firebaseAuth.signOut();
 
-        //Going back to Login page to login vendor's credentials
-        Route newRoute = MaterialPageRoute(builder: (c) => const AuthScreen());
+        //Going back to Login page to login rider's credentials
+        Route newRoute = MaterialPageRoute(builder: (c) => const RegisterScreen2());
         Navigator.pushReplacement(context, newRoute);
       });
     }
   }
+  //Save currentUser to sharedPreferences
+  Future<void> saveCurrentUserToSharedPreferences(User user) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences.setString('currentUserUid', user.uid);
+  }
 
-  //Saves vendor information to Firestore
+  //Saves rider information to Firestore
   Future saveDataToFirestore(User currentUser) async {
-    // Accessing the Firestore collection 'vendors' and setting the document with their unique currentUser's UID
-    await FirebaseFirestore.instance.collection("vendors").doc(currentUser.uid).set({
-      "RiderUID": currentUser.uid, // Storing user's UID
+    // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
+    await FirebaseFirestore.instance.collection("riders").doc(currentUser.uid).set({
+      "riderUID": currentUser.uid, // Storing user's UID
       "riderEmail": currentUser.email, // Storing user's email
       "cityAddress": cityController.text.trim(), // Storing city address after trimming leading/trailing whitespace
       "lastName": lastNameController.text.trim(), // Storing last name after trimming leading/trailing whitespace
@@ -156,12 +162,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "earnings": 0.0, // Initializing earnings as 0.0
     });
 
-    //Save vendor's data locally
+    //Save rider's data locally
     sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences!.setString("uid", currentUser.uid);
     await sharedPreferences!.setString("email", currentUser.email.toString());
     await sharedPreferences!.setString("contactNumber", contactNumberController.text.trim());
-
+    await sharedPreferences?.setString('email', emailController.text.trim());
+    await sharedPreferences?.setString('password', passwordController.text.trim());
+    await sharedPreferences?.setString('confirmPassword', confirmPasswordController.text.trim());
   }
 
   @override

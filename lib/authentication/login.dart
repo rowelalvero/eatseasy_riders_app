@@ -102,7 +102,7 @@ class _LogInScreenState extends State<LogInScreen> {
 
     Timer(const Duration(seconds: 3), () async {
       Navigator.pop(context);
-      Navigator.push(context,MaterialPageRoute(builder: (c) => RegisterScreen2()));
+      Navigator.push(context,MaterialPageRoute(builder: (c) => const RegisterScreen()));
     });
 
 

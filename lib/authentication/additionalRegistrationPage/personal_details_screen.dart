@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
@@ -22,22 +24,44 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   // Image picker instance
   File? imageXFile;
 
-  bool changesSaved = false;
+  bool changesSaved = true;
   bool isCompleted = false;
+  late List<int> riderProfileImageBytes;
 
 
   // Get image
   Future<void> _getImage() async {
+    sharedPreferences = await SharedPreferences.getInstance();
     final ImagePicker picker = ImagePicker();
     final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
-    setState(() {
-      if (pickedImage != null) {
+    if (pickedImage != null) {
+      final Directory appDirectory = await getApplicationDocumentsDirectory();
+      final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+
+      // Get the file extension
+      String fileExtension = pickedImage.path.split('.').last.toLowerCase();
+
+      // If the file extension is not jpg/jpeg or png, assume png
+      if (!(fileExtension == 'jpg' || fileExtension == 'jpeg')) {
+        fileExtension = 'png';
+      }
+
+      // Change the extension of the saved image path accordingly
+      final String savedImagePath = '${appDirectory.path}/$fileName.$fileExtension';
+
+      await File(savedImagePath).writeAsBytes(await pickedImage.readAsBytes());
+
+      setState(() async {
         imageXFile = File(pickedImage.path);
+        //riderProfileImageBytes = await File(savedImagePath).readAsBytes();
         changesSaved = false;
         isCompleted = false;
-      }
-    });
+      });
+      // Convert image to bytes
+
+    }
   }
+
 
   //Nationality dropdown items
   final List<String> _dropdownItems = [
@@ -245,22 +269,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     'Zimbabwean',
   ];
 
-  bool _personalDetailsScreenIsCompleted() {
-    return (sharedPreferences!.containsKey('nationality') &&
-        sharedPreferences!.containsKey('user_image_path') ||
-        sharedPreferences!.containsKey('secondaryContactNumber'));
-  }
-  Future<void> saveBooleanToSharedPreferences(bool value) async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences?.setBool('personal_details_completed', value);
-  }
-
-  // Call this method when you want to save the boolean value
-  void savePersonalDetailsCompletionStatus() async {
-    bool isCompleted = _personalDetailsScreenIsCompleted();
-    await saveBooleanToSharedPreferences(isCompleted);
-  }
-
   //Save user data locally
   void _saveUserDataToPrefs() async {
     if (imageXFile == null) {
@@ -276,9 +284,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       sharedPreferences = await SharedPreferences.getInstance();
       await sharedPreferences?.setString('secondaryContactNumber', secondaryContactNumberController.text);
       await sharedPreferences?.setString('nationality', nationalityController.text);
-      savePersonalDetailsCompletionStatus();
       if (imageXFile != null) {
         await sharedPreferences?.setString('user_image_path', imageXFile!.path);
+        //await sharedPreferences?.setString('riderProfileImageBytes', base64Encode(riderProfileImageBytes));
       }
 
       await sharedPreferences?.setBool('changesSaved', true);
@@ -286,6 +294,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
         changesSaved  = true;
         isCompleted = true;
       });
+
+      // Store completion status in shared preferences
+      await sharedPreferences?.setBool('personalDetailsCompleted', true);
     }
   }
 
@@ -344,7 +355,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 TextButton(
                   onPressed: () {
                     setState(() {
-                      RegisterScreen2();
+                      const RegisterScreen2();
                     });
                     Navigator.pop(context, true);
                     },
@@ -678,18 +689,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(18.0),
           child: ElevatedButton(
-            onPressed: () {
-              _saveUserDataToPrefs();
-              setState(() {
-                isCompleted = true;
-              });
-
-              // Store completion status in shared preferences
-              SharedPreferences.getInstance().then((sharedPreferences) {
-                sharedPreferences.setBool('personalDetailsCompleted', true);
-              });
-              RegisterScreen2();
-            },
+            onPressed: () => _saveUserDataToPrefs(),
             // Register button styling
             style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 242, 198, 65),
