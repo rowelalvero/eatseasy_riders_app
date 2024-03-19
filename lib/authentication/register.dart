@@ -133,7 +133,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         Navigator.pop(context);
 
         //To prevent the user to go directly to home screen after restarted the app
-        //firebaseAuth.signOut();
+        firebaseAuth.signOut();
 
         //Going back to Login page to login rider's credentials
         Route newRoute = MaterialPageRoute(builder: (c) => const RegisterScreen2());
@@ -158,7 +158,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "firstName": firstNameController.text.trim(), // Storing first name after trimming leading/trailing whitespace
       "contactNumber": contactNumberController.text.trim(), // Storing contact number after trimming leading/trailing whitespace
       "serviceType": serviceType.text.trim(), //Storing the service type of the rider
-      "status": "approved", // Setting the status to 'approved'
+      "status": "pending", // Setting the status to 'pending'
       "earnings": 0.0, // Initializing earnings as 0.0
     });
 

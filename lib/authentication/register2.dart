@@ -1,17 +1,15 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart' as fStorage;
 import 'package:firebase_auth/firebase_auth.dart';
-
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 import 'additionalRegistrationPage/personal_details_screen.dart';
 import '../global/global.dart';
 import 'auth_screen.dart';
+import 'imageGetters/rider_profile.dart';
 
 class RegisterScreen2 extends StatefulWidget {
   const RegisterScreen2({Key? key}) : super(key: key);
@@ -28,15 +26,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return sharedPreferences?.getBool('personalDetailsCompleted') ?? false;
   }
 
+  //The business logo will upload to Firestorage
   String riderImageUrl = "";
   Future<void> _uploadRiderImage() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    // Retrieve image bytes from SharedPreferences
-    final String? imageDataString = sharedPreferences?.getString('user_image_path');
-    final String? riderEmail = sharedPreferences?.getString('email');
-    // Decode base64 string to bytes
-    final Uint8List imageBytes = base64Decode(imageDataString!);
-
+    String? riderEmail = sharedPreferences?.getString('email');
+    // Get time and date and store it in imageFileName
     String imageFileName = DateTime.now().millisecondsSinceEpoch.toString();
 
     // Save the image to reference path and replace image file name with imageFileName
@@ -47,8 +41,14 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
         .child("profile")
         .child(imageFileName);
 
+    // Get the image file extension (assuming it's either jpg/jpeg or png)
+    String fileExtension = riderProfile!.path.split('.').last.toLowerCase();
+
+    // Set the content type based on the file extension
+    fStorage.SettableMetadata metadata = fStorage.SettableMetadata(contentType: 'image/$fileExtension');
+
     // Upload the image to the path reference in Firebase storage
-    fStorage.UploadTask uploadTask = reference.putData(imageBytes);
+    fStorage.UploadTask uploadTask = reference.putFile(File(riderProfile!.path), metadata);
 
     // Get the download URL of the image after the upload is complete
     fStorage.TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() async {
@@ -124,12 +124,15 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
       "secondaryContactNumber": savedSecondaryContactNumber,
       "nationality": savedNationality,
+      "riderAvatarUrl": riderImageUrl,
     });
 
-    //Save rider's data locally
+    /*//Save rider's data locally
     sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences!.setString("photoUrl", riderImageUrl);*/
 
-
+    //Clear all data saved from sharedPreferences
+    await sharedPreferences?.clear();
     return null;
   }
 

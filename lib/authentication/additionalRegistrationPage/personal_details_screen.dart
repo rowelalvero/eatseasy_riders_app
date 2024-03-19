@@ -1,12 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
 import '../../global/global.dart';
+import '../imageGetters/rider_profile.dart';
 import '../register2.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
@@ -21,45 +20,21 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   TextEditingController secondaryContactNumberController = TextEditingController();
   TextEditingController nationalityController = TextEditingController();
 
-  // Image picker instance
-  File? imageXFile;
-
   bool changesSaved = true;
   bool isCompleted = false;
   late List<int> riderProfileImageBytes;
 
 
-  // Get image
+  final ImagePicker _picker = ImagePicker();
+
+  //Get image and save it to imageXFile
   Future<void> _getImage() async {
-    sharedPreferences = await SharedPreferences.getInstance();
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedImage = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedImage != null) {
-      final Directory appDirectory = await getApplicationDocumentsDirectory();
-      final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    riderProfile = await _picker.pickImage(source: ImageSource.gallery);
 
-      // Get the file extension
-      String fileExtension = pickedImage.path.split('.').last.toLowerCase();
-
-      // If the file extension is not jpg/jpeg or png, assume png
-      if (!(fileExtension == 'jpg' || fileExtension == 'jpeg')) {
-        fileExtension = 'png';
-      }
-
-      // Change the extension of the saved image path accordingly
-      final String savedImagePath = '${appDirectory.path}/$fileName.$fileExtension';
-
-      await File(savedImagePath).writeAsBytes(await pickedImage.readAsBytes());
-
-      setState(() async {
-        imageXFile = File(pickedImage.path);
-        //riderProfileImageBytes = await File(savedImagePath).readAsBytes();
-        changesSaved = false;
-        isCompleted = false;
-      });
-      // Convert image to bytes
-
-    }
+    //Update image
+    setState(() {
+      riderProfile;
+    });
   }
 
 
@@ -271,7 +246,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
   //Save user data locally
   void _saveUserDataToPrefs() async {
-    if (imageXFile == null) {
+    if (riderProfile == null) {
       showDialog(
           context: context,
           builder: (c) {
@@ -284,9 +259,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       sharedPreferences = await SharedPreferences.getInstance();
       await sharedPreferences?.setString('secondaryContactNumber', secondaryContactNumberController.text);
       await sharedPreferences?.setString('nationality', nationalityController.text);
-      if (imageXFile != null) {
-        await sharedPreferences?.setString('user_image_path', imageXFile!.path);
-        //await sharedPreferences?.setString('riderProfileImageBytes', base64Encode(riderProfileImageBytes));
+      if (riderProfile != null) {
+        await sharedPreferences?.setString('user_image_path', riderProfile!.path);//await sharedPreferences?.setString('riderProfileImageBytes', base64Encode(riderProfileImageBytes));
       }
 
       await sharedPreferences?.setBool('changesSaved', true);
@@ -316,7 +290,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     String? imagePath = sharedPreferences?.getString('user_image_path');
     if (imagePath != null && imagePath.isNotEmpty) {
       setState(() {
-        imageXFile = File(imagePath);
+        riderProfile = XFile(imagePath);
       });
     }
   }
@@ -327,7 +301,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     });
 
     setState(() {
-      imageXFile = null;
+      riderProfile = null;
       // Update changesSaved based on other changes
     });
   }
@@ -382,11 +356,11 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                 // Load image
                 String? imagePath = sharedPreferences?.getString('user_image_path');
                 if (imagePath != null && imagePath.isNotEmpty) {
-                  imageXFile = File(imagePath);
+                  riderProfile = XFile(imagePath);
                 }
                 changesSaved = sharedPreferences?.getBool('changesSaved') ?? false;
               } else {
-                imageXFile = File('');
+                riderProfile = XFile('');
                 nationalityController.text = _dropdownItems.first;
                 secondaryContactNumberController.text = '';
               }
@@ -495,12 +469,12 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       child: CircleAvatar(
                           radius: MediaQuery.of(context).size.width * 0.20,
                           backgroundColor: const Color.fromARGB(255, 230, 229, 229),
-                          backgroundImage: imageXFile == null
+                          backgroundImage: riderProfile == null
                               ? null
-                              : FileImage(imageXFile!),
+                              : FileImage(File(riderProfile!.path)),
 
                           //alternative icon
-                          child: imageXFile == null
+                          child: riderProfile == null
                               ? Icon(
                             Icons.add_photo_alternate,
                             size: MediaQuery.of(context).size.width * 0.20,
@@ -531,7 +505,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             ),
 
                             // Remove image button
-                            if (imageXFile != null)
+                            if (riderProfile != null)
                               TextButton(
                                 onPressed: () => _removeImage(),
                                 child: const Text(
