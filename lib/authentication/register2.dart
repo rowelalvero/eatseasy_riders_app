@@ -125,7 +125,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       "secondaryContactNumber": savedSecondaryContactNumber,
       "nationality": savedNationality,
       "riderAvatarUrl": riderImageUrl,
-    });
+    }, SetOptions(merge: true));
 
     /*//Save rider's data locally
     sharedPreferences = await SharedPreferences.getInstance();
