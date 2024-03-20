@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatseasy_riders_app/authentication/register2.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +10,6 @@ import '../global/global.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
-import 'auth_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -31,6 +28,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController contactNumberController = TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
+  TextEditingController middleInitialController = TextEditingController();
+  TextEditingController suffixController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
@@ -156,6 +155,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "cityAddress": cityController.text.trim(), // Storing city address after trimming leading/trailing whitespace
       "lastName": lastNameController.text.trim(), // Storing last name after trimming leading/trailing whitespace
       "firstName": firstNameController.text.trim(), // Storing first name after trimming leading/trailing whitespace
+      "M.I.": middleInitialController.text.trim(), // Storing middle initial after trimming leading/trailing whitespace
+      "suffix": suffixController.text.trim(), // Storing suffix after trimming leading/trailing whitespace
       "contactNumber": contactNumberController.text.trim(), // Storing contact number after trimming leading/trailing whitespace
       "serviceType": serviceType.text.trim(), //Storing the service type of the rider
       "status": "pending", // Setting the status to 'pending'
@@ -228,13 +229,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       //Service type dropdown
                       Container(
                         padding: const EdgeInsets.all(4),
-                        margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                        margin: const EdgeInsets.only(
+                            left: 18.0, right: 18.0, top: 8.0),
                         decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                            color: const Color.fromARGB(255, 67, 83, 89),
-                          ),
+                          color: const Color(0xFFE0E3E7),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
@@ -276,6 +275,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         data: Icons.person_2_rounded,
                         controller: lastNameController,
                         hintText: "Last Name*",
+                        isObsecure: false,
+                        keyboardType: TextInputType.text,
+                      ),
+
+                      //Middle initial text field
+                      CustomTextField(
+                        data: Icons.person_2_rounded,
+                        controller: middleInitialController,
+                        hintText: "M.I.",
+                        isObsecure: false,
+                        keyboardType: TextInputType.text,
+                      ),
+
+                      //Suffix text field
+                      CustomTextField(
+                        data: Icons.person_2_rounded,
+                        controller: suffixController,
+                        hintText: "Suffix",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
                       ),
