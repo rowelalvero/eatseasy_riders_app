@@ -19,6 +19,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  bool isButtonPressed = false;
   //form key instance
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -51,6 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   //Form validation
   Future<void> formValidation() async {
+    isButtonPressed = !isButtonPressed;
     //check if password and confirm password are matched
     if (passwordController.text == confirmPasswordController.text) {
       //check if one of the textfields is empty
@@ -235,6 +237,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: const Color(0xFFE0E3E7),
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        width: MediaQuery.of(context).orientation == Orientation.landscape ? MediaQuery.of(context).size.width * 0.6 : double.infinity,
                         child: DropdownButtonFormField<String>(
                           decoration: const InputDecoration(
                             border: InputBorder.none,
@@ -341,25 +344,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
 
               //submit button
-              ElevatedButton(
-                onPressed: () {
-                  formValidation();
-                },
-                // Register button styling
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 166, vertical: 10),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0))),
-                child: const Text(
-                  "Submit",
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 67, 83, 89),
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                  ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FractionallySizedBox(
+                        widthFactor: MediaQuery.of(context).orientation == Orientation.landscape ? 0.64 : 1,
+                        // Set width factor to 0.64 in landscape mode, and 1 otherwise
+                        child: ElevatedButton(
+                          onPressed: isButtonPressed ? null : () => formValidation(),
+                          // Register button styling
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            elevation: 4, // Elevation for the shadow
+                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                          ),
+                          child: Text(
+                            isButtonPressed ? "Submitted" : "Submit",
+                            style: TextStyle(
+                              color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                              fontFamily: "Poppins",
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
 

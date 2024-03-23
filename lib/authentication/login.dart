@@ -20,6 +20,7 @@ class LogInScreen extends StatefulWidget {
 }
 
 class _LogInScreenState extends State<LogInScreen> {
+  bool isButtonPressed = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   TextEditingController emailController = TextEditingController();
@@ -27,6 +28,7 @@ class _LogInScreenState extends State<LogInScreen> {
 
   //Check email and password
   formValidation(){
+    isButtonPressed = !isButtonPressed;
    if(emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
      //Login
      logInNow();
@@ -189,27 +191,43 @@ class _LogInScreenState extends State<LogInScreen> {
           ),
 
           //Login button
-          ElevatedButton(
-            onPressed: () => formValidation(),
-            // ignore: sort_child_properties_last
-            child: const Text(
-              "Login",
-              style: TextStyle(
-                color: Color.fromARGB(255, 67, 83, 89),
-                fontFamily: "Poppins",
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
-              ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: FractionallySizedBox(
+                    widthFactor: MediaQuery.of(context).orientation == Orientation.landscape ? 0.64 : 1,
+                    // Set width factor to 0.64 in landscape mode, and 1 otherwise
+                    child: ElevatedButton(
+                      onPressed: isButtonPressed ? null : () => formValidation(),
+                      // Register button styling
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        elevation: 4, // Elevation for the shadow
+                        shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                      ),
+                      child: Text(
+                        isButtonPressed ? "Login" : "Login",
+                        style: TextStyle(
+                          color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                          fontFamily: "Poppins",
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-
-            //Login button styling
-            style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-                padding:
-                const EdgeInsets.symmetric(horizontal: 166, vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0))),
           ),
+
+
 
           //Register Button
           Column(

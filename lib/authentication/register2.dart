@@ -20,6 +20,7 @@ class RegisterScreen2 extends StatefulWidget {
 
 class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isPersonalDetailsCompleted;
+  bool isButtonPressed = false;
 
   Future<bool> _checkPersonalDetailsCompleted() async {
     sharedPreferences = await SharedPreferences.getInstance();
@@ -61,6 +62,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 
   //Form validation
   Future<void> formValidation() async {
+    isButtonPressed = !isButtonPressed;
     bool isPersonalDetailsCompleted = await _checkPersonalDetailsCompleted();
     //check if image is empty
     if (!isPersonalDetailsCompleted) {
@@ -270,31 +272,42 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
             height: 20,
           ),
 
+          //submit button
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: ElevatedButton(
-              onPressed: () => formValidation(),
-              // Register button styling
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 136, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0))),
-              child: const Text(
-                "Submit",
-                style: TextStyle(
-                  color: Color.fromARGB(255, 67, 83, 89),
-                  fontFamily: "Poppins",
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
+            child: Row(
+              children: [
+                Expanded(
+                  child: FractionallySizedBox(
+                    widthFactor: MediaQuery.of(context).orientation == Orientation.landscape ? 0.64 : 1,
+                    /// Set width factor to 0.64 in landscape mode, and 1 otherwise
+                    child: ElevatedButton(
+                      onPressed: isButtonPressed ? null : () => formValidation(),
+                      // Register button styling
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        elevation: 4, // Elevation for the shadow
+                        shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                      ),
+                      child: Text(
+                        isButtonPressed ? "Submitted" : "Submit",
+                        style: TextStyle(
+                          color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                          fontFamily: "Poppins",
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-          //submit button
-
-
           //spacing
           const SizedBox(
             height: 20,

@@ -20,11 +20,11 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   TextEditingController secondaryContactNumberController = TextEditingController();
   TextEditingController nationalityController = TextEditingController();
 
-  bool changesSaved = true;
-  bool isCompleted = false;
-  late List<int> riderProfileImageBytes;
+  bool changesSaved = true; // Flag to track if changes are saved
+  bool isCompleted = false; // Flag to track if form is completed
+  bool isButtonPressed = false; // Flag to track if button is pressed
 
-
+  //Image picker instance
   final ImagePicker _picker = ImagePicker();
 
   //Get image and save it to imageXFile
@@ -246,6 +246,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
   //Save user data locally
   void _saveUserDataToPrefs() async {
+    //return error message if user pressed the save button without selecting an image
     if (riderProfile == null) {
       showDialog(
           context: context,
@@ -256,13 +257,19 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           });
     }
     else {
+      // Toggle the button state
+      isButtonPressed = !isButtonPressed;
       sharedPreferences = await SharedPreferences.getInstance();
+      //Save secondaryContactNumber locally
       await sharedPreferences?.setString('secondaryContactNumber', secondaryContactNumberController.text);
+      //Save nationality locally
       await sharedPreferences?.setString('nationality', nationalityController.text);
+      //Save image locally
       if (riderProfile != null) {
         await sharedPreferences?.setString('user_image_path', riderProfile!.path);//await sharedPreferences?.setString('riderProfileImageBytes', base64Encode(riderProfileImageBytes));
       }
 
+      //Save changesSaved value to true
       await sharedPreferences?.setBool('changesSaved', true);
       setState(() {
         changesSaved  = true;
@@ -615,42 +622,41 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     ),
                     // Nationality dropdown
                     Container(
-                        padding: const EdgeInsets.all(4),
-                        margin: const EdgeInsets.only(
-                            left: 18.0, right: 18.0, top: 8.0),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE0E3E7),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: SizedBox(
-                          width: 365,
-                          child: DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              hintText: 'Select an item', // Hint text
-                              hintStyle: TextStyle(color: Colors.grey),
-                              prefixIcon: Icon(Icons.flag_rounded),
-                            ),
-                            isExpanded: true,
-                            value: nationalityController.text,
-                            onChanged: (String? newValue) async {
-                              setState(() {
-                                nationalityController.text = newValue!;
-                                changesSaved = false;
-                                isCompleted = false;
-                              });
-                            },
-                            items: _dropdownItems.map((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(value),
-                              );
-                            }).toList(),
-                            dropdownColor: Colors.white,
-                            // Set the background color of the dropdown list
-                            elevation: 2, // Set the elevation of the dropdown list
+                      padding: const EdgeInsets.all(4),
+                      margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE0E3E7),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: SizedBox(
+                        width: MediaQuery.of(context).orientation == Orientation.landscape ? MediaQuery.of(context).size.width * 0.6 : double.infinity,
+                        child: DropdownButtonFormField<String>(
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Select an item', // Hint text
+                            hintStyle: TextStyle(color: Colors.grey),
+                            prefixIcon: Icon(Icons.flag_rounded),
                           ),
-                        )
+                          isExpanded: true,
+                          value: nationalityController.text,
+                          onChanged: (String? newValue) async {
+                            setState(() {
+                              nationalityController.text = newValue!;
+                              changesSaved = false;
+                              isCompleted = false;
+                            });
+                          },
+                          items: _dropdownItems.map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          dropdownColor: Colors.white,
+                          // Set the background color of the dropdown list
+                          elevation: 2, // Set the elevation of the dropdown list
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -662,22 +668,31 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
         // Submit button
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(18.0),
-          child: ElevatedButton(
-            onPressed: () => _saveUserDataToPrefs(),
-            // Register button styling
-            style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-                padding:
-                const EdgeInsets.symmetric(horizontal: 166, vertical: 10),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0))),
-            child: const Text(
-              "Save",
-              style: TextStyle(
-                color: Color.fromARGB(255, 67, 83, 89),
-                fontFamily: "Poppins",
-                fontWeight: FontWeight.w700,
-                fontSize: 20,
+          child: Expanded(
+            child: FractionallySizedBox(
+              widthFactor: MediaQuery.of(context).orientation == Orientation.landscape ? 0.64 : 1,
+              // Set width factor to 0.64 in landscape mode, and 1 otherwise
+              child: ElevatedButton(
+                onPressed: isButtonPressed ? null : () => _saveUserDataToPrefs(),
+                // Register button styling
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  elevation: 4, // Elevation for the shadow
+                  shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                ),
+                child: Text(
+                  isButtonPressed ? "Saved" : "Save",
+                  style: TextStyle(
+                    color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                    fontFamily: "Poppins",
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                  ),
+                ),
               ),
             ),
           ),
