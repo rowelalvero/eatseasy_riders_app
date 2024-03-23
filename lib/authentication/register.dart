@@ -52,7 +52,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   //Form validation
   Future<void> formValidation() async {
-    isButtonPressed = !isButtonPressed;
     //check if password and confirm password are matched
     if (passwordController.text == confirmPasswordController.text) {
       //check if one of the textfields is empty
@@ -123,7 +122,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (currentUser != null) {
       // Save user's credentials to SharedPreferences
       await saveCurrentUserToSharedPreferences(currentUser!);
-      // Rest of your code
+      //Set the isButtonPressed to true to disable the button after pressing submit button
+      setState(() {
+        isButtonPressed = !isButtonPressed;
+      });
     }
 
     //If the rider is authenticated
@@ -349,29 +351,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: FractionallySizedBox(
-                        widthFactor: MediaQuery.of(context).orientation == Orientation.landscape ? 0.64 : 1,
-                        // Set width factor to 0.64 in landscape mode, and 1 otherwise
-                        child: ElevatedButton(
-                          onPressed: isButtonPressed ? null : () => formValidation(),
-                          // Register button styling
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            elevation: 4, // Elevation for the shadow
-                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                      child: ElevatedButton(
+                        onPressed: isButtonPressed ? null : () => formValidation(),
+                        // Register button styling
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
                           ),
-                          child: Text(
-                            isButtonPressed ? "Submitted" : "Submit",
-                            style: TextStyle(
-                              color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20,
-                            ),
+                          elevation: 4, // Elevation for the shadow
+                          shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                        ),
+                        child: Text(
+                          isButtonPressed ? "Submitted" : "Submit",
+                          style: TextStyle(
+                            color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
                           ),
                         ),
                       ),

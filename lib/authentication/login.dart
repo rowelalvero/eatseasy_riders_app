@@ -196,9 +196,6 @@ class _LogInScreenState extends State<LogInScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: FractionallySizedBox(
-                    widthFactor: MediaQuery.of(context).orientation == Orientation.landscape ? 0.64 : 1,
-                    // Set width factor to 0.64 in landscape mode, and 1 otherwise
                     child: ElevatedButton(
                       onPressed: isButtonPressed ? null : () => formValidation(),
                       // Register button styling
@@ -221,7 +218,6 @@ class _LogInScreenState extends State<LogInScreen> {
                         ),
                       ),
                     ),
-                  ),
                 ),
               ],
             ),

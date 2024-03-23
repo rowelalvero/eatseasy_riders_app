@@ -2,6 +2,7 @@
 import 'package:eatseasy_riders_app/splashScreen/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'authentication/additionalRegistrationPage/personal_details_screen.dart';
@@ -25,7 +26,10 @@ Future main() async {
 
   sharedPreferences = await SharedPreferences.getInstance();
 
-  runApp(const MyApp());
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(const MyApp());
+  });
 }
 
 class MyApp extends StatelessWidget {
