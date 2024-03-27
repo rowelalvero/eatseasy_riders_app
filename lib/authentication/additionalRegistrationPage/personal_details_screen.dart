@@ -592,6 +592,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       controller: secondaryContactNumberController,
                       hintText: "",
                       isObsecure: false,
+                      redBorder: false,
                       onChanged: (value) {
                         setState(() {
                           changesSaved = false;

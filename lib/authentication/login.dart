@@ -170,6 +170,7 @@ class _LogInScreenState extends State<LogInScreen> {
                   controller: emailController,
                   hintText: "Email",
                   isObsecure: false,
+                  redBorder: false,
                   keyboardType: TextInputType.text,
                 ),
 
@@ -179,6 +180,7 @@ class _LogInScreenState extends State<LogInScreen> {
                   controller: passwordController,
                   hintText: "Password",
                   isObsecure: true,
+                  redBorder: false,
                   keyboardType: TextInputType.text,
                 ),
               ],

@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final String hintText;
   bool? isObsecure = true;
   bool? enabled = true;
+  bool redBorder;
   final ValueChanged<String>? onChanged;
 
   CustomTextField({
@@ -18,6 +19,7 @@ class CustomTextField extends StatelessWidget {
     this.isObsecure,
     this.enabled,
     this.keyboardType,
+    required this.redBorder,
     this.onChanged,
   });
 
@@ -28,6 +30,9 @@ class CustomTextField extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFE0E3E7),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: redBorder ? Colors.red : Colors.transparent,
+        ),
       ),
       padding: const EdgeInsets.all(4),
       margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
@@ -52,7 +57,11 @@ class CustomTextField extends StatelessWidget {
                 focusColor: Theme.of(context).primaryColor,
                 hintText: hintText,
               ),
-              onChanged: onChanged,
+              onChanged: (value) {
+                if (onChanged != null) {
+                  onChanged!(value);
+                }
+              },
             ),
           );
         },

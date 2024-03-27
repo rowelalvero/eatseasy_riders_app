@@ -121,36 +121,91 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return false;
   }
 
+  bool _iscityControllerInvalid = false;
+  bool _isFirstNameControllerInvalid = false;
+  bool _isLastNameControllerInvalid = false;
+  bool _isEmailControllerInvalid = false;
+  bool _isFormIncomplete = false;
+
+  void _ValidateTextFields() {
+    if (cityController.text.isEmpty) {
+      setState(() {
+        _iscityControllerInvalid = true;
+        _isFormIncomplete = true;
+      });
+    }
+    if (firstNameController.text.isEmpty) {
+      setState(() {
+        _isFirstNameControllerInvalid = true;
+        _isFormIncomplete = true;
+      });
+    }
+    if (lastNameController.text.isEmpty) {
+      setState(() {
+        _isLastNameControllerInvalid = true;
+        _isFormIncomplete = true;
+      });
+    }
+    if (emailController.text.isEmpty) {
+     setState(() {
+       _isEmailControllerInvalid = true;
+       _isFormIncomplete = true;
+     });
+    }
+  }
   //Form validation
   Future<void> _formValidation() async {
-    if (_isPasswordValidated()) {
-      if(_isPasswordMatched) {
-        //check if one of the textfields is empty
-        if (emailController.text.isNotEmpty &&
-            lastNameController.text.isNotEmpty &&
-            firstNameController.text.isNotEmpty &&
-            contactNumberController.text.isNotEmpty &&
-            cityController.text.isNotEmpty &&
-            serviceType.text.isNotEmpty) {
-          //show loading screen after submitting
-          showDialog(
-              context: context,
-              builder: (c) {
-                return const LoadingDialog(
-                  message: "Submitting",
-                );
-              });
+    _ValidateTextFields();
+    if (_isFormIncomplete) {
+      if (_isPasswordValidated()) {
+        if(_isPasswordMatched) {
+          if (isContactNumberCompleted) {
+            //check if one of the textfields is empty
+            if (emailController.text.isNotEmpty &&
+                lastNameController.text.isNotEmpty &&
+                firstNameController.text.isNotEmpty &&
+                contactNumberController.text.isNotEmpty &&
+                cityController.text.isNotEmpty &&
+                serviceType.text.isNotEmpty) {
+              //show loading screen after submitting
+              showDialog(
+                  context: context,
+                  builder: (c) {
+                    return const LoadingDialog(
+                      message: "Submitting",
+                    );
+                  });
 
-          //Authenticate the rider
-          authenticateVendorAndSignUp();
+              //Authenticate the rider
+              authenticateVendorAndSignUp();
+            }
+            //fill the empty fields
+            else {
+              showDialog(
+                  context: context,
+                  builder: (c) {
+                    return const ErrorDialog(
+                      message: "Please fill up all required fields*",
+                    );
+                  });
+            }
+          }
+          else {
+            showDialog(
+                context: context,
+                builder: (c) {
+                  return const ErrorDialog(
+                    message: "Invalid contact number. Please try again.",
+                  );
+                });
+          }
         }
-        //fill the empty fields
         else {
           showDialog(
               context: context,
               builder: (c) {
                 return const ErrorDialog(
-                  message: "Please fill up all required fields*",
+                  message: "Passwords don't match.",
                 );
               });
         }
@@ -160,17 +215,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
             context: context,
             builder: (c) {
               return const ErrorDialog(
-                message: "Passwords don't match",
+                message: "Password is invalid.",
               );
             });
       }
     }
+    //fill the empty fields
     else {
       showDialog(
           context: context,
           builder: (c) {
             return const ErrorDialog(
-              message: "Password is invalid.",
+              message: "Please fill up all required fields*",
             );
           });
     }
@@ -307,6 +363,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: "City*",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
+                        redBorder: _iscityControllerInvalid,
+                          onChanged:(value) {
+                          setState(() {
+                            _iscityControllerInvalid = false;
+                          });
+                          }
                       ),
 
                       //Service type dropdown
@@ -352,6 +414,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: "First Name*",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
+                        redBorder: _isFirstNameControllerInvalid,
+                          onChanged:(value) {
+                            setState(() {
+                              _isFirstNameControllerInvalid = false;
+                            });
+                          }
                       ),
 
                       //Last name text field
@@ -361,6 +429,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: "Last Name*",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
+                        redBorder: _isLastNameControllerInvalid,
+                          onChanged:(value) {
+                            setState(() {
+                              _isLastNameControllerInvalid = false;
+                            });
+                          }
                       ),
 
                       //Middle initial text field
@@ -370,6 +444,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: "M.I.",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
+                        redBorder: false,
                       ),
 
                       //Suffix text field
@@ -379,6 +454,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: "Suffix",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
+                        redBorder: false,
                       ),
 
                       //Contact number text field,
@@ -467,6 +543,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: "Email*",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
+                        redBorder: _isEmailControllerInvalid,
+                          onChanged:(value) {
+                            setState(() {
+                              _isEmailControllerInvalid = false;
+                            });
+                          }
                       ),
 
                       //Password text field
