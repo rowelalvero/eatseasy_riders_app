@@ -27,7 +27,7 @@ class _LogInScreenState extends State<LogInScreen> {
   TextEditingController passwordController = TextEditingController();
 
   //Check email and password
-  formValidation(){
+  _formValidation(){
     isButtonPressed = !isButtonPressed;
    if(emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
      //Login
@@ -197,7 +197,7 @@ class _LogInScreenState extends State<LogInScreen> {
               children: [
                 Expanded(
                     child: ElevatedButton(
-                      onPressed: isButtonPressed ? null : () => formValidation(),
+                      onPressed: isButtonPressed ? null : () => _formValidation(),
                       // Register button styling
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),

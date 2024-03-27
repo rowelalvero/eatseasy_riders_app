@@ -28,6 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _hasEightChar = false;
   bool _isUserTypingPassword = false;
   bool _isUserTypingConfirmPassword = false;
+  bool _isUserTypingContactNumber = false;
   bool _isPasswordMatched = false;
 
   FocusNode passwordFocusNode = FocusNode();
@@ -299,7 +300,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      //city text field
+                      //City text field
                       CustomTextField(
                         data: Icons.location_city_rounded,
                         controller: cityController,
@@ -344,7 +345,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
 
-                      //first name text field
+                      //First name text field
                       CustomTextField(
                         data: Icons.person_2_rounded,
                         controller: firstNameController,
@@ -353,7 +354,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.text,
                       ),
 
-                      //last name text field
+                      //Last name text field
                       CustomTextField(
                         data: Icons.person_2_rounded,
                         controller: lastNameController,
@@ -380,26 +381,86 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.text,
                       ),
 
-                      //contact number text field
-                      CustomTextField(
-                        keyboardType: TextInputType.number,
-                        data: Icons.phone_android_rounded,
-                        controller: contactNumberController,
-                        hintText: "Contact Number*",
-                        isObsecure: false,
-                        onChanged: (value) {
-                          if (value.length != 11) {
-                            setState(() {
-                              isContactNumberCompleted = false;
-                            });
-                          }
-                          else {
-                            isContactNumberCompleted = true;
-                          }
-                        },
+                      //Contact number text field,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0E3E7),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                        child: LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                            return ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: maxWidth),
+                              child: TextFormField(
+                                  enabled: true,
+                                  controller: contactNumberController,
+                                  obscureText: false,
+                                  cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    prefixIcon: const Icon(Icons.phone_android_rounded, color: Color.fromARGB(255, 67, 83, 89)),
+                                    focusColor: Theme.of(context).primaryColor,
+                                    hintText: "Contact Number*",
+                                  ),
+                                onChanged: (value) {
+                                    setState(() {
+                                      _isUserTypingContactNumber = true;
+                                    });
+                                  if (value.length == 11) {
+                                    setState(() {
+                                      isContactNumberCompleted = true;
+                                    });
+                                  }
+                                  else {
+                                    if (contactNumberController.text.isEmpty) {
+                                      setState(() {
+                                        _isUserTypingContactNumber = false;
+                                      });
+                                    }
+                                    else {
+                                      setState(() {
+                                        isContactNumberCompleted = false;
+                                      });
+                                    }
+                                  }
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
 
-                      //email text field
+                      //Show "Invalid Contact number"
+                      if (_isUserTypingContactNumber && isContactNumberCompleted == false)
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 10),
+                                  Text("Invalid Contact number",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      //Email text field
                       CustomTextField(
                         data: Icons.email_rounded,
                         controller: emailController,
@@ -408,7 +469,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         keyboardType: TextInputType.text,
                       ),
 
-                      //password text field
+                      //Password text field
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFE0E3E7),
@@ -445,6 +506,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
 
+                      //Validation notifier
                       if (_isUserTypingPassword)
                         Row(
                           children: [
@@ -489,7 +551,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ],
                         ),
 
-                      //confirm password text field
+                      //Confirm password text field
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFE0E3E7),
@@ -530,6 +592,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
 
+                      //Show "Passwords don't match"
                       if (_isUserTypingConfirmPassword && _isPasswordMatched == false)
                         const Row(
                           children: [
@@ -559,7 +622,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: 10,
               ),
 
-              //submit button
+              //Submit button
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
