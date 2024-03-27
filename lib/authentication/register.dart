@@ -20,6 +20,18 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   bool isButtonPressed = false;
+  bool isContactNumberCompleted = true;
+  String _password = '';
+  bool _hasUpperCase = false;
+  bool _hasLowerCase = false;
+  bool _hasNumber = false;
+  bool _hasEightChar = false;
+  bool _isUserTypingPassword = false;
+  bool _isUserTypingConfirmPassword = false;
+  bool _isPasswordMatched = false;
+
+  FocusNode passwordFocusNode = FocusNode();
+
   //form key instance
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -49,49 +61,115 @@ class _RegisterScreenState extends State<RegisterScreen> {
     serviceType.text = _dropdownItems.first;
   }
 
+  void _validatePassword(String value) {
+    setState(() {
+      _password = value;
+      setState(() {
+        _isUserTypingPassword = true;
+        _matchPassword();
+      });
+      // Password must have uppercase at least
+      _hasUpperCase = RegExp(r'[A-Z]').hasMatch(_password);
+      // Password must have lowercase at least
+      _hasLowerCase = RegExp(r'[a-z]').hasMatch(_password);
+      // Password must have one number at least
+      _hasNumber = RegExp(r'[0-9]').hasMatch(_password);
+      // Password length should be at least 8 characters
+      if (_password.length >= 8) {
+        setState(() {
+          _hasEightChar = true;
+        });
+      }
+      else {
+        setState(() {
+          _hasEightChar = false;
+        });
+      }
+    });
+  }
+
+  void _matchPassword() {
+    if (passwordController.text == confirmPasswordController.text) {
+      if (confirmPasswordController.text.isEmpty) {
+        setState(() {
+          _isPasswordMatched = false;
+        });
+      }
+      else {
+        setState(() {
+          _isPasswordMatched = true;
+        });
+      }
+    }
+    else {
+      setState(() {
+        _isPasswordMatched = false;
+      });
+    }
+  }
+
+  bool _isPasswordValidated() {
+    if (_hasUpperCase == true &&
+        _hasLowerCase == true &&
+        _hasNumber == true &&
+        _hasEightChar == true){
+
+      return true;
+    }
+
+    return false;
+  }
 
   //Form validation
-  Future<void> formValidation() async {
-    //check if password and confirm password are matched
-    if (passwordController.text == confirmPasswordController.text) {
-      //check if one of the textfields is empty
-      if (confirmPasswordController.text.isNotEmpty &&
-          emailController.text.isNotEmpty &&
-          lastNameController.text.isNotEmpty &&
-          firstNameController.text.isNotEmpty &&
-          contactNumberController.text.isNotEmpty &&
-          cityController.text.isNotEmpty &&
-          serviceType.text.isNotEmpty) {
-        //show loading screen after submitting
-        showDialog(
-            context: context,
-            builder: (c) {
-              return const LoadingDialog(
-                message: "Submitting",
-              );
-            });
+  Future<void> _formValidation() async {
+    if (_isPasswordValidated()) {
+      if(_isPasswordMatched) {
+        //check if one of the textfields is empty
+        if (emailController.text.isNotEmpty &&
+            lastNameController.text.isNotEmpty &&
+            firstNameController.text.isNotEmpty &&
+            contactNumberController.text.isNotEmpty &&
+            cityController.text.isNotEmpty &&
+            serviceType.text.isNotEmpty) {
+          //show loading screen after submitting
+          showDialog(
+              context: context,
+              builder: (c) {
+                return const LoadingDialog(
+                  message: "Submitting",
+                );
+              });
 
-        //Authenticate the rider
-        authenticateVendorAndSignUp();
+          //Authenticate the rider
+          authenticateVendorAndSignUp();
+        }
+        //fill the empty fields
+        else {
+          showDialog(
+              context: context,
+              builder: (c) {
+                return const ErrorDialog(
+                  message: "Please fill up all required fields*",
+                );
+              });
+        }
       }
-      //fill the empty fields
       else {
         showDialog(
             context: context,
             builder: (c) {
               return const ErrorDialog(
-                message: "Please fill up all required fields*",
+                message: "Passwords don't match",
               );
             });
       }
     }
-    //please check the password if matched
     else {
       showDialog(
           context: context,
           builder: (c) {
             return const ErrorDialog(
-              message: "Passwords do not match.",
+              message: "Password is invalid.",
             );
           });
     }
@@ -309,6 +387,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: contactNumberController,
                         hintText: "Contact Number*",
                         isObsecure: false,
+                        onChanged: (value) {
+                          if (value.length != 11) {
+                            setState(() {
+                              isContactNumberCompleted = false;
+                            });
+                          }
+                          else {
+                            isContactNumberCompleted = true;
+                          }
+                        },
                       ),
 
                       //email text field
@@ -321,22 +409,148 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
 
                       //password text field
-                      CustomTextField(
-                        data: Icons.password_rounded,
-                        controller: passwordController,
-                        hintText: "Password*",
-                        isObsecure: true,
-                        keyboardType: TextInputType.text,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0E3E7),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _isUserTypingPassword ? (_isPasswordValidated() ? Colors.green : Colors.red) : Colors.transparent,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                        child: LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                            return ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: maxWidth),
+                              child: TextFormField(
+                                  enabled: true,
+                                  controller: passwordController,
+                                  obscureText: true,
+                                  cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                  keyboardType: TextInputType.text,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    prefixIcon: const Icon(Icons.password_rounded, color: Color.fromARGB(255, 67, 83, 89)),
+                                    focusColor: Theme.of(context).primaryColor,
+                                    hintText: "Password*",
+                                  ),
+                                  onChanged: (value) {
+                                    _validatePassword(value);
+                                  }
+                              ),
+                            );
+                          },
+                        ),
                       ),
 
+                      if (_isUserTypingPassword)
+                        Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    "Password must contain: ",
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontFamily: "Poppins",
+                                      color: Color.fromARGB(255, 67, 83, 89),
+                                    ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildValidationRow(
+                                        'At least one uppercase letter',
+                                        _hasUpperCase,
+                                      ),
+                                      _buildValidationRow(
+                                        'At least one lowercase letter',
+                                        _hasLowerCase,
+                                      ),
+                                      _buildValidationRow(
+                                        'At least one number',
+                                        _hasNumber,
+                                      ),
+                                      _buildValidationRow(
+                                        'Minimum of 8 characters',
+                                        _hasEightChar,
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
                       //confirm password text field
-                      CustomTextField(
-                        data: Icons.password_rounded,
-                        controller: confirmPasswordController,
-                        hintText: "Confirm password*",
-                        isObsecure: true,
-                        keyboardType: TextInputType.text,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0E3E7),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _isUserTypingConfirmPassword ? (_isPasswordMatched ? Colors.green : Colors.red) : Colors.transparent,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(4),
+                        margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                        child: LayoutBuilder(
+                          builder: (BuildContext context, BoxConstraints constraints) {
+                            double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                            return ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: maxWidth),
+                              child: TextFormField(
+                                enabled: true,
+                                controller: confirmPasswordController,
+                                obscureText: true,
+                                cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                keyboardType: TextInputType.text,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  prefixIcon: const Icon(Icons.password_rounded, color: Color.fromARGB(255, 67, 83, 89)),
+                                  focusColor: Theme.of(context).primaryColor,
+                                  hintText: 'Confirm Password*',
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _isUserTypingConfirmPassword = true;
+                                  });
+
+                                  _matchPassword();
+                                  }
+                              ),
+                            );
+                          },
+                        ),
                       ),
+
+                      if (_isUserTypingConfirmPassword && _isPasswordMatched == false)
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 10),
+                                  Text("Passwords don't match",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   )),
 
@@ -352,7 +566,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: isButtonPressed ? null : () => formValidation(),
+                        onPressed: isButtonPressed ? null : () => _formValidation(),
                         // Register button styling
                         style: ElevatedButton.styleFrom(
                           backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
@@ -386,4 +600,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ));
   }
+
+  Widget _buildValidationRow(String message, bool isValid) {
+    return Row(
+      children: <Widget>[
+        Icon(
+          isValid ? Icons.check_circle_rounded : Icons.cancel_rounded,
+          color: isValid ? Colors.green : Colors.red,
+        ),
+        const SizedBox(width: 10),
+        Text(
+          message,
+          style: TextStyle(
+            fontSize: 14,
+            color: isValid ? Colors.green : const Color.fromARGB(255, 67, 83, 89),
+            fontFamily: "Poppins",
+          ),
+        ),
+      ],
+    );
+  }
 }
+

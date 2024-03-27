@@ -36,11 +36,6 @@ class CustomTextField extends StatelessWidget {
         builder: (BuildContext context, BoxConstraints constraints) {
           double maxWidth = MediaQuery.of(context).size.width * 0.9; // Set maximum width to 80% of screen width
 
-          // Check if landscape mode and limit width further
-          if (MediaQuery.of(context).orientation == Orientation.landscape) {
-            maxWidth = MediaQuery.of(context).size.width * 0.6; // Set maximum width to 60% of screen width in landscape
-          }
-
           return ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: TextFormField(
