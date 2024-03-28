@@ -45,7 +45,7 @@ class _LogInScreenState extends State<LogInScreen> {
 
   logInNow() async {
     showDialog(context: context, builder: (c) {
-      return const LoadingDialog(message: "Logging In",);
+      return const LoadingDialog(message: "Logging In", isRegisterPage: false,);
     });
 
     //Firebase current user
@@ -93,21 +93,7 @@ class _LogInScreenState extends State<LogInScreen> {
   }
 
   void registrationPage() {
-    //show loading screen after submitting
-    showDialog(
-        context: context,
-        builder: (c) {
-          return const LoadingDialog(
-            message: "Loading",
-          );
-        });
-
-    Timer(const Duration(seconds: 3), () async {
-      Navigator.pop(context);
-      Navigator.push(context,MaterialPageRoute(builder: (c) => const RegisterScreen()));
-    });
-
-
+    Navigator.push(context,MaterialPageRoute(builder: (c) => const LoadingDialog(message: "Loading", isRegisterPage: true)));
   }
 
   @override
@@ -171,6 +157,8 @@ class _LogInScreenState extends State<LogInScreen> {
                   hintText: "Email",
                   isObsecure: false,
                   redBorder: false,
+                  noLeftMargin: false,
+                  noRightMargin: false,
                   keyboardType: TextInputType.text,
                 ),
 
@@ -181,6 +169,8 @@ class _LogInScreenState extends State<LogInScreen> {
                   hintText: "Password",
                   isObsecure: true,
                   redBorder: false,
+                  noLeftMargin: false,
+                  noRightMargin: false,
                   keyboardType: TextInputType.text,
                 ),
               ],

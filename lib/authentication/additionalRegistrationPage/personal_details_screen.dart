@@ -593,6 +593,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       hintText: "",
                       isObsecure: false,
                       redBorder: false,
+                      noLeftMargin: false,
+                      noRightMargin: false,
                       onChanged: (value) {
                         setState(() {
                           changesSaved = false;

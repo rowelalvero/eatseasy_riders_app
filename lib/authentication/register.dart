@@ -121,42 +121,70 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return false;
   }
 
-  bool _iscityControllerInvalid = false;
+  bool _isCityControllerInvalid = false;
   bool _isFirstNameControllerInvalid = false;
   bool _isLastNameControllerInvalid = false;
   bool _isEmailControllerInvalid = false;
-  bool _isFormIncomplete = false;
+  bool _isContactNumberControllerInvalid = false;
+  bool _isPasswordControllerInvalid = false;
+  bool _isConfirmPasswordControllerInvalid = false;
+  bool _isFormComplete = true;
 
-  void _ValidateTextFields() {
+  void _validateTextFields() {
     if (cityController.text.isEmpty) {
       setState(() {
-        _iscityControllerInvalid = true;
-        _isFormIncomplete = true;
+        _isCityControllerInvalid = true;
+        _isFormComplete = false;
       });
     }
     if (firstNameController.text.isEmpty) {
       setState(() {
         _isFirstNameControllerInvalid = true;
-        _isFormIncomplete = true;
+        _isFormComplete = false;
       });
     }
     if (lastNameController.text.isEmpty) {
       setState(() {
         _isLastNameControllerInvalid = true;
-        _isFormIncomplete = true;
+        _isFormComplete = false;
+      });
+    }
+    if (contactNumberController.text.isEmpty) {
+      setState(() {
+        _isContactNumberControllerInvalid = true;
+        _isFormComplete = false;
+      });
+    }
+    if (passwordController.text.isEmpty) {
+      setState(() {
+        _isPasswordControllerInvalid = true;
+        _isFormComplete = false;
+      });
+    }
+    if (confirmPasswordController.text.isEmpty) {
+      setState(() {
+        _isConfirmPasswordControllerInvalid = true;
+        _isFormComplete = false;
       });
     }
     if (emailController.text.isEmpty) {
      setState(() {
        _isEmailControllerInvalid = true;
-       _isFormIncomplete = true;
+       _isFormComplete = false;
      });
+    }
+    if (cityController.text.isNotEmpty &&
+        firstNameController.text.isNotEmpty &&
+        lastNameController.text.isNotEmpty &&
+        emailController.text.isNotEmpty) {
+
+      _isFormComplete = true;
     }
   }
   //Form validation
   Future<void> _formValidation() async {
-    _ValidateTextFields();
-    if (_isFormIncomplete) {
+    _validateTextFields();
+    if (_isFormComplete) {
       if (_isPasswordValidated()) {
         if(_isPasswordMatched) {
           if (isContactNumberCompleted) {
@@ -172,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   context: context,
                   builder: (c) {
                     return const LoadingDialog(
-                      message: "Submitting",
+                      message: "Submitting", isRegisterPage: false,
                     );
                   });
 
@@ -363,10 +391,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: "City*",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
-                        redBorder: _iscityControllerInvalid,
+                        redBorder: _isCityControllerInvalid,
+                          noLeftMargin: false,
+                          noRightMargin: false,
                           onChanged:(value) {
                           setState(() {
-                            _iscityControllerInvalid = false;
+                            _isCityControllerInvalid = false;
                           });
                           }
                       ),
@@ -407,63 +437,90 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
 
-                      //First name text field
-                      CustomTextField(
-                        data: Icons.person_2_rounded,
-                        controller: firstNameController,
-                        hintText: "First Name*",
-                        isObsecure: false,
-                        keyboardType: TextInputType.text,
-                        redBorder: _isFirstNameControllerInvalid,
-                          onChanged:(value) {
-                            setState(() {
-                              _isFirstNameControllerInvalid = false;
-                            });
-                          }
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            //Last name text field
+                              child: CustomTextField(
+                                  data: Icons.person_2_rounded,
+                                  controller: lastNameController,
+                                  hintText: "Last Name*",
+                                  isObsecure: false,
+                                  keyboardType: TextInputType.text,
+                                  redBorder: _isLastNameControllerInvalid,
+                                  noLeftMargin: false,
+                                  noRightMargin: true,
+                                  onChanged:(value) {
+                                    setState(() {
+                                      _isLastNameControllerInvalid = false;
+                                    });
+                                  }
+                              ),
+                          ),
+                          //Suffix text field
+                          Expanded(
+                              flex: 1,
+                              child: CustomTextField(
+                                data: null,
+                                controller: suffixController,
+                                hintText: "Suffix",
+                                isObsecure: false,
+                                keyboardType: TextInputType.text,
+                                noLeftMargin: true,
+                                noRightMargin: false,
+                                redBorder: false,
+                              ),
+                          ),
+                        ],
                       ),
 
-                      //Last name text field
-                      CustomTextField(
-                        data: Icons.person_2_rounded,
-                        controller: lastNameController,
-                        hintText: "Last Name*",
-                        isObsecure: false,
-                        keyboardType: TextInputType.text,
-                        redBorder: _isLastNameControllerInvalid,
-                          onChanged:(value) {
-                            setState(() {
-                              _isLastNameControllerInvalid = false;
-                            });
-                          }
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            //Firstname text fields
+                            child: CustomTextField(
+                                data: Icons.person_2_rounded,
+                                controller: firstNameController,
+                                hintText: "First Name*",
+                                isObsecure: false,
+                                keyboardType: TextInputType.text,
+                                redBorder: _isFirstNameControllerInvalid,
+                                noLeftMargin: false,
+                                noRightMargin: true,
+                                onChanged:(value) {
+                                  setState(() {
+                                    _isFirstNameControllerInvalid = false;
+                                  });
+                                }
+                            ),
+                          ),
+                          //Middle Initial text field
+                          Expanded(
+                            flex: 1,
+                            child: CustomTextField(
+                              data: null,
+                              controller: middleInitialController,
+                              hintText: "Middle In.",
+                              isObsecure: false,
+                              keyboardType: TextInputType.text,
+                              noLeftMargin: true,
+                              noRightMargin: false,
+                              redBorder: false,
+                            ),
+                          ),
+                        ],
                       ),
-
-                      //Middle initial text field
-                      CustomTextField(
-                        data: Icons.person_2_rounded,
-                        controller: middleInitialController,
-                        hintText: "M.I.",
-                        isObsecure: false,
-                        keyboardType: TextInputType.text,
-                        redBorder: false,
-                      ),
-
-                      //Suffix text field
-                      CustomTextField(
-                        data: Icons.person_2_rounded,
-                        controller: suffixController,
-                        hintText: "Suffix",
-                        isObsecure: false,
-                        keyboardType: TextInputType.text,
-                        redBorder: false,
-                      ),
-
                       //Contact number text field,
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFE0E3E7),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
+                            color: _isContactNumberControllerInvalid
+                                ? Colors.red
+                                : _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
                           ),
                         ),
                         padding: const EdgeInsets.all(4),
@@ -488,6 +545,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 onChanged: (value) {
                                     setState(() {
                                       _isUserTypingContactNumber = true;
+                                      _isContactNumberControllerInvalid = false;
                                     });
                                   if (value.length == 11) {
                                     setState(() {
@@ -544,6 +602,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         isObsecure: false,
                         keyboardType: TextInputType.text,
                         redBorder: _isEmailControllerInvalid,
+                          noLeftMargin: false,
+                          noRightMargin: false,
                           onChanged:(value) {
                             setState(() {
                               _isEmailControllerInvalid = false;
@@ -557,7 +617,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: const Color(0xFFE0E3E7),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: _isUserTypingPassword ? (_isPasswordValidated() ? Colors.green : Colors.red) : Colors.transparent,
+                            color: _isPasswordControllerInvalid
+                                ? Colors.red
+                                : _isUserTypingPassword ? (_isPasswordValidated() ? Colors.green : Colors.red) : Colors.transparent,
                           ),
                         ),
                         padding: const EdgeInsets.all(4),
@@ -580,6 +642,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     hintText: "Password*",
                                   ),
                                   onChanged: (value) {
+                                    _isPasswordControllerInvalid = false;
                                     _validatePassword(value);
                                   }
                               ),
@@ -639,7 +702,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: const Color(0xFFE0E3E7),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: _isUserTypingConfirmPassword ? (_isPasswordMatched ? Colors.green : Colors.red) : Colors.transparent,
+                            color: _isConfirmPasswordControllerInvalid
+                                ? Colors.red
+                                : _isUserTypingConfirmPassword ? (_isPasswordMatched ? Colors.green : Colors.red) : Colors.transparent,
                           ),
                         ),
                         padding: const EdgeInsets.all(4),
@@ -664,6 +729,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 onChanged: (value) {
                                   setState(() {
                                     _isUserTypingConfirmPassword = true;
+                                    _isConfirmPasswordControllerInvalid = false;
                                   });
 
                                   _matchPassword();

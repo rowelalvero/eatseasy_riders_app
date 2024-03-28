@@ -80,7 +80,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
           context: context,
           builder: (c) {
             return const LoadingDialog(
-              message: "Submitting",
+              message: "Submitting", isRegisterPage: false,
             );
           });
       //Authenticate the rider

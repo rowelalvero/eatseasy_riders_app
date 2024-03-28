@@ -9,6 +9,8 @@ class CustomTextField extends StatelessWidget {
   bool? isObsecure = true;
   bool? enabled = true;
   bool redBorder;
+  bool noLeftMargin;
+  bool noRightMargin;
   final ValueChanged<String>? onChanged;
 
   CustomTextField({
@@ -20,6 +22,8 @@ class CustomTextField extends StatelessWidget {
     this.enabled,
     this.keyboardType,
     required this.redBorder,
+    required this.noLeftMargin,
+    required this.noRightMargin,
     this.onChanged,
   });
 
@@ -35,7 +39,9 @@ class CustomTextField extends StatelessWidget {
         ),
       ),
       padding: const EdgeInsets.all(4),
-      margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+      margin: noLeftMargin
+          ? const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0)
+          : (noRightMargin ? const EdgeInsets.only(left: 18.0, right: 4.0, top: 8.0) : const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0)),
 
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -53,7 +59,9 @@ class CustomTextField extends StatelessWidget {
               // icon styling
               decoration: InputDecoration(
                 border: InputBorder.none,
-                prefixIcon: Icon(data, color: const Color.fromARGB(255, 67, 83, 89)),
+                prefixIcon: noLeftMargin
+                    ? null
+                    : Icon(data, color: const Color.fromARGB(255, 67, 83, 89)),
                 focusColor: Theme.of(context).primaryColor,
                 hintText: hintText,
               ),
@@ -67,6 +75,5 @@ class CustomTextField extends StatelessWidget {
         },
       ),
     );
-
   }
 }
