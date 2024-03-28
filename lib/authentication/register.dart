@@ -29,6 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isUserTypingPassword = false;
   bool _isUserTypingConfirmPassword = false;
   bool _isUserTypingContactNumber = false;
+  bool _isUserTypingEmail = false;
   bool _isPasswordMatched = false;
 
   FocusNode passwordFocusNode = FocusNode();
@@ -43,7 +44,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController middleInitialController = TextEditingController();
-  TextEditingController suffixController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
@@ -54,12 +54,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     'Delivery-partners / Foot',
   ];
 
+  final List<String> _suffixDropdownItems = [
+    'Jr.',
+    'Sr.',
+    'II',
+    'III',
+    'IV',
+    ' '
+  ];
+
+  String? _suffixController;
+
   @override
   void initState() {
     super.initState();
     serviceType = TextEditingController();
     // Set the initial value of the controller to the first item in the dropdown
     serviceType.text = _dropdownItems.first;
+    /*suffixController.text = _suffixDropdownItems.first;*/
   }
 
   void _validatePassword(String value) {
@@ -130,6 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isConfirmPasswordControllerInvalid = false;
   bool _isFormComplete = true;
 
+  //Check if the required fields are filled
   void _validateTextFields() {
     if (cityController.text.isEmpty) {
       setState(() {
@@ -181,20 +194,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _isFormComplete = true;
     }
   }
+
+
+
+  //Check if the format of email is valid
+  bool isValidEmail(email) {
+    // Regular expression for email validation
+    final RegExp emailRegex =
+    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+
+    return emailRegex.hasMatch(email);
+  }
+
   //Form validation
   Future<void> _formValidation() async {
+    String email = emailController.text.trim();
     _validateTextFields();
     if (_isFormComplete) {
       if (_isPasswordValidated()) {
         if(_isPasswordMatched) {
-          if (isContactNumberCompleted) {
-            //check if one of the textfields is empty
-            if (emailController.text.isNotEmpty &&
-                lastNameController.text.isNotEmpty &&
-                firstNameController.text.isNotEmpty &&
-                contactNumberController.text.isNotEmpty &&
-                cityController.text.isNotEmpty &&
-                serviceType.text.isNotEmpty) {
+          if(isValidEmail(email)) {
+            if (isContactNumberCompleted) {
               //show loading screen after submitting
               showDialog(
                   context: context,
@@ -207,23 +227,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
               //Authenticate the rider
               authenticateVendorAndSignUp();
             }
-            //fill the empty fields
             else {
               showDialog(
                   context: context,
                   builder: (c) {
                     return const ErrorDialog(
-                      message: "Please fill up all required fields*",
+                      message: "Invalid contact number. Please try again.",
                     );
                   });
             }
           }
           else {
+            setState(() {
+              _isEmailControllerInvalid = true;
+            });
             showDialog(
                 context: context,
                 builder: (c) {
                   return const ErrorDialog(
-                    message: "Invalid contact number. Please try again.",
+                    message: "Email format is invalid.",
                   );
                 });
           }
@@ -323,7 +345,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "lastName": lastNameController.text.trim(), // Storing last name after trimming leading/trailing whitespace
       "firstName": firstNameController.text.trim(), // Storing first name after trimming leading/trailing whitespace
       "M.I.": middleInitialController.text.trim(), // Storing middle initial after trimming leading/trailing whitespace
-      "suffix": suffixController.text.trim(), // Storing suffix after trimming leading/trailing whitespace
+      "suffix": _suffixController, // Storing suffix after trimming leading/trailing whitespace
       "contactNumber": contactNumberController.text.trim(), // Storing contact number after trimming leading/trailing whitespace
       "serviceType": serviceType.text.trim(), //Storing the service type of the rider
       "status": "pending", // Setting the status to 'pending'
@@ -458,9 +480,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   }
                               ),
                           ),
+
                           //Suffix text field
                           Expanded(
                               flex: 1,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE0E3E7),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: SizedBox(
+                                child: DropdownButtonFormField<String>(
+                                  hint: const Text('Suffix'), // Hint text
+                                  decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                  ),
+                                  value: _suffixController,
+                                  onChanged: (String? newValue) async {
+                                    setState(() {
+                                      _suffixController = newValue!;
+                                    });
+                                  },
+                                  items: _suffixDropdownItems.map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  dropdownColor: Colors.white,
+                                  // Set the background color of the dropdown list
+                                  elevation: 2, // Set the elevation of the dropdown list
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          /*Expanded(
+                            flex: 1,
                               child: CustomTextField(
                                 data: null,
                                 controller: suffixController,
@@ -471,7 +529,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 noRightMargin: false,
                                 redBorder: false,
                               ),
-                          ),
+                          ),*/
                         ],
                       ),
 
@@ -607,9 +665,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           onChanged:(value) {
                             setState(() {
                               _isEmailControllerInvalid = false;
+                              _isUserTypingEmail= true;
                             });
                           }
                       ),
+                      //Show "Passwords don't match"
+                      if (_isEmailControllerInvalid == true)
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 10),
+                                  Text("Email format is invalid",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
 
                       //Password text field
                       Container(
