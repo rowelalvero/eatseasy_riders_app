@@ -124,7 +124,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 
     // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
     await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
-      "secondaryContactNumber": savedSecondaryContactNumber,
+      "secondaryContactNumber": "+63$savedSecondaryContactNumber",
       "nationality": savedNationality,
       "riderAvatarUrl": riderImageUrl,
     }, SetOptions(merge: true));

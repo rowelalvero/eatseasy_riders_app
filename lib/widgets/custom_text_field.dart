@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-// ignore: must_be_immutable
 class CustomTextField extends StatelessWidget {
-  final TextEditingController controller;
+  final TextEditingController? controller;
   final IconData? data;
   final TextInputType? keyboardType;
   final String hintText;
@@ -12,10 +11,11 @@ class CustomTextField extends StatelessWidget {
   bool noLeftMargin;
   bool noRightMargin;
   final ValueChanged<String>? onChanged;
+  final TextCapitalization textCapitalization; // Add this property
 
   CustomTextField({
-    super.key,
-    required this.controller,
+    Key? key,
+    this.controller,
     this.data,
     required this.hintText,
     this.isObsecure,
@@ -25,7 +25,8 @@ class CustomTextField extends StatelessWidget {
     required this.noLeftMargin,
     required this.noRightMargin,
     this.onChanged,
-  });
+    this.textCapitalization = TextCapitalization.none, // Default text capitalization
+  }) : super(key: key); // Modify constructor
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +56,7 @@ class CustomTextField extends StatelessWidget {
               obscureText: isObsecure!,
               cursorColor: const Color.fromARGB(255, 242, 198, 65),
               keyboardType: keyboardType,
-
+              textCapitalization: textCapitalization, // Pass text capitalization
               // icon styling
               decoration: InputDecoration(
                 border: InputBorder.none,

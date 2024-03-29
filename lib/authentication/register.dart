@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatseasy_riders_app/authentication/register2.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_storage/firebase_storage.dart' as fStorage;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mime/mime.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 import '../global/global.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
+import 'login.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -29,8 +29,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isUserTypingPassword = false;
   bool _isUserTypingConfirmPassword = false;
   bool _isUserTypingContactNumber = false;
-  bool _isUserTypingEmail = false;
   bool _isPasswordMatched = false;
+  bool _obscureText = true;
 
   FocusNode passwordFocusNode = FocusNode();
 
@@ -39,7 +39,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   //Text fields controllers
   TextEditingController cityController = TextEditingController();
-  TextEditingController serviceType = TextEditingController();
   TextEditingController contactNumberController = TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
@@ -48,12 +47,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
 
-  final List<String> _dropdownItems = [
+  //Dropdown items of service type
+  final List<String> _serviceTypeDropdownItems = [
     'Delivery-partners / Riders',
-    'Delivery-partners / Riders - Bicycle',
+    'Delivery-partners / Bicycle',
     'Delivery-partners / Foot',
   ];
 
+  late List<Map<String, dynamic>> _serviceTypeDropdownItemsWithIcons;
+
+  //Dropdown items of suffixes
   final List<String> _suffixDropdownItems = [
     'Jr.',
     'Sr.',
@@ -63,22 +66,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
     ' '
   ];
 
+  //String var of suffix dropdown
   String? _suffixController;
+  //String var of service type dropdown
+  String? _serviceType;
 
   @override
   void initState() {
     super.initState();
-    serviceType = TextEditingController();
-    // Set the initial value of the controller to the first item in the dropdown
-    serviceType.text = _dropdownItems.first;
-    /*suffixController.text = _suffixDropdownItems.first;*/
+    _serviceTypeDropdownItemsWithIcons = _serviceTypeDropdownItems.map((item) {
+      IconData icon;
+      if (item.contains('Riders')) {
+        icon = Icons.motorcycle_rounded;
+      } else if (item.contains('Foot')) {
+        icon = Icons.directions_walk;
+      } else if (item.contains('Bicycle')) {
+        icon = Icons.directions_bike;
+      }
+      else {
+        icon = Icons.place;
+      }
+      return {'text': item, 'icon': icon};
+    }).toList();
   }
 
   void _validatePassword(String value) {
     setState(() {
       _password = value;
       setState(() {
-        _isUserTypingPassword = true;
+        _isUserTypingPassword = true; //Track if user is typing
         _matchPassword();
       });
       // Password must have uppercase at least
@@ -101,6 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
+  //Check if the passwords are matched
   void _matchPassword() {
     if (passwordController.text == confirmPasswordController.text) {
       if (confirmPasswordController.text.isEmpty) {
@@ -121,6 +138,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  //Check if the password met the validation criteria
   bool _isPasswordValidated() {
     if (_hasUpperCase == true &&
         _hasLowerCase == true &&
@@ -134,6 +152,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   bool _isCityControllerInvalid = false;
+  bool _isServiceTypeEmpty = false;
   bool _isFirstNameControllerInvalid = false;
   bool _isLastNameControllerInvalid = false;
   bool _isEmailControllerInvalid = false;
@@ -142,11 +161,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isConfirmPasswordControllerInvalid = false;
   bool _isFormComplete = true;
 
-  //Check if the required fields are filled
+  //Check if the required fields are all filled
   void _validateTextFields() {
     if (cityController.text.isEmpty) {
       setState(() {
         _isCityControllerInvalid = true;
+        _isFormComplete = false;
+      });
+    }
+    if (_serviceType == null) {
+      setState(() {
+        _isServiceTypeEmpty = true;
         _isFormComplete = false;
       });
     }
@@ -189,7 +214,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (cityController.text.isNotEmpty &&
         firstNameController.text.isNotEmpty &&
         lastNameController.text.isNotEmpty &&
-        emailController.text.isNotEmpty) {
+        emailController.text.isNotEmpty &&
+        _serviceType != null) {
 
       _isFormComplete = true;
     }
@@ -209,11 +235,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
   //Form validation
   Future<void> _formValidation() async {
     String email = emailController.text.trim();
+    //Check if the required fields are all filled
     _validateTextFields();
+    //Check if the form is completed
     if (_isFormComplete) {
+      //Check if the password met the validation criteria
       if (_isPasswordValidated()) {
+        //Check if the passwords are matched
         if(_isPasswordMatched) {
+          //Check if the format of email is valid
           if(isValidEmail(email)) {
+            //Check if the contact no. is complete
             if (isContactNumberCompleted) {
               //show loading screen after submitting
               showDialog(
@@ -226,6 +258,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
               //Authenticate the rider
               authenticateVendorAndSignUp();
+
             }
             else {
               showDialog(
@@ -238,6 +271,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             }
           }
           else {
+            //Display "invalid email" if its invalid format
             setState(() {
               _isEmailControllerInvalid = true;
             });
@@ -270,7 +304,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             });
       }
     }
-    //fill the empty fields
     else {
       showDialog(
           context: context,
@@ -346,8 +379,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "firstName": firstNameController.text.trim(), // Storing first name after trimming leading/trailing whitespace
       "M.I.": middleInitialController.text.trim(), // Storing middle initial after trimming leading/trailing whitespace
       "suffix": _suffixController, // Storing suffix after trimming leading/trailing whitespace
-      "contactNumber": contactNumberController.text.trim(), // Storing contact number after trimming leading/trailing whitespace
-      "serviceType": serviceType.text.trim(), //Storing the service type of the rider
+      "contactNumber": "+63${contactNumberController.text.trim()}", // Storing contact number after trimming leading/trailing whitespace
+      "serviceType": _serviceType, //Storing the service type of the rider
       "status": "pending", // Setting the status to 'pending'
       "earnings": 0.0, // Initializing earnings as 0.0
     });
@@ -356,7 +389,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     sharedPreferences = await SharedPreferences.getInstance();
     await sharedPreferences!.setString("uid", currentUser.uid);
     await sharedPreferences!.setString("email", currentUser.email.toString());
-    await sharedPreferences!.setString("contactNumber", contactNumberController.text.trim());
+    await sharedPreferences!.setString("contactNumber", "+63${contactNumberController.text.trim()}");
     await sharedPreferences?.setString('email', emailController.text.trim());
     await sharedPreferences?.setString('password', passwordController.text.trim());
     await sharedPreferences?.setString('confirmPassword', confirmPasswordController.text.trim());
@@ -413,6 +446,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         hintText: "City*",
                         isObsecure: false,
                         keyboardType: TextInputType.text,
+                          textCapitalization: TextCapitalization.sentences,
                         redBorder: _isCityControllerInvalid,
                           noLeftMargin: false,
                           noRightMargin: false,
@@ -423,46 +457,121 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           }
                       ),
 
+                      //Show "Please enter your city"
+                      if (_isCityControllerInvalid == true)
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 2),
+                                  Text("Please enter your city",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
                       //Service type dropdown
                       Container(
                         padding: const EdgeInsets.all(4),
-                        margin: const EdgeInsets.only(
-                            left: 18.0, right: 18.0, top: 8.0),
+                        margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
                         decoration: BoxDecoration(
                           color: const Color(0xFFE0E3E7),
                           borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _isServiceTypeEmpty ? Colors.red : Colors.transparent,
+                          ),
                         ),
-                        width: MediaQuery.of(context).orientation == Orientation.landscape ? MediaQuery.of(context).size.width * 0.6 : double.infinity,
-                        child: DropdownButtonFormField<String>(
+                        child: DropdownButtonFormField2<Map<String, dynamic>>(
+                          isExpanded: true,
                           decoration: const InputDecoration(
                             border: InputBorder.none,
-                            hintText: 'Select an item', // Hint text
-                            hintStyle: TextStyle(color: Colors.grey),
                           ),
-                          value: serviceType.text,
-                          items: _dropdownItems.map((String item) {
-                            return DropdownMenuItem<String>(
-                              value: item,child: Row(
-                              children: [
-                                const Icon(Icons.motorcycle_rounded), // Icon
-                                const SizedBox(width: 10), // Add some space between icon and text
-                                Text(item),
-                              ],
-                            ),
+                          hint: const Text(
+                            'Select your service type*',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          items: _serviceTypeDropdownItemsWithIcons.map((item) {
+                            return DropdownMenuItem<Map<String, dynamic>>(
+                              value: item,
+                              child: Row(
+                                children: [
+                                  Icon(item['icon']), // Icon
+                                  const SizedBox(width: 10),
+                                  Text(item['text'], style: const TextStyle(fontSize: 16)),
+                                ],
+                              ),
                             );
                           }).toList(),
-                          onChanged: (String? selectedItem) {
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Select your service type*';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
                             setState(() {
-                              serviceType.text = selectedItem!;
+                              _isServiceTypeEmpty = false;
+                              _serviceType = value.toString();
                             });
                           },
+                          buttonStyleData: const ButtonStyleData(
+                            padding: EdgeInsets.only(right: 8),
+                          ),
+                          iconStyleData: const IconStyleData(
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.black45,
+                            ),
+                            iconSize: 24,
+                          ),
+                          dropdownStyleData: DropdownStyleData(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
                         ),
                       ),
+
+                      //Show "Please select your service type"
+                      if (_isServiceTypeEmpty == true)
+                         const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 2),
+                                  Text("Please select your service type",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
 
                       Row(
                         children: [
                           Expanded(
-                            flex: 3,
+                            flex: 2,
                             //Last name text field
                               child: CustomTextField(
                                   data: Icons.person_2_rounded,
@@ -470,6 +579,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   hintText: "Last Name*",
                                   isObsecure: false,
                                   keyboardType: TextInputType.text,
+                                  textCapitalization: TextCapitalization.sentences,
                                   redBorder: _isLastNameControllerInvalid,
                                   noLeftMargin: false,
                                   noRightMargin: true,
@@ -483,7 +593,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                           //Suffix text field
                           Expanded(
-                              flex: 1,
+                            flex: 1,
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
@@ -491,59 +601,92 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 color: const Color(0xFFE0E3E7),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: SizedBox(
-                                child: DropdownButtonFormField<String>(
-                                  hint: const Text('Suffix'), // Hint text
-                                  decoration: const InputDecoration(
-                                    border: InputBorder.none,
+                              child: DropdownButtonFormField2<String>(
+                                isExpanded: true,
+                                decoration: const InputDecoration(
+                                  border: InputBorder.none,
+                                ),
+                                hint: const Text('Suffix',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                items: _suffixDropdownItems.map((item) => DropdownMenuItem<String>(
+                                  value: item,
+                                  child: Text(item,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                    ),
                                   ),
-                                  value: _suffixController,
-                                  onChanged: (String? newValue) async {
-                                    setState(() {
-                                      _suffixController = newValue!;
-                                    });
-                                  },
-                                  items: _suffixDropdownItems.map((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  dropdownColor: Colors.white,
-                                  // Set the background color of the dropdown list
-                                  elevation: 2, // Set the elevation of the dropdown list
+                                ))
+                                    .toList(),
+                                validator: (value) {
+                                  if (value == null) {
+                                    return 'Suffix';
+                                  }
+                                  return null;
+                                },
+                                onChanged: (value) {
+                                  setState(() {
+                                    _suffixController = value.toString();
+                                  });
+                                },
+                                buttonStyleData: const ButtonStyleData(
+                                  padding: EdgeInsets.only(right: 8),
+                                ),
+                                iconStyleData: const IconStyleData(
+                                  icon: Icon(Icons.arrow_drop_down,
+                                    color: Colors.black45,
+                                  ),
+                                  iconSize: 24,
+                                ),
+                                dropdownStyleData: DropdownStyleData(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                ),
+                                menuItemStyleData: const MenuItemStyleData(
+                                  padding: EdgeInsets.symmetric(horizontal: 16),
                                 ),
                               ),
                             ),
-                          ),
-
-                          /*Expanded(
-                            flex: 1,
-                              child: CustomTextField(
-                                data: null,
-                                controller: suffixController,
-                                hintText: "Suffix",
-                                isObsecure: false,
-                                keyboardType: TextInputType.text,
-                                noLeftMargin: true,
-                                noRightMargin: false,
-                                redBorder: false,
-                              ),
-                          ),*/
+                          )
                         ],
                       ),
+
+                      //Show "Please enter your first name"
+                      if (_isLastNameControllerInvalid == true)
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 2),
+                                  Text("Please enter your first name",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
 
                       Row(
                         children: [
                           Expanded(
                             flex: 3,
-                            //Firstname text fields
+                            //Firstname text field
                             child: CustomTextField(
                                 data: Icons.person_2_rounded,
                                 controller: firstNameController,
                                 hintText: "First Name*",
                                 isObsecure: false,
                                 keyboardType: TextInputType.text,
+                                textCapitalization: TextCapitalization.sentences,
                                 redBorder: _isFirstNameControllerInvalid,
                                 noLeftMargin: false,
                                 noRightMargin: true,
@@ -554,6 +697,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 }
                             ),
                           ),
+
                           //Middle Initial text field
                           Expanded(
                             flex: 1,
@@ -563,6 +707,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               hintText: "Middle In.",
                               isObsecure: false,
                               keyboardType: TextInputType.text,
+                              textCapitalization: TextCapitalization.sentences,
                               noLeftMargin: true,
                               noRightMargin: false,
                               redBorder: false,
@@ -570,67 +715,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ],
                       ),
-                      //Contact number text field,
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE0E3E7),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: _isContactNumberControllerInvalid
-                                ? Colors.red
-                                : _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(4),
-                        margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                        child: LayoutBuilder(
-                          builder: (BuildContext context, BoxConstraints constraints) {
-                            double maxWidth = MediaQuery.of(context).size.width * 0.9;
-                            return ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: maxWidth),
-                              child: TextFormField(
-                                  enabled: true,
-                                  controller: contactNumberController,
-                                  obscureText: false,
-                                  cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    border: InputBorder.none,
-                                    prefixIcon: const Icon(Icons.phone_android_rounded, color: Color.fromARGB(255, 67, 83, 89)),
-                                    focusColor: Theme.of(context).primaryColor,
-                                    hintText: "Contact Number*",
-                                  ),
-                                onChanged: (value) {
-                                    setState(() {
-                                      _isUserTypingContactNumber = true;
-                                      _isContactNumberControllerInvalid = false;
-                                    });
-                                  if (value.length == 11) {
-                                    setState(() {
-                                      isContactNumberCompleted = true;
-                                    });
-                                  }
-                                  else {
-                                    if (contactNumberController.text.isEmpty) {
-                                      setState(() {
-                                        _isUserTypingContactNumber = false;
-                                      });
-                                    }
-                                    else {
-                                      setState(() {
-                                        isContactNumberCompleted = false;
-                                      });
-                                    }
-                                  }
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
 
-                      //Show "Invalid Contact number"
-                      if (_isUserTypingContactNumber && isContactNumberCompleted == false)
+                      //Show "Please enter your last name"
+                      if (_isLastNameControllerInvalid == true)
                         const Row(
                           children: [
                             Padding(
@@ -638,8 +725,111 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 10),
-                                  Text("Invalid Contact number",
+                                  SizedBox(height: 2),
+                                  Text("Please enter your last name",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                      //Contact number text field,
+                      Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: CustomTextField(
+                              data: Icons.phone,
+                              hintText: "+63",
+                              isObsecure: false,
+                              keyboardType: TextInputType.none,
+                              noLeftMargin: false,
+                              noRightMargin: true,
+                              redBorder: false,
+                              enabled: false,
+                            ),
+                          ),
+
+                          Expanded(
+                            flex: 5,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE0E3E7),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _isContactNumberControllerInvalid
+                                      ? Colors.red
+                                      : _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                              child: LayoutBuilder(
+                                builder: (BuildContext context, BoxConstraints constraints) {
+                                  double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                                  return ConstrainedBox(
+                                    constraints: BoxConstraints(maxWidth: maxWidth),
+                                    child: TextFormField(
+                                      enabled: true,
+                                      controller: contactNumberController,
+                                      obscureText: false,
+                                      cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                      keyboardType: TextInputType.phone,
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        focusColor: Theme.of(context).primaryColor,
+                                        hintText: "Contact Number*",
+                                      ),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _isUserTypingContactNumber = true;
+                                          _isContactNumberControllerInvalid = false;
+                                        });
+                                        if (value.length == 10) {
+                                          setState(() {
+                                            isContactNumberCompleted = true;
+                                          });
+                                        }
+                                        else {
+                                          if (contactNumberController.text.isEmpty) {
+                                            setState(() {
+                                              _isUserTypingContactNumber = false;
+                                            });
+                                          }
+                                          else {
+                                            setState(() {
+                                              isContactNumberCompleted = false;
+                                            });
+                                          }
+                                        }
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      //Show "Invalid Contact number"
+                      if ((_isUserTypingContactNumber &&
+                          isContactNumberCompleted == false) || _isContactNumberControllerInvalid)
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 2),
+                                  Text("Enter a valid contact number",
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontFamily: "Poppins",
@@ -658,18 +848,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         controller: emailController,
                         hintText: "Email*",
                         isObsecure: false,
-                        keyboardType: TextInputType.text,
+                        keyboardType: TextInputType.emailAddress,
                         redBorder: _isEmailControllerInvalid,
                           noLeftMargin: false,
                           noRightMargin: false,
                           onChanged:(value) {
                             setState(() {
                               _isEmailControllerInvalid = false;
-                              _isUserTypingEmail= true;
                             });
                           }
                       ),
-                      //Show "Passwords don't match"
+
+                      //Show "Please enter your valid email format"
                       if (_isEmailControllerInvalid == true)
                         const Row(
                           children: [
@@ -678,8 +868,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  SizedBox(height: 10),
-                                  Text("Email format is invalid",
+                                  SizedBox(height: 2),
+                                  Text("Please enter your valid email format",
                                       style: TextStyle(
                                         fontSize: 14,
                                         fontFamily: "Poppins",
@@ -713,12 +903,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: TextFormField(
                                   enabled: true,
                                   controller: passwordController,
-                                  obscureText: true,
+                                  obscureText: _obscureText,
                                   cursorColor: const Color.fromARGB(255, 242, 198, 65),
                                   keyboardType: TextInputType.text,
                                   decoration: InputDecoration(
                                     border: InputBorder.none,
                                     prefixIcon: const Icon(Icons.password_rounded, color: Color.fromARGB(255, 67, 83, 89)),
+                                    suffixIcon: IconButton(
+                                      icon: Icon(passwordController.text.isNotEmpty
+                                          ? (_obscureText ? Icons.visibility : Icons.visibility_off)
+                                          : null,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _obscureText = !_obscureText;
+                                        });
+                                      },
+                                    ),
                                     focusColor: Theme.of(context).primaryColor,
                                     hintText: "Password*",
                                   ),
@@ -777,6 +978,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ],
                         ),
 
+                      //Show "Please provide a strong password"
+                      if (_isPasswordControllerInvalid == true)
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 35),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 2),
+                                  Text("Please provide a strong password",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.red,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
                       //Confirm password text field
                       Container(
                         decoration: BoxDecoration(
@@ -798,12 +1022,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: TextFormField(
                                 enabled: true,
                                 controller: confirmPasswordController,
-                                obscureText: true,
+                                obscureText: _obscureText,
                                 cursorColor: const Color.fromARGB(255, 242, 198, 65),
                                 keyboardType: TextInputType.text,
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   prefixIcon: const Icon(Icons.password_rounded, color: Color.fromARGB(255, 67, 83, 89)),
+                                  suffixIcon: IconButton(
+                                    icon: Icon(confirmPasswordController.text.isNotEmpty
+                                        ? (_obscureText ? Icons.visibility : Icons.visibility_off)
+                                        : null,
+                                    ),
+                                    onPressed: () {
+                                      setState(() {
+                                        _obscureText = !_obscureText;
+                                      });
+                                    },
+                                  ),
                                   focusColor: Theme.of(context).primaryColor,
                                   hintText: 'Confirm Password*',
                                 ),
@@ -888,11 +1123,45 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(
                 height: 30,
               ),
+
+              //Register Button
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        "Don't have an account?",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontFamily: "Poppins",
+                          color: Colors.black54,
+                        ),
+                      ),
+
+                      TextButton(
+                        onPressed: () => const LogInScreen(),
+                        child: const Text(
+                          "Register",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontFamily: "Poppins",
+                            color: Color.fromARGB(255, 242, 198, 65),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ],
           ),
-        ));
+        )
+    );
   }
 
+  //Logic for password validation notifier
   Widget _buildValidationRow(String message, bool isValid) {
     return Row(
       children: <Widget>[

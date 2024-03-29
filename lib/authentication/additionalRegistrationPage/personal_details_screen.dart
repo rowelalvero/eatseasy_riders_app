@@ -24,16 +24,61 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   bool isCompleted = false; // Flag to track if form is completed
   bool isButtonPressed = false; // Flag to track if button is pressed
 
+  bool isSecContactNumberCompleted = false;
+  bool _isSecContactNumberControllerInvalid = false;
+
   //Image picker instance
   final ImagePicker _picker = ImagePicker();
 
   //Get image and save it to imageXFile
-  Future<void> _getImage() async {
+  Future<void> getImage() async {
     riderProfile = await _picker.pickImage(source: ImageSource.gallery);
 
     //Update image
     setState(() {
+      isButtonPressed = false;
+      changesSaved = false;
+      isCompleted = false;
       riderProfile;
+    });
+  }
+
+  _getImage() async {
+    bool? isCamera = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Camera"),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("Gallery "),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (isCamera == null) return;
+
+    XFile? file = await ImagePicker()
+        .pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
+    riderProfile = XFile(file!.path);
+    setState(() {
+      isButtonPressed = false;
+      changesSaved = false;
+      isCompleted = false;
     });
   }
 
@@ -244,6 +289,31 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     'Zimbabwean',
   ];
 
+  void userData() async{
+    sharedPreferences = await SharedPreferences.getInstance();
+    //Save secondaryContactNumber locally
+    await sharedPreferences?.setString('secondaryContactNumber', secondaryContactNumberController.text);
+    //Save nationality locally
+    await sharedPreferences?.setString('nationality', nationalityController.text);
+    //Save image locally
+    if (riderProfile != null) {
+      await sharedPreferences?.setString('user_image_path', riderProfile!.path);//await sharedPreferences?.setString('riderProfileImageBytes', base64Encode(riderProfileImageBytes));
+    }
+
+    //Save changesSaved value to true
+    await sharedPreferences?.setBool('changesSaved', true);
+    await sharedPreferences?.setBool('isButtonPressed', true);
+    setState(() {
+      changesSaved  = true;
+      isCompleted = true;
+    });
+
+    // Store completion status in shared preferences
+    await sharedPreferences?.setBool('personalDetailsCompleted', true);
+    // Toggle the button state
+    isButtonPressed = !isButtonPressed;
+  }
+
   //Save user data locally
   void _saveUserDataToPrefs() async {
     //return error message if user pressed the save button without selecting an image
@@ -257,27 +327,15 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           });
     }
     else {
-      // Toggle the button state
-      isButtonPressed = !isButtonPressed;
-      sharedPreferences = await SharedPreferences.getInstance();
-      //Save secondaryContactNumber locally
-      await sharedPreferences?.setString('secondaryContactNumber', secondaryContactNumberController.text);
-      //Save nationality locally
-      await sharedPreferences?.setString('nationality', nationalityController.text);
-      //Save image locally
-      if (riderProfile != null) {
-        await sharedPreferences?.setString('user_image_path', riderProfile!.path);//await sharedPreferences?.setString('riderProfileImageBytes', base64Encode(riderProfileImageBytes));
+      if (secondaryContactNumberController.text.isNotEmpty && isSecContactNumberCompleted == false) {
+        setState(() {
+          _isSecContactNumberControllerInvalid = true;
+        });
+      } else if (isSecContactNumberCompleted == true) {
+        userData();
+      } else if (secondaryContactNumberController.text.isEmpty) {
+        userData();
       }
-
-      //Save changesSaved value to true
-      await sharedPreferences?.setBool('changesSaved', true);
-      setState(() {
-        changesSaved  = true;
-        isCompleted = true;
-      });
-
-      // Store completion status in shared preferences
-      await sharedPreferences?.setBool('personalDetailsCompleted', true);
     }
   }
 
@@ -291,8 +349,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       nationalityController.text = sharedPreferences?.getString('nationality') ?? _dropdownItems.first;
       //
       changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
+      isButtonPressed = sharedPreferences?.getBool('isButtonPressed') ?? false;
     });
-
     //Load image
     String? imagePath = sharedPreferences?.getString('user_image_path');
     if (imagePath != null && imagePath.isNotEmpty) {
@@ -304,7 +362,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
   Future<void> _removeImage() async {
     setState(() {
+      isButtonPressed = false;
       changesSaved = false;
+      isCompleted = false;
     });
 
     setState(() {
@@ -574,7 +634,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Secondary Contact Number",
+                          Text("Secondary Contact Number (Optional)",
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Color.fromARGB(255, 67, 83, 89),
@@ -586,22 +646,105 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                         ],
                       ),
                     ),
-                    CustomTextField(
-                      keyboardType: TextInputType.number,
-                      data: Icons.phone_android_rounded,
-                      controller: secondaryContactNumberController,
-                      hintText: "",
-                      isObsecure: false,
-                      redBorder: false,
-                      noLeftMargin: false,
-                      noRightMargin: false,
-                      onChanged: (value) {
-                        setState(() {
-                          changesSaved = false;
-                          isCompleted = false;
-                        });
-                      },
+
+                    //Secondary contact number text field,
+                    Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: CustomTextField(
+                            data: Icons.phone,
+                            hintText: "+63",
+                            isObsecure: false,
+                            keyboardType: TextInputType.none,
+                            noLeftMargin: false,
+                            noRightMargin: true,
+                            redBorder: false,
+                            enabled: false,
+                          ),
+                        ),
+
+                        Expanded(
+                          flex: 5,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE0E3E7),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: _isSecContactNumberControllerInvalid
+                                      ? Colors.red
+                                      : isSecContactNumberCompleted ? Colors.green : Colors.transparent,
+                                ),
+                              ),
+                              padding: const EdgeInsets.all(4),
+                              margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                              child: LayoutBuilder(
+                                builder: (BuildContext context, BoxConstraints constraints) {
+                                  double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                                  return ConstrainedBox(
+                                    constraints: BoxConstraints(maxWidth: maxWidth),
+                                    child: TextFormField(
+                                      enabled: true,
+                                      controller: secondaryContactNumberController,
+                                      obscureText: false,
+                                      cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                      keyboardType: TextInputType.phone,
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        focusColor: Theme.of(context).primaryColor,
+                                        hintText: "",
+                                      ),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _isSecContactNumberControllerInvalid = false;
+                                          changesSaved = false;
+                                          isCompleted = false;
+                                          isButtonPressed = false;
+                                        });
+                                        if(value.length == 10) {
+                                          setState(() {
+                                            isSecContactNumberCompleted = true;
+                                          });
+                                        }
+                                        else {
+                                          setState(() {
+                                            isSecContactNumberCompleted = false;
+                                          });
+                                        }
+                                      },
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                        )
+                      ],
                     ),
+                    //Contact number text field,
+
+
+                    //Show "Invalid Contact number"
+                    if (_isSecContactNumberControllerInvalid == true && isSecContactNumberCompleted == false)
+                      const Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: 35),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 2),
+                                Text("Enter a valid contact number",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins",
+                                      color: Colors.red,
+                                    )
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
 
                     //Spacing
                     const SizedBox(height: 10),
