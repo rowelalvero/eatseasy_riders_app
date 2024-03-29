@@ -422,17 +422,56 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ],
             ),
-            //Remove the appbar back button
-            automaticallyImplyLeading: false,
-            //appBar elevation/shadow
-            elevation: 2,
-            centerTitle: true),
+          //appBar elevation/shadow
+          elevation: 2,
+          centerTitle: true,
+          leadingWidth: 40.0,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
+              onPressed: () {
+                // Add functionality to go back
+                Navigator.pop(context);
+              },
+            ),
+          ),
+        ),
 
         //Register body
         body: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.max,
             children: [
+              const SizedBox(height: 20),
+              const Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Fill-out the required details and start driving with EatsEasy!",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color.fromARGB(255, 67, 83, 89),
+                            fontFamily: "Poppins",
+                          ),
+                        ),
+                        Text(
+                          "Please provide the following information.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color.fromARGB(255, 67, 83, 89),
+                            fontFamily: "Poppins",
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
               //Text Fields
               const SizedBox(height: 10),
               Form(
