@@ -1119,11 +1119,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
               ),
 
-              //spacing
-              const SizedBox(
-                height: 30,
-              ),
-
               //Register Button
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1132,7 +1127,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        "Don't have an account?",
+                        "Have an account?",
                         style: TextStyle(
                           fontSize: 14,
                           fontFamily: "Poppins",
@@ -1141,9 +1136,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
 
                       TextButton(
-                        onPressed: () => const LogInScreen(),
+                        onPressed: () => Navigator.of(context).pop(),
                         child: const Text(
-                          "Register",
+                          "Login here",
                           style: TextStyle(
                             fontSize: 14,
                             fontFamily: "Poppins",
