@@ -20,11 +20,17 @@ class RegisterScreen2 extends StatefulWidget {
 
 class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isPersonalDetailsCompleted;
+  late Future<bool> _isDriverLicenseCompleted;
   bool isButtonPressed = false;
 
   Future<bool> _checkPersonalDetailsCompleted() async {
     sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences?.getBool('personalDetailsCompleted') ?? false;
+  }
+
+  Future<bool> _checkDriverLicenseCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('driverLicenseCompleted') ?? false;
   }
 
   //The business logo will upload to Firestorage
@@ -70,7 +76,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
           context: context,
           builder: (c) {
             return const ErrorDialog(
-              message: "Please complete the required fields.",
+              message: "Please complete the required sections.",
             );
           });
     }
@@ -141,7 +147,9 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   @override
   void initState() {
     super.initState();
+    //Initialize the status of every sections
     _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
+    _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
   }
 
   @override
@@ -242,7 +250,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
             });
           },),
-          //LinkTile(title: 'Driver License', destination: '/driversLicense', isRequired: true, isCompleted: false),
+          LinkTile(title: 'Driver License', destination: '/driversLicense', isRequiredBasedOnCompletion: true, isCompleted: _isDriverLicenseCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
+            });
+          },),
           //LinkTile(title: 'Declarations', destination: '/declarations', isRequired: true, isCompleted: false),
           //LinkTile(title: 'Consents', destination: '/consents', isRequired: true, isCompleted: false),
           //LinkTile(title: 'EatsEasy Wallet', destination: '/eatsEasyWallet', isRequired: true, isCompleted: false),

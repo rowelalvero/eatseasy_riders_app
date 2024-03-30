@@ -1144,7 +1144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           shadowColor: Colors.grey.withOpacity(0.3), // Light gray
                         ),
                         child: Text(
-                          isButtonPressed ? "Submitted" : "Submit",
+                          isButtonPressed ? "Sign Up" : "Sign Up",
                           style: TextStyle(
                             color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
                             fontFamily: "Poppins",
