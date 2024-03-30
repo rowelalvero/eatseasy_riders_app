@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 
 import '../../global/global.dart';
+import '../../widgets/custom_text_field.dart';
 import '../imageGetters/rider_profile.dart';
 import '../register2.dart';
 
@@ -21,6 +23,9 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
   TextEditingController licenseNumberController = TextEditingController();
   TextEditingController issueDateController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+  TextEditingController motherMaidenNameController = TextEditingController();
+  TextEditingController residentialAddressController = TextEditingController();
 
   bool changesSaved = true; // Flag to track if changes are saved
   bool isCompleted = false; // Flag to track if form is completed
@@ -30,6 +35,10 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
   bool _isLicenseNumberControllerInvalid = false;
   bool _isIssueDateCompleted = false;
   bool _isIssueDateControllerInvalid = false;
+  bool _isAgeInvalid = false;
+  bool _ismotherMaidenNameInvalid = false;
+
+  String? _residentialPermanentAddressController;
 
   late DateTime _chosenDateTime;
 
@@ -168,6 +177,9 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       backLicense = null;
       // Update changesSaved based on other changes
     });
+  }
+
+  void _saveUserDataToPrefs() {
   }
 
   @override
@@ -319,7 +331,8 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                               controller: licenseNumberController,
                               obscureText: false,
                               cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                              keyboardType: TextInputType.phone,
+                              keyboardType: TextInputType.text,
+                              textCapitalization: TextCapitalization.sentences,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 focusColor: Theme.of(context).primaryColor,
@@ -602,6 +615,216 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         ),
                       ],
                     ),
+                    //Age
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 18),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Age (Required)",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),
+                    //Age
+                    CustomTextField(
+                        controller: ageController,
+                        hintText: "",
+                        isObsecure: false,
+                        keyboardType: TextInputType.number,
+                        redBorder: _isAgeInvalid,
+                        noLeftMargin: false,
+                        noRightMargin: false,
+                        onChanged:(value) {
+                          setState(() {
+                            _isAgeInvalid = false;
+                          });
+                        }
+                    ),
+
+                    //Mother's Maiden Name
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 18),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Mother's Maiden Name (Required)",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),
+                    //Mother's Maiden Name
+                    CustomTextField(
+                        controller: ageController,
+                        hintText: "",
+                        isObsecure: false,
+                        keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.sentences,
+                        redBorder: _ismotherMaidenNameInvalid,
+                        noLeftMargin: false,
+                        noRightMargin: false,
+                        onChanged:(value) {
+                          setState(() {
+                            _ismotherMaidenNameInvalid = false;
+                          });
+                        }
+                    ),
+
+                    //Residential Address
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 18),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Residential Address (Optional)",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    //Residential Address
+                    CustomTextField(
+                        controller: ageController,
+                        hintText: "",
+                        isObsecure: false,
+                        keyboardType: TextInputType.text,
+                        textCapitalization: TextCapitalization.sentences,
+                        redBorder: false,
+                        noLeftMargin: false,
+                        noRightMargin: false,
+                        onChanged:(value) {
+                          setState(() {
+                          });
+                        }
+                    ),
+
+                    //Residential is permanent Address?
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 18),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Is your residential address the same as you permanent address?(Required)",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    //Residential Address
+                    Container(
+                      padding: const EdgeInsets.all(4),
+                      margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE0E3E7),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButtonFormField2<String>(
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                        ),
+                        hint: const Text('Select an option',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        items: ['Yes', 'No'].map((item) => DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item,
+                            style: const TextStyle(
+                              fontSize: 16,
+                            ),
+                          ),
+                        ))
+                            .toList(),
+                        validator: (value) {
+                          if (value == null) {
+                            return 'Suffix';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          setState(() {
+                            _residentialPermanentAddressController = value.toString();
+                          });
+                        },
+                        buttonStyleData: const ButtonStyleData(
+                          padding: EdgeInsets.only(right: 8),
+                        ),
+                        iconStyleData: const IconStyleData(
+                          icon: Icon(Icons.arrow_drop_down,
+                            color: Colors.black45,
+                          ),
+                          iconSize: 24,
+                        ),
+                        dropdownStyleData: DropdownStyleData(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                        ),
+                        menuItemStyleData: const MenuItemStyleData(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(18.0),
+                      child: Expanded(
+                        child: FractionallySizedBox(
+                          widthFactor: MediaQuery.of(context).orientation == Orientation.landscape ? 0.64 : 1,
+                          // Set width factor to 0.64 in landscape mode, and 1 otherwise
+                          child: ElevatedButton(
+                            onPressed: isButtonPressed ? null : () => _saveUserDataToPrefs(),
+                            // Register button styling
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              elevation: 4, // Elevation for the shadow
+                              shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                            ),
+                            child: Text(
+                              isButtonPressed ? "Saved" : "Save",
+                              style: TextStyle(
+                                color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -612,5 +835,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     );
   }
 }
+
+
 
 
