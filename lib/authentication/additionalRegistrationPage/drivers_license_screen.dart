@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -31,6 +32,8 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
   bool _isIssueDateControllerInvalid = false;
 
   late DateTime _chosenDateTime;
+
+  bool _isFrontImageSelected = false;
 
   bool validateLicenseNumber(String licenseNumber) {
     final RegExp pattern = RegExp(r'^[A-Z]\d{2}-\d{2}-\d{6}$');
@@ -100,6 +103,71 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
         ),
       ),
     );
+  }
+
+  _getImage() async {
+    bool? isCamera = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text("Camera"),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text("Gallery "),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (isCamera == null) return;
+
+    XFile? file = await ImagePicker()
+        .pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
+    _isFrontImageSelected ? frontLicense = XFile(file!.path): backLicense = XFile(file!.path);
+    setState(() {
+      isButtonPressed = false;
+      changesSaved = false;
+      isCompleted = false;
+    });
+  }
+
+  Future<void> _removeFrontLicenseImage() async {
+    setState(() {
+      isButtonPressed = false;
+      changesSaved = false;
+      isCompleted = false;
+    });
+
+    setState(() {
+      frontLicense = null;
+      // Update changesSaved based on other changes
+    });
+  }
+
+  Future<void> _removeBackLicenseImage() async {
+    setState(() {
+      isButtonPressed = false;
+      changesSaved = false;
+      isCompleted = false;
+    });
+
+    setState(() {
+      backLicense = null;
+      // Update changesSaved based on other changes
+    });
   }
 
   @override
@@ -357,6 +425,182 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           );
                         },
                       ),
+                    ),
+
+                    //Front Image
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 18),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Front Image (Required)",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                    // Image Picker
+                    InkWell(
+                      //get image from gallery
+                      onTap: () {
+                        setState(() {
+                          _isFrontImageSelected = true;
+                        });
+
+                        _getImage();
+                      },
+
+                      //display selected image
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.20 * 4,
+                          height: MediaQuery.of(context).size.width * 0.20 * 2,
+                          color: const Color.fromARGB(255, 230, 229, 229),
+                          child: frontLicense == null
+                              ? Icon(
+                            Icons.add_photo_alternate,
+                            size: MediaQuery.of(context).size.width * 0.20,
+                            color: Colors.grey,
+                          )
+                              : Image.file(File(frontLicense!.path),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+
+                    ),
+
+                    Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+
+                            TextButton(
+                              onPressed: () => _getImage(),
+
+                              child: const Text(
+                                "Upload Image",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: "Poppins",
+                                  color: Color.fromARGB(255, 242, 198, 65),
+                                ),
+                              ),
+                            ),
+
+                            // Remove image button
+                            if (frontLicense != null)
+                              TextButton(
+                                onPressed: () => _removeFrontLicenseImage(),
+                                child: const Text(
+                                  "Remove",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: "Poppins",
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+
+                    //Back Image
+                    const SizedBox(height: 10),
+                    const Padding(
+                      padding: EdgeInsets.only(left: 18),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Back Image (Required)",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                    // Image Picker
+                    InkWell(
+                      //get image from gallery
+                        onTap: () {
+                          _isFrontImageSelected = false;
+                          _getImage();
+                        },
+
+                        //display selected image
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.20 * 4,
+                            height: MediaQuery.of(context).size.width * 0.20 * 2,
+                            color: const Color.fromARGB(255, 230, 229, 229),
+                            child: backLicense == null
+                                ? Icon(
+                              Icons.add_photo_alternate,
+                              size: MediaQuery.of(context).size.width * 0.20,
+                              color: Colors.grey,
+                            )
+                                : Image.file(
+                              File(backLicense!.path),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        )
+
+                    ),
+
+                    Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+
+                            TextButton(
+                              onPressed: () => _getImage(),
+
+                              child: const Text(
+                                "Upload Image",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontFamily: "Poppins",
+                                  color: Color.fromARGB(255, 242, 198, 65),
+                                ),
+                              ),
+                            ),
+
+                            // Remove image button
+                            if (backLicense != null)
+                              TextButton(
+                                onPressed: () => _removeBackLicenseImage(),
+                                child: const Text(
+                                  "Remove",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: "Poppins",
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
                     ),
                   ],
                 ),

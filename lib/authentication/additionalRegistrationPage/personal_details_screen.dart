@@ -31,18 +31,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   final ImagePicker _picker = ImagePicker();
 
   //Get image and save it to imageXFile
-  Future<void> getImage() async {
-    riderProfile = await _picker.pickImage(source: ImageSource.gallery);
-
-    //Update image
-    setState(() {
-      isButtonPressed = false;
-      changesSaved = false;
-      isCompleted = false;
-      riderProfile;
-    });
-  }
-
   _getImage() async {
     bool? isCamera = await showDialog(
       context: context,
