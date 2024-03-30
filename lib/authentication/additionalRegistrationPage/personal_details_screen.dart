@@ -303,6 +303,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     //Save changesSaved value to true
     await sharedPreferences?.setBool('changesSaved', true);
     await sharedPreferences?.setBool('isButtonPressed', true);
+    await sharedPreferences?.setBool('isSecContactNumberCompleted', true);
     setState(() {
       changesSaved  = true;
       isCompleted = true;
@@ -327,7 +328,10 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           });
     }
     else {
-      if (secondaryContactNumberController.text.isNotEmpty && isSecContactNumberCompleted == false) {
+      if (secondaryContactNumberController.text.length == 10) {
+        userData();
+      }
+      else if (secondaryContactNumberController.text.isNotEmpty && isSecContactNumberCompleted == false) {
         setState(() {
           _isSecContactNumberControllerInvalid = true;
         });
@@ -350,6 +354,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       //
       changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
       isButtonPressed = sharedPreferences?.getBool('isButtonPressed') ?? false;
+      //isSecContactNumberCompleted = sharedPreferences?.getBool('isSecContactNumberCompleted') ?? false;
     });
     //Load image
     String? imagePath = sharedPreferences?.getString('user_image_path');
