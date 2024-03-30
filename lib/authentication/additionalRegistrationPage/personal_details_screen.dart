@@ -555,8 +555,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                               : null),
                     ),
 
-
-
                     Column(
                       children: [
                         Row(
@@ -759,7 +757,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("Nationality",
+                          Text("Nationality (Required)",
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Color.fromARGB(255, 67, 83, 89),

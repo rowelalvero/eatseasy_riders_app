@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
+import '../authentication/additionalRegistrationPage/drivers_license_screen.dart';
 import '../authentication/register.dart';
+import '../authentication/register2.dart';
 
 class LoadingDialog extends StatelessWidget {
   final String? message;
@@ -20,7 +22,7 @@ class LoadingDialog extends StatelessWidget {
         // Navigate to the main content page
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const RegisterScreen()),
+          MaterialPageRoute(builder: (context) => const RegisterScreen2()),
         );
       });
     }

@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
       ),
       home: const MySplashScreen(),
       routes: {
-        '/personalDetails': (context) => PersonalDetailsScreen(),
+        '/personalDetails': (context) => const PersonalDetailsScreen(),
         '/driversLicense': (context) => const DriversLicenseScreen(),
         '/declarations': (context) => const DeclarationsScreen(),
         '/consents': (context) => const ConsentsScreen(),

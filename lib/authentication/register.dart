@@ -444,6 +444,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisSize: MainAxisSize.max,
             children: [
               const SizedBox(height: 20),
+
+
               const Row(
                 children: [
                   Padding(
