@@ -43,6 +43,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
   late DateTime _chosenDateTime;
 
   bool _isFrontImageSelected = false;
+  bool _isFrontImageWillDeleted = false;
 
   bool validateLicenseNumber(String licenseNumber) {
     final RegExp pattern = RegExp(r'^[A-Z]\d{2}-\d{2}-\d{6}$');
@@ -102,7 +103,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                       isCompleted = false;
                       isButtonPressed = false;
                       _chosenDateTime = val;
-                      issueDateController.text = DateFormat('yyyy-MM-dd').format(val); // Format the chosen date and set it to the TextField;
+                      issueDateController.text = DateFormat('MM/dd/yyyy').format(val); // Format the chosen date and set it to the TextField;
                     });
                   },
                 ),
@@ -153,7 +154,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     });
   }
 
-  Future<void> _removeFrontLicenseImage() async {
+  Future<void> _removeLicenseImage() async {
     setState(() {
       isButtonPressed = false;
       changesSaved = false;
@@ -161,25 +162,15 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     });
 
     setState(() {
-      frontLicense = null;
+      _isFrontImageWillDeleted
+          ? frontLicense = null
+          : backLicense = null;
       // Update changesSaved based on other changes
     });
   }
 
-  Future<void> _removeBackLicenseImage() async {
-    setState(() {
-      isButtonPressed = false;
-      changesSaved = false;
-      isCompleted = false;
-    });
+  void _saveUserDataToPrefs() async {
 
-    setState(() {
-      backLicense = null;
-      // Update changesSaved based on other changes
-    });
-  }
-
-  void _saveUserDataToPrefs() {
   }
 
   @override
@@ -499,8 +490,12 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           children: [
 
                             TextButton(
-                              onPressed: () => _getImage(),
-
+                              onPressed: () {
+                                setState(() {
+                                  _isFrontImageSelected = true;
+                                });
+                                _getImage();
+                                } ,
                               child: const Text(
                                 "Upload Image",
                                 style: TextStyle(
@@ -514,7 +509,13 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                             // Remove image button
                             if (frontLicense != null)
                               TextButton(
-                                onPressed: () => _removeFrontLicenseImage(),
+                                onPressed: () {
+                                  setState(() {
+                                    _isFrontImageWillDeleted = true;
+                                  });
+
+                                  _removeLicenseImage();
+                              },
                                 child: const Text(
                                   "Remove",
                                   style: TextStyle(
@@ -553,7 +554,10 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                     InkWell(
                       //get image from gallery
                         onTap: () {
-                          _isFrontImageSelected = false;
+                          setState(() {
+                            _isFrontImageSelected = false;
+                          });
+
                           _getImage();
                         },
 
@@ -586,7 +590,12 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           children: [
 
                             TextButton(
-                              onPressed: () => _getImage(),
+                              onPressed: () {
+                                setState(() {
+                                  _isFrontImageSelected = false;
+                                });
+                                _getImage();
+                                },
 
                               child: const Text(
                                 "Upload Image",
@@ -601,7 +610,13 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                             // Remove image button
                             if (backLicense != null)
                               TextButton(
-                                onPressed: () => _removeBackLicenseImage(),
+                                onPressed: () {
+                                  setState(() {
+                                    _isFrontImageWillDeleted = false;
+                                  });
+
+                                  _removeLicenseImage();
+                                },
                                 child: const Text(
                                   "Remove",
                                   style: TextStyle(
