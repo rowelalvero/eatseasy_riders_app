@@ -27,8 +27,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   bool isSecContactNumberCompleted = false;
   bool _isSecContactNumberControllerInvalid = false;
 
-  //Image picker instance
-  final ImagePicker _picker = ImagePicker();
 
   //Get image and save it to imageXFile
   _getImage() async {
@@ -285,7 +283,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     await sharedPreferences?.setString('nationality', nationalityController.text);
     //Save image locally
     if (riderProfile != null) {
-      await sharedPreferences?.setString('user_image_path', riderProfile!.path);//await sharedPreferences?.setString('riderProfileImageBytes', base64Encode(riderProfileImageBytes));
+      await sharedPreferences?.setString('user_image_path', riderProfile!.path);
     }
 
     //Save changesSaved value to true
@@ -362,7 +360,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
     setState(() {
       riderProfile = null;
-      // Update changesSaved based on other changes
     });
   }
 
@@ -409,16 +406,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
               if (sharedPreferences!.containsKey('nationality') &&
                   sharedPreferences!.containsKey('user_image_path') ||
                   sharedPreferences!.containsKey('secondaryContactNumber')) {
-                // Load secondary contact number data
-                secondaryContactNumberController.text = sharedPreferences?.getString('secondaryContactNumber') ?? '';
-                // Load nationality data
-                nationalityController.text = sharedPreferences?.getString('nationality') ?? _dropdownItems.first;
-                // Load image
-                String? imagePath = sharedPreferences?.getString('user_image_path');
-                if (imagePath != null && imagePath.isNotEmpty) {
-                  riderProfile = XFile(imagePath);
-                }
-                changesSaved = sharedPreferences?.getBool('changesSaved') ?? false;
+
+                _loadUserDetails();
+
               } else {
                 riderProfile = XFile('');
                 nationalityController.text = _dropdownItems.first;

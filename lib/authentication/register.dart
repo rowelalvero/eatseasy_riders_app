@@ -67,9 +67,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   ];
 
   //String var of suffix dropdown
-  String? _suffixController;
+  String? suffixController;
   //String var of service type dropdown
-  String? _serviceType;
+  String? serviceTypeController;
 
   @override
   void initState() {
@@ -169,7 +169,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         _isFormComplete = false;
       });
     }
-    if (_serviceType == null) {
+    if (serviceTypeController == null) {
       setState(() {
         _isServiceTypeEmpty = true;
         _isFormComplete = false;
@@ -215,7 +215,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         firstNameController.text.isNotEmpty &&
         lastNameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
-        _serviceType != null) {
+        serviceTypeController != null) {
 
       _isFormComplete = true;
     }
@@ -378,9 +378,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       "lastName": lastNameController.text.trim(), // Storing last name after trimming leading/trailing whitespace
       "firstName": firstNameController.text.trim(), // Storing first name after trimming leading/trailing whitespace
       "M.I.": middleInitialController.text.trim(), // Storing middle initial after trimming leading/trailing whitespace
-      "suffix": _suffixController, // Storing suffix after trimming leading/trailing whitespace
+      "suffix": suffixController, // Storing suffix after trimming leading/trailing whitespace
       "contactNumber": "+63${contactNumberController.text.trim()}", // Storing contact number after trimming leading/trailing whitespace
-      "serviceType": _serviceType, //Storing the service type of the rider
+      "serviceType": serviceTypeController, //Storing the service type of the rider
       "status": "pending", // Setting the status to 'pending'
       "earnings": 0.0, // Initializing earnings as 0.0
     });
@@ -562,7 +562,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           onChanged: (value) {
                             setState(() {
                               _isServiceTypeEmpty = false;
-                              _serviceType = value.toString();
+                              serviceTypeController = value.toString();
                             });
                           },
                           buttonStyleData: const ButtonStyleData(
@@ -667,7 +667,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 },
                                 onChanged: (value) {
                                   setState(() {
-                                    _suffixController = value.toString();
+                                    suffixController = value.toString();
                                   });
                                 },
                                 buttonStyleData: const ButtonStyleData(
