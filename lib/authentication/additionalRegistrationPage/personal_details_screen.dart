@@ -5,6 +5,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
 import '../../global/global.dart';
+import '../cameraPage/camera_page.dart';
+import '../cameraPage/camera_widget.dart';
 import '../imageGetters/rider_profile.dart';
 import '../register2.dart';
 
@@ -348,6 +350,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       setState(() {
         riderProfile = XFile(imagePath);
       });
+    } else {
+      riderProfile = null;
     }
   }
 
@@ -385,11 +389,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    setState(() {
-                      const RegisterScreen2();
-                    });
                     Navigator.pop(context, true);
-                    },
+                  },
                   child: const Text('Discard'),
                 ),
                 TextButton(
@@ -402,13 +403,11 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
           if (result == true) {
             sharedPreferences = await SharedPreferences.getInstance();
+
             setState(() {
               if (sharedPreferences!.containsKey('nationality') &&
-                  sharedPreferences!.containsKey('user_image_path') ||
-                  sharedPreferences!.containsKey('secondaryContactNumber')) {
-
+                  sharedPreferences!.containsKey('user_image_path')) {
                 _loadUserDetails();
-
               } else {
                 riderProfile = XFile('');
                 nationalityController.text = _dropdownItems.first;
@@ -419,8 +418,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           }
           return false; // Prevent pop if changes are not discarded
         }
-        return true; // Allow pop if changes are saved
+        return true; // Allow pop if changes are saved or no changes were made
       },
+
 
       child: Scaffold(
         appBar: AppBar(
@@ -513,7 +513,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     // Image Picker
                     InkWell(
                       //get image from gallery
-                      onTap: () => _getImage(),
+                      onTap: () => Navigator.pushNamed(context, '/camera'),
 
                       //display selected image
                       child: CircleAvatar(
@@ -644,65 +644,57 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             enabled: false,
                           ),
                         ),
-
                         Expanded(
                           flex: 5,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE0E3E7),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: _isSecContactNumberControllerInvalid
-                                      ? Colors.red
-                                      : isSecContactNumberCompleted ? Colors.green : Colors.transparent,
-                                ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE0E3E7),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: _isSecContactNumberControllerInvalid
+                                    ? Colors.red
+                                    : isSecContactNumberCompleted ? Colors.green : Colors.transparent,
                               ),
-                              padding: const EdgeInsets.all(4),
-                              margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
-                              child: LayoutBuilder(
-                                builder: (BuildContext context, BoxConstraints constraints) {
-                                  double maxWidth = MediaQuery.of(context).size.width * 0.9;
-                                  return ConstrainedBox(
-                                    constraints: BoxConstraints(maxWidth: maxWidth),
-                                    child: TextFormField(
-                                      enabled: true,
-                                      controller: secondaryContactNumberController,
-                                      obscureText: false,
-                                      cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                                      keyboardType: TextInputType.phone,
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        focusColor: Theme.of(context).primaryColor,
-                                        hintText: "",
-                                      ),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _isSecContactNumberControllerInvalid = false;
-                                          changesSaved = false;
-                                          isCompleted = false;
-                                          isButtonPressed = false;
-                                        });
-                                        if(value.length == 10) {
-                                          setState(() {
-                                            isSecContactNumberCompleted = true;
-                                          });
-                                        }
-                                        else {
-                                          setState(() {
-                                            isSecContactNumberCompleted = false;
-                                          });
-                                        }
-                                      },
-                                    ),
-                                  );
+                            ),
+                            padding: const EdgeInsets.all(4),
+                            margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9),
+                              child: TextFormField(
+                                enabled: true,
+                                controller: secondaryContactNumberController,
+                                obscureText: false,
+                                cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                keyboardType: TextInputType.phone,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  focusColor: Theme.of(context).primaryColor,
+                                  hintText: "",
+                                ),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _isSecContactNumberControllerInvalid = false;
+                                    changesSaved = false;
+                                    isCompleted = false;
+                                    isButtonPressed = false;
+                                  });
+                                  if(value.length == 10) {
+                                    setState(() {
+                                      isSecContactNumberCompleted = true;
+                                    });
+                                  }
+                                  else {
+                                    setState(() {
+                                      isSecContactNumberCompleted = false;
+                                    });
+                                  }
                                 },
                               ),
                             ),
-                        )
+                          ),
+                        ),
                       ],
                     ),
-                    //Contact number text field,
-
 
                     //Show "Invalid Contact number"
                     if (_isSecContactNumberControllerInvalid == true && isSecContactNumberCompleted == false)
@@ -788,40 +780,43 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-
-        // Submit button
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: Expanded(
-            child: FractionallySizedBox(
-              widthFactor: MediaQuery.of(context).orientation == Orientation.landscape ? 0.64 : 1,
-              // Set width factor to 0.64 in landscape mode, and 1 otherwise
-              child: ElevatedButton(
-                onPressed: isButtonPressed ? null : () => _saveUserDataToPrefs(),
-                // Register button styling
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  elevation: 4, // Elevation for the shadow
-                  shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                ),
-                child: Text(
-                  isButtonPressed ? "Saved" : "Save",
-                  style: TextStyle(
-                    color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w700,
-                    fontSize: 20,
-                  ),
+              //Spacing
+              const SizedBox(
+                height: 10,
+              ),
+              // Submit button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: isButtonPressed ? null : () => _saveUserDataToPrefs(),
+                        // Register button styling
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          elevation: 4, // Elevation for the shadow
+                          shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                        ),
+                        child: Text(
+                          isButtonPressed ? "Saved" : "Save",
+                          style: TextStyle(
+                            color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
+            ],
           ),
         ),
       ),

@@ -17,6 +17,7 @@ import 'authentication/additionalRegistrationPage/vehicle_info_screen.dart';
 import 'authentication/additionalRegistrationPage/orcr_screen.dart';
 import 'authentication/additionalRegistrationPage/vehicle_documents_screen.dart';
 
+import 'authentication/cameraPage/camera_page.dart';
 import 'global/global.dart';
 
 Future main() async {
@@ -54,7 +55,7 @@ class MyApp extends StatelessWidget {
         '/emergencyContact': (context) => const EmergencyContactScreen(),
         '/vehicleInfo': (context) => const VehicleInfoScreen(),
         '/orCr': (context) => const OrCrScreen(),
-        '/vehicleDocs': (context) => const VehicleDocumentsScreen(),
+        '/vehicleDocs': (context) => const VehicleDocumentsScreen()
       },
     );
   }

@@ -124,15 +124,31 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   //Saves rider information to Firestore
   Future<User?> _saveDataToFirestore() async {
     sharedPreferences = await SharedPreferences.getInstance();
+    // Personal Details Screen
     String? currentUserUid = sharedPreferences?.getString('currentUserUid');
     String? savedSecondaryContactNumber = sharedPreferences!.getString('secondaryContactNumber');
     String? savedNationality = sharedPreferences!.getString('nationality');
+    // Driver License Screen
+    String? savedLicenseNumber = sharedPreferences?.getString('licenseNumber');
+    String? savedIssueDate = sharedPreferences?.getString('issueDate');
+    String? savedAge = sharedPreferences?.getString('age');
+    String? savedMotherMaidenName = sharedPreferences?.getString('motherMaiden');
+    String? savedResidentialAddress = sharedPreferences?.getString('residentialAddress');
+    String? savedIsResidentialPermanentAddress = sharedPreferences?.getString('isResidentialPermanentAddress');
 
     // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
     await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
+      // Personal Details Screen
       "secondaryContactNumber": "+63$savedSecondaryContactNumber",
       "nationality": savedNationality,
       "riderAvatarUrl": riderImageUrl,
+      // Driver License Screen
+      "licenseNumber": savedLicenseNumber,
+      "issueDate": savedIssueDate,
+      "age": savedAge,
+      "motherMaidenName": savedMotherMaidenName,
+      "residentialAddress": savedResidentialAddress,
+      "isResidentialPermanentAddress": savedIsResidentialPermanentAddress,
     }, SetOptions(merge: true));
 
     /*//Save rider's data locally
@@ -315,6 +331,36 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
                 ),
               ],
             ),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Have an account?",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontFamily: "Poppins",
+                      color: Colors.black54,
+                    ),
+                  ),
+
+                  TextButton(
+                    onPressed: () => sharedPreferences?.clear(),
+                    child: const Text(
+                      "Login here",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: "Poppins",
+                        color: Color.fromARGB(255, 242, 198, 65),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            ],
           ),
           //spacing
           const SizedBox(

@@ -9,6 +9,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../global/global.dart';
+import '../mainScreens/home_screen.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 
@@ -73,8 +74,8 @@ class _LogInScreenState extends State<LogInScreen> {
 
       readDataAndSetDataLocally(currentUser!).then((value) {
         Navigator.pop(context);
-        //Route newRoute = MaterialPageRoute(builder: (c) => const HomeScreen());
-        //Navigator.pushReplacement(context, newRoute);
+        Route newRoute = MaterialPageRoute(builder: (c) => const HomeScreen());
+        Navigator.pushReplacement(context, newRoute);
       });
     }
   }

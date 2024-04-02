@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../../global/global.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
+import '../cameraPage/camera_page.dart';
 import '../imageGetters/rider_profile.dart';
 import '../register2.dart';
 
@@ -42,7 +43,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
   bool _isResidentialPermanentAddressEmpty = false;
   bool _isFormComplete = true;
 
-  String? residentialPermanentAddressController = 'Yes';
+  late String residentialPermanentAddressController = 'Yes';
 
   late DateTime _chosenDateTime;
   bool _isDateTimeSelected = false;
@@ -121,7 +122,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     );
   }
 
-  _getImage() async {
+  /*_getImage() async {
     bool? isCamera = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -158,7 +159,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       changesSaved = false;
       isCompleted = false;
     });
-  }
+  }*/
 
   Future<void> _removeLicenseImage() async {
     setState(() {
@@ -176,8 +177,24 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     });
   }
 
+  //Check if the format of email is valid
+  bool isLicenseNumberFormatValid(String licenseNumber) {
+    // Regular expression for email validation
+    final RegExp licenseNumberRegex = RegExp(r'^N\d{2}-\d{2}-\d{6}$');
+
+    return licenseNumberRegex.hasMatch(licenseNumber);
+  }
+
   void _validateTextFields() {
+    String licenseNumber = licenseNumberController.text.trim();
     if (licenseNumberController.text.isEmpty) {
+      setState(() {
+        _isLicenseNumberControllerInvalid = true;
+        _isLicenseNumberCompleted = false;
+        _isFormComplete = false;
+      });
+    }
+    if (isLicenseNumberFormatValid(licenseNumber) == false) {
       setState(() {
         _isLicenseNumberControllerInvalid = true;
         _isLicenseNumberCompleted = false;
@@ -208,25 +225,32 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
         _isFormComplete = false;
       });
     }
+    if (ageController.text.isNotEmpty) {
+      int age = int.parse(ageController.text);
+      if (age < 18) {
+        _isAgeInvalid = true;
+        _isFormComplete = false;
+      }
+    }
     if (motherMaidenNameController.text.isEmpty) {
       setState(() {
         _isMotherMaidenNameInvalid = true;
         _isFormComplete = false;
       });
     }
-    if (residentialPermanentAddressController == null) {
+    if (residentialPermanentAddressController  == null) {
       setState(() {
         _isResidentialPermanentAddressEmpty = true;
         _isFormComplete = false;
       });
     }
-    if (licenseNumberController.text.isNotEmpty &&
-        issueDateController.text.isNotEmpty &&
-        frontLicense != null &&
-        backLicense != null &&
-        ageController.text.isNotEmpty &&
-        motherMaidenNameController.text.isNotEmpty &&
-        residentialPermanentAddressController != null) {
+    if (!_isLicenseNumberControllerInvalid &&
+        isLicenseNumberFormatValid(licenseNumber) &&
+        !_isIssueDateControllerInvalid &&
+        !_isfrontLicenseHasNoImage &&
+        !_isAgeInvalid &&
+        !_isMotherMaidenNameInvalid &&
+        !_isResidentialPermanentAddressEmpty) {
 
       _isFormComplete = true;
     }
@@ -241,8 +265,40 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       await sharedPreferences?.setString('licenseNumber', licenseNumberController.text);
       //Save issueDateController locally
       await sharedPreferences?.setString('issueDate', issueDateController.text);
-      await sharedPreferences?.setString('chosenDateTime', DateFormat('MM/dd/yyyy').format(_chosenDateTime));
+
+      String dateString = _chosenDateTime.toIso8601String(); // Convert DateTime to ISO 8601 string format
+      await sharedPreferences?.setString('dateTimeKey', dateString);
+
       await sharedPreferences?.setBool('isDateTimeSelected', true);
+
+      //Save age locally
+      await sharedPreferences?.setString('age', ageController.text);
+      //Save motherMaidenName locally
+      await sharedPreferences?.setString('motherMaiden', motherMaidenNameController.text);
+      //Save residentialAddressController locally
+      if (residentialAddressController.text.isNotEmpty) {
+        await sharedPreferences?.setString('residentialAddress', residentialAddressController.text);
+      }
+      //Save residentialPermanentAddressController locally
+      await sharedPreferences?.setString('isResidentialPermanentAddress', residentialPermanentAddressController );
+      // Store completion status in shared preferences
+      await sharedPreferences?.setBool('personalDetailsCompleted', true);
+
+      //Save changesSaved value to true
+      await sharedPreferences?.setBool('changesSaved', true);
+      await sharedPreferences?.setBool('isButtonPressedDriversLicenseScreen', true);
+
+      setState(() {
+        changesSaved  = true;
+        isCompleted = true;
+      });
+
+      // Store completion status in shared preferences
+      await sharedPreferences?.setBool('driverLicenseCompleted', true);
+
+      // Toggle the button state
+      isButtonPressedDriversLicenseScreen = !isButtonPressedDriversLicenseScreen;
+
       //Save frontLicense Image locally
       if (frontLicense != null) {
         await sharedPreferences?.setString('frontLicensePath', frontLicense!.path);
@@ -251,29 +307,8 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       if (backLicense != null) {
         await sharedPreferences?.setString('backLicensePath', backLicense!.path);
       }
-      //Save age locally
-      await sharedPreferences?.setString('age', ageController.text);
-      print('age saved');
-      //Save motherMaidenName locally
-      await sharedPreferences?.setString('motherMaiden', motherMaidenNameController.text);
-      //Save residentialAddressController locally
-      if (residentialAddressController.text.isNotEmpty) {
-        await sharedPreferences?.setString('residentialAddress', residentialAddressController.text);
-      }
-      //Save residentialPermanentAddressController locally
-      await sharedPreferences?.setString('residentialPermanentAddress', residentialPermanentAddressController!);
-      // Store completion status in shared preferences
-      await sharedPreferences?.setBool('personalDetailsCompleted', true);
 
-      //Save changesSaved value to true
-      await sharedPreferences?.setBool('changesSaved', true);
-      await sharedPreferences?.setBool('isButtonPressed', true);
-      setState(() {
-        changesSaved  = true;
-        isCompleted = true;
-      });
-      // Toggle the button state
-      isButtonPressedDriversLicenseScreen = !isButtonPressedDriversLicenseScreen;
+
     }
     else {
       showDialog(
@@ -291,33 +326,56 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     setState(() {
       //Load licenseNumber data
       licenseNumberController.text = sharedPreferences?.getString('licenseNumber') ?? '';
-      //Load licenseNumber data
+
+      //Load issueDate data
       issueDateController.text = sharedPreferences?.getString('issueDate') ?? '';
-      String? dateString = sharedPreferences?.getString('chosenDateTime');
-      _chosenDateTime = DateTime.tryParse(dateString!)!;
+
+
+      String? dateString = sharedPreferences?.getString('dateTimeKey');
+      if (dateString != null) {
+        _chosenDateTime = DateTime.tryParse(dateString)!; // Parse the stored string back to DateTime
+      }
+
       _isDateTimeSelected  = sharedPreferences?.getBool('isDateTimeSelected') ?? false;
-      //Load age data
+
+      // Load age data
       ageController.text = sharedPreferences?.getString('age') ?? '';
-      //Load motherMaidenName data
+
+      // Load motherMaidenName data
       motherMaidenNameController.text = sharedPreferences?.getString('motherMaiden') ?? '';
-      //Load motherMaidenName data
+
+      // Load residentialAddress data
       residentialAddressController.text = sharedPreferences?.getString('residentialAddress') ?? '';
       //Load residentialPermanentAddress data
-      residentialPermanentAddressController = sharedPreferences?.getString('residentialPermanentAddress') ?? '';
+      residentialPermanentAddressController  = sharedPreferences?.getString('residentialPermanentAddress') ?? 'Yes';
+
+      changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
+      isButtonPressedDriversLicenseScreen = sharedPreferences?.getBool('isButtonPressedDriversLicenseScreen') ?? false;
     });
+
     //Load license images
     String? frontLicenseImagePath = sharedPreferences?.getString('frontLicensePath');
     String? backLicenseImagePath = sharedPreferences?.getString('backLicensePath');
 
     if (frontLicenseImagePath != null && frontLicenseImagePath.isNotEmpty) {
       setState(() {
-        frontLicense = XFile(frontLicenseImagePath);
+        frontLicense = File(frontLicenseImagePath);
+      });
+    }
+    else {
+      setState(() {
+        frontLicense = null;
       });
     }
 
     if (backLicenseImagePath != null && backLicenseImagePath.isNotEmpty) {
       setState(() {
-        backLicense = XFile(backLicenseImagePath);
+        backLicense = File(backLicenseImagePath);
+      });
+    }
+    else {
+      setState(() {
+        backLicense = null;
       });
     }
   }
@@ -370,8 +428,8 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
               _loadUserDetails();
 
             } else {
-              backLicense = XFile('');
-              frontLicense = XFile('');
+              backLicense = File('');
+              frontLicense = File('');
               issueDateController.text = '';
               licenseNumberController.text = '';
             }
@@ -483,7 +541,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                   isCompleted = false;
                                   isButtonPressedDriversLicenseScreen = false;
                                 });
-                                if(value.length == 11) {
+                                if(isLicenseNumberFormatValid(value)) {
                                   setState(() {
                                     _isLicenseNumberCompleted = true;
                                   });
@@ -519,6 +577,29 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         ),
                       ],
                     ),
+
+                    //Please enter your valid license number"
+                    if (_isLicenseNumberControllerInvalid == true)
+                      const Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: 35),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 2),
+                                Text("Please enter your valid license number",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins",
+                                      color: Colors.red,
+                                    )
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
 
                     //License Issue Date
                     const SizedBox(height: 10),
@@ -581,6 +662,29 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                       ),
                     ),
 
+                    // Show "Please select the issue date of your driver's license"
+                    if (_isIssueDateControllerInvalid == true)
+                      const Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: 35),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 2),
+                                Text("Please select the issue date of your driver's license",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins",
+                                      color: Colors.red,
+                                    )
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+
                     //Front Image
                     const SizedBox(height: 10),
                     const Padding(
@@ -605,11 +709,28 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                     InkWell(
                       //get image from gallery
                       onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CameraPage(
+                              onImageCaptured: (image, type) {
+                                if (type == LicenseImageType.Front) {
+                                  setState(() {
+                                    frontLicense = image;
+                                  });
+                                } else {
+                                  setState(() {
+                                    backLicense = image;
+                                  });
+                                }
+                              },
+                              type: LicenseImageType.Front,
+                            ),
+                          ),
+                        );
                         setState(() {
                           _isFrontImageSelected = true;
                         });
-
-                        _getImage();
                       },
 
                       //display selected image
@@ -619,18 +740,23 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           width: MediaQuery.of(context).size.width * 0.20 * 4,
                           height: MediaQuery.of(context).size.width * 0.20 * 2,
                           color: const Color.fromARGB(255, 230, 229, 229),
-                          child: frontLicense == null
+                          child: frontLicense != null
+                              ? Image.file(
+                            frontLicense!,
+                            fit: BoxFit.cover,
+                          )
+                              : frontLicense == null
                               ? Icon(
                             Icons.add_photo_alternate,
                             size: MediaQuery.of(context).size.width * 0.20,
                             color: Colors.grey,
                           )
-                              : Image.file(File(frontLicense!.path),
+                              : Image.file(
+                            File(frontLicense!.path),
                             fit: BoxFit.cover,
                           ),
                         ),
-                      )
-
+                      ),
                     ),
 
                     Column(
@@ -641,10 +767,25 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
                             TextButton(
                               onPressed: () {
-                                setState(() {
-                                  _isFrontImageSelected = true;
-                                });
-                                _getImage();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CameraPage(
+                                      onImageCaptured: (image, type) {
+                                        if (type == LicenseImageType.Front) {
+                                          setState(() {
+                                            frontLicense = image;
+                                          });
+                                        } else {
+                                          setState(() {
+                                            backLicense = image;
+                                          });
+                                        }
+                                      },
+                                      type: LicenseImageType.Front,
+                                    ),
+                                  ),
+                                );
                                 } ,
                               child: const Text(
                                 "Upload Image",
@@ -703,34 +844,52 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                     // Image Picker
                     InkWell(
                       //get image from gallery
-                        onTap: () {
-                          setState(() {
-                            _isFrontImageSelected = false;
-                          });
-
-                          _getImage();
-                        },
-
-                        //display selected image
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.20 * 4,
-                            height: MediaQuery.of(context).size.width * 0.20 * 2,
-                            color: const Color.fromARGB(255, 230, 229, 229),
-                            child: backLicense == null
-                                ? Icon(
-                              Icons.add_photo_alternate,
-                              size: MediaQuery.of(context).size.width * 0.20,
-                              color: Colors.grey,
-                            )
-                                : Image.file(
-                              File(backLicense!.path),
-                              fit: BoxFit.cover,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CameraPage(
+                              onImageCaptured: (image, type) {
+                                if (type == LicenseImageType.Front) {
+                                  setState(() {
+                                    frontLicense = image;
+                                  });
+                                } else {
+                                  setState(() {
+                                    backLicense = image;
+                                  });
+                                }
+                              },
+                              type: LicenseImageType.Back,
                             ),
                           ),
-                        )
+                        );
+                      },
 
+                        //display selected image
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.20 * 4,
+                          height: MediaQuery.of(context).size.width * 0.20 * 2,
+                          color: const Color.fromARGB(255, 230, 229, 229),
+                          child: backLicense != null
+                              ? Image.file(
+                            backLicense!,
+                            fit: BoxFit.cover,
+                          )
+                              : backLicense == null
+                              ? Icon(
+                            Icons.add_photo_alternate,
+                            size: MediaQuery.of(context).size.width * 0.20,
+                            color: Colors.grey,
+                          )
+                              : Image.file(
+                            File(backLicense!.path),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
                     ),
 
                     Column(
@@ -738,13 +897,27 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-
                             TextButton(
                               onPressed: () {
-                                setState(() {
-                                  _isFrontImageSelected = false;
-                                });
-                                _getImage();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CameraPage(
+                                      onImageCaptured: (image, type) {
+                                        if (type == LicenseImageType.Front) {
+                                          setState(() {
+                                            frontLicense = image;
+                                          });
+                                        } else {
+                                          setState(() {
+                                            backLicense = image;
+                                          });
+                                        }
+                                      },
+                                      type: LicenseImageType.Back,
+                                    ),
+                                  ),
+                                );
                                 },
 
                               child: const Text(
@@ -800,6 +973,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                     ),
                     //Age
                     CustomTextField(
+                        data: Icons.phone,
                         controller: ageController,
                         hintText: "",
                         isObsecure: false,
@@ -809,10 +983,36 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         noRightMargin: false,
                         onChanged:(value) {
                           setState(() {
+                            changesSaved = false;
+                            isCompleted = false;
+                            isButtonPressedDriversLicenseScreen = false;
                             _isAgeInvalid = false;
+
                           });
                         }
                     ),
+
+                    if (_isAgeInvalid == true)
+                      const Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: 35),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 2),
+                                Text("Please enter your age",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins",
+                                      color: Colors.red,
+                                    )
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
 
                     //Mother's Maiden Name
                     const SizedBox(height: 10),
@@ -834,6 +1034,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                     ),
                     //Mother's Maiden Name
                     CustomTextField(
+                        data: Icons.phone,
                         controller: motherMaidenNameController,
                         hintText: "",
                         isObsecure: false,
@@ -844,10 +1045,35 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         noRightMargin: false,
                         onChanged:(value) {
                           setState(() {
+                            changesSaved = false;
+                            isCompleted = false;
+                            isButtonPressedDriversLicenseScreen = false;
                             _isMotherMaidenNameInvalid = false;
                           });
                         }
                     ),
+
+                    if (_isMotherMaidenNameInvalid == true)
+                      const Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: 35),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 2),
+                                Text("Please enter your mother's maiden name",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins",
+                                      color: Colors.red,
+                                    )
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
 
                     //Residential Address
                     const SizedBox(height: 10),
@@ -870,6 +1096,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
                     //Residential Address
                     CustomTextField(
+                        data: Icons.phone,
                         controller: residentialAddressController,
                         hintText: "",
                         isObsecure: false,
@@ -880,6 +1107,9 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         noRightMargin: false,
                         onChanged:(value) {
                           setState(() {
+                            changesSaved = false;
+                            isCompleted = false;
+                            isButtonPressedDriversLicenseScreen = false;
                           });
                         }
                     ),
@@ -919,7 +1149,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           'Select an option',
                           style: TextStyle(fontSize: 16),
                         ),
-                        value: 'Yes', // Set default value to 'Yes'
+                        value: residentialPermanentAddressController, // Set default value to 'Yes'
                         items: ['Yes', 'No'].map((item) => DropdownMenuItem<String>(
                           value: item,
                           child: Text(
@@ -938,6 +1168,10 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         },
                         onChanged: (value) {
                           setState(() {
+                            changesSaved = false;
+                            isCompleted = false;
+                            isButtonPressedDriversLicenseScreen = false;
+                            _isResidentialPermanentAddressEmpty = false;
                             residentialPermanentAddressController = value.toString();
                           });
                         },
@@ -999,8 +1233,11 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         ],
                       ),
                     ),
+                    //spacing
+                    const SizedBox(
+                      height: 30,
+                    ),
                   ],
-
                 ),
               ),
             ],
@@ -1010,7 +1247,3 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     );
   }
 }
-
-
-
-
