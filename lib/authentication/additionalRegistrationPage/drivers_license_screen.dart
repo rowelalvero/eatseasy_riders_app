@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
@@ -248,6 +248,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
         isLicenseNumberFormatValid(licenseNumber) &&
         !_isIssueDateControllerInvalid &&
         !_isfrontLicenseHasNoImage &&
+        !_isbackLicenseHasNoImage &&
         !_isAgeInvalid &&
         !_isMotherMaidenNameInvalid &&
         !_isResidentialPermanentAddressEmpty) {
@@ -359,7 +360,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
     if (frontLicenseImagePath != null && frontLicenseImagePath.isNotEmpty) {
       setState(() {
-        frontLicense = File(frontLicenseImagePath);
+        frontLicense = XFile(frontLicenseImagePath);
       });
     }
     else {
@@ -370,12 +371,32 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
     if (backLicenseImagePath != null && backLicenseImagePath.isNotEmpty) {
       setState(() {
-        backLicense = File(backLicenseImagePath);
+        backLicense = XFile(backLicenseImagePath);
       });
     }
     else {
       setState(() {
         backLicense = null;
+      });
+    }
+  }
+
+  void _navigateToCamera(bool isFrontLicense) async {
+    final XFile? capturedImage = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CameraWidget(isFrontLicense: isFrontLicense),
+      ),
+    );
+
+    // Handle the captured image
+    if (capturedImage != null) {
+      setState(() {
+        if (isFrontLicense) {
+          frontLicense = capturedImage;
+        } else {
+          backLicense = capturedImage;
+        }
       });
     }
   }
@@ -427,11 +448,6 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
               _loadUserDetails();
 
-            } else {
-              backLicense = File('');
-              frontLicense = File('');
-              issueDateController.text = '';
-              licenseNumberController.text = '';
             }
           });
           return true; // Allow pop after changes are discarded
@@ -709,54 +725,27 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                     InkWell(
                       //get image from gallery
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CameraPage(
-                              onImageCaptured: (image, type) {
-                                if (type == LicenseImageType.Front) {
-                                  setState(() {
-                                    frontLicense = image;
-                                  });
-                                } else {
-                                  setState(() {
-                                    backLicense = image;
-                                  });
-                                }
-                              },
-                              type: LicenseImageType.Front,
-                            ),
-                          ),
-                        );
+                        _navigateToCamera(true);
                         setState(() {
                           _isFrontImageSelected = true;
                         });
                       },
-
                       //display selected image
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.20 * 4,
-                          height: MediaQuery.of(context).size.width * 0.20 * 2,
-                          color: const Color.fromARGB(255, 230, 229, 229),
-                          child: frontLicense != null
-                              ? Image.file(
-                            frontLicense!,
-                            fit: BoxFit.cover,
-                          )
-                              : frontLicense == null
-                              ? Icon(
-                            Icons.add_photo_alternate,
-                            size: MediaQuery.of(context).size.width * 0.20,
-                            color: Colors.grey,
-                          )
-                              : Image.file(
-                            File(frontLicense!.path),
-                            fit: BoxFit.cover,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.23 * 4,
+                            height: MediaQuery.of(context).size.width * 0.27 * 2,
+                            color: const Color.fromARGB(255, 230, 229, 229),
+                            child: frontLicense == null
+                                ? Icon(
+                              Icons.add_photo_alternate,
+                              size: MediaQuery.of(context).size.width * 0.20,
+                              color: Colors.grey,
+                            )
+                                : Image.file(File(frontLicense!.path), fit: BoxFit.cover),
                           ),
-                        ),
-                      ),
+                        )
                     ),
 
                     Column(
@@ -767,25 +756,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
                             TextButton(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CameraPage(
-                                      onImageCaptured: (image, type) {
-                                        if (type == LicenseImageType.Front) {
-                                          setState(() {
-                                            frontLicense = image;
-                                          });
-                                        } else {
-                                          setState(() {
-                                            backLicense = image;
-                                          });
-                                        }
-                                      },
-                                      type: LicenseImageType.Front,
-                                    ),
-                                  ),
-                                );
+                                _navigateToCamera(true);
                                 } ,
                               child: const Text(
                                 "Upload Image",
@@ -845,51 +816,25 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                     InkWell(
                       //get image from gallery
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => CameraPage(
-                              onImageCaptured: (image, type) {
-                                if (type == LicenseImageType.Front) {
-                                  setState(() {
-                                    frontLicense = image;
-                                  });
-                                } else {
-                                  setState(() {
-                                    backLicense = image;
-                                  });
-                                }
-                              },
-                              type: LicenseImageType.Back,
-                            ),
-                          ),
-                        );
+                        _navigateToCamera(false);
                       },
 
                         //display selected image
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                        child: Container(
-                          width: MediaQuery.of(context).size.width * 0.20 * 4,
-                          height: MediaQuery.of(context).size.width * 0.20 * 2,
-                          color: const Color.fromARGB(255, 230, 229, 229),
-                          child: backLicense != null
-                              ? Image.file(
-                            backLicense!,
-                            fit: BoxFit.cover,
-                          )
-                              : backLicense == null
-                              ? Icon(
-                            Icons.add_photo_alternate,
-                            size: MediaQuery.of(context).size.width * 0.20,
-                            color: Colors.grey,
-                          )
-                              : Image.file(
-                            File(backLicense!.path),
-                            fit: BoxFit.cover,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.23 * 4,
+                            height: MediaQuery.of(context).size.width * 0.27 * 2,
+                            color: const Color.fromARGB(255, 230, 229, 229),
+                            child: backLicense == null
+                                ? Icon(
+                              Icons.add_photo_alternate,
+                              size: MediaQuery.of(context).size.width * 0.20,
+                              color: Colors.grey,
+                            )
+                                : Image.file(File(backLicense!.path), fit: BoxFit.cover),
                           ),
-                        ),
-                      ),
+                        )
                     ),
 
                     Column(
@@ -899,25 +844,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           children: [
                             TextButton(
                               onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CameraPage(
-                                      onImageCaptured: (image, type) {
-                                        if (type == LicenseImageType.Front) {
-                                          setState(() {
-                                            frontLicense = image;
-                                          });
-                                        } else {
-                                          setState(() {
-                                            backLicense = image;
-                                          });
-                                        }
-                                      },
-                                      type: LicenseImageType.Back,
-                                    ),
-                                  ),
-                                );
+                                _navigateToCamera(false);
                                 },
 
                               child: const Text(

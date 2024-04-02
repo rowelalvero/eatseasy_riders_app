@@ -5,10 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
 import '../../global/global.dart';
-import '../cameraPage/camera_page.dart';
-import '../cameraPage/camera_widget.dart';
 import '../imageGetters/rider_profile.dart';
-import '../register2.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
   const PersonalDetailsScreen({Key? key}) : super(key: key);
@@ -513,7 +510,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                     // Image Picker
                     InkWell(
                       //get image from gallery
-                      onTap: () => Navigator.pushNamed(context, '/camera'),
+                      onTap: () => _getImage,
 
                       //display selected image
                       child: CircleAvatar(
