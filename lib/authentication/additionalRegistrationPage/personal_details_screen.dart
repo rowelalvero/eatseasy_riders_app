@@ -296,6 +296,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
     // Store completion status in shared preferences
     await sharedPreferences?.setBool('personalDetailsCompleted', true);
+
     // Toggle the button state
     isButtonPressed = !isButtonPressed;
   }
@@ -313,10 +314,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           });
     }
     else {
-      if (secondaryContactNumberController.text.length == 10) {
-        userData();
-      }
-      else if (secondaryContactNumberController.text.isNotEmpty && isSecContactNumberCompleted == false) {
+      if (secondaryContactNumberController.text.isNotEmpty && isSecContactNumberCompleted == false) {
         setState(() {
           _isSecContactNumberControllerInvalid = true;
         });
@@ -373,53 +371,53 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     _loadUserDetails();
   }
 
+  Future<bool> _onWillPop() async {
+    if (!changesSaved) {
+      final result = await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Discard Changes?'),
+          content: const Text('Are you sure you want to discard changes?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Discard'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      );
+
+      if (result == true) {
+        sharedPreferences = await SharedPreferences.getInstance();
+
+        setState(() {
+          if (sharedPreferences!.containsKey('nationality') &&
+              sharedPreferences!.containsKey('user_image_path')) {
+
+            _loadUserDetails();
+
+          } else {
+            riderProfile = XFile('');
+            nationalityController.text = _dropdownItems.first;
+            secondaryContactNumberController.text = '';
+          }
+        });
+        return true; // Allow pop after changes are discarded
+      }
+      return false; // Prevent pop if changes are not discarded
+    }
+    return true; // Allow pop if changes are saved or no changes were made
+  }
+
   @override
   Widget build(BuildContext context) {
-    return WillPopScope (
-      onWillPop: () async {
-        if (!changesSaved) {
-          final result = await showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Discard Changes?'),
-              content: const Text('Are you sure you want to discard changes?'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, true);
-                  },
-                  child: const Text('Discard'),
-                ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
-                ),
-              ],
-            ),
-          );
-
-          if (result == true) {
-            sharedPreferences = await SharedPreferences.getInstance();
-
-            setState(() {
-              if (sharedPreferences!.containsKey('nationality') &&
-                  sharedPreferences!.containsKey('user_image_path')) {
-                _loadUserDetails();
-              } else {
-                riderProfile = XFile('');
-                nationalityController.text = _dropdownItems.first;
-                secondaryContactNumberController.text = '';
-              }
-            });
-            return true; // Allow pop after changes are discarded
-          }
-          return false; // Prevent pop if changes are not discarded
-        }
-        return true; // Allow pop if changes are saved or no changes were made
-      },
-
-
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 242, 198, 65),
           title: const Column(
@@ -449,374 +447,382 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
             padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-              onPressed: () {
-                // Add functionality to go back
-                Navigator.of(context).pop();
+              onPressed: () async {
+                // Call _onWillPop to handle the back button press
+                final bool canPop = await _onWillPop();
+                if (canPop) {
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ),
         ),
 
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              // Text Fields
-              const SizedBox(height: 10),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-
-                    //spacing
-                    const SizedBox(height: 10),
-
-                    //Header
-                    const Row(
+        body: WillPopScope(
+          onWillPop: _onWillPop,
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  // Text Fields
+                  const SizedBox(height: 10),
+                  Form(
+                    key: _formKey,
+                    child: Column(
                       children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Profile Photo",
-                                  style: TextStyle(
-                                    fontSize: 25,
-                                    fontFamily: "Poppins",
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                  )),
-                              SizedBox(height: 10),
-                              Text("Upload your profile logo: ",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                    fontFamily: "Poppins",
-                                  )),
-                              Text("Accepted file formats: .jpg, .png, .jpeg",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black54,
-                                    fontFamily: "Poppins",
-                                  )),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
 
-                    //spacing
-                    const SizedBox(height: 20),
+                        //spacing
+                        const SizedBox(height: 10),
 
-                    // Image Picker
-                    InkWell(
-                      //get image from gallery
-                      onTap: () => _getImage,
-
-                      //display selected image
-                      child: CircleAvatar(
-                          radius: MediaQuery.of(context).size.width * 0.20,
-                          backgroundColor: const Color.fromARGB(255, 230, 229, 229),
-                          backgroundImage: riderProfile == null
-                              ? null
-                              : FileImage(File(riderProfile!.path)),
-
-                          //alternative icon
-                          child: riderProfile == null
-                              ? Icon(
-                            Icons.add_photo_alternate,
-                            size: MediaQuery.of(context).size.width * 0.20,
-                            color: Colors.grey,
-                          )
-                              : null),
-                    ),
-
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        //Header
+                        const Row(
                           children: [
-
-                            TextButton(
-                              onPressed: () => _getImage(),
-
-                              child: const Text(
-                                "Upload Image",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: "Poppins",
-                                  color: Color.fromARGB(255, 242, 198, 65),
-                                ),
+                            Padding(
+                              padding: EdgeInsets.only(left: 18),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Profile Photo",
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontFamily: "Poppins",
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                      )),
+                                  SizedBox(height: 10),
+                                  Text("Upload your profile logo: ",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                        fontFamily: "Poppins",
+                                      )),
+                                  Text("Accepted file formats: .jpg, .png, .jpeg",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                        fontFamily: "Poppins",
+                                      )),
+                                ],
                               ),
                             ),
-
-                            // Remove image button
-                            if (riderProfile != null)
-                              TextButton(
-                                onPressed: () => _removeImage(),
-                                child: const Text(
-                                  "Remove",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: "Poppins",
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                  ),
-                                ),
-                              ),
                           ],
                         ),
-                      ],
-                    ),
 
-                    //Header
-                    const Row(
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 18),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Make sure you meet all the requirements",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    fontFamily: "Poppins",
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                  )),
-                              Text("    • Avoid wearing accessories.",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                    fontFamily: "Poppins",
-                                  )),
-                              Text("    • Make sure you're in well-lit environment.",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                    fontFamily: "Poppins",
-                                  )),
-                              Text("    • Take a picture with white background.",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                    fontFamily: "Poppins",
-                                  )),
-                            ],
-                          ),
+                        //spacing
+                        const SizedBox(height: 20),
+
+                        // Image Picker
+                        InkWell(
+                          //get image from gallery
+                          onTap: () => _getImage(),
+
+                          //display selected image
+                          child: CircleAvatar(
+                              radius: MediaQuery.of(context).size.width * 0.20,
+                              backgroundColor: const Color.fromARGB(255, 230, 229, 229),
+                              backgroundImage: riderProfile == null
+                                  ? null
+                                  : FileImage(File(riderProfile!.path)),
+
+                              //alternative icon
+                              child: riderProfile == null
+                                  ? Icon(
+                                Icons.add_photo_alternate,
+                                size: MediaQuery.of(context).size.width * 0.20,
+                                color: Colors.grey,
+                              )
+                                  : null),
                         ),
-                      ],
-                    ),
 
-                    //spacing
-                    const SizedBox(height: 20),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Secondary Contact Number (Optional)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )),
-                          // Secondary contact number text field
-
-                        ],
-                      ),
-                    ),
-
-                    //Secondary contact number text field,
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: CustomTextField(
-                            data: Icons.phone,
-                            hintText: "+63",
-                            isObsecure: false,
-                            keyboardType: TextInputType.none,
-                            noLeftMargin: false,
-                            noRightMargin: true,
-                            redBorder: false,
-                            enabled: false,
-                          ),
-                        ),
-                        Expanded(
-                          flex: 5,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0E3E7),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _isSecContactNumberControllerInvalid
-                                    ? Colors.red
-                                    : isSecContactNumberCompleted ? Colors.green : Colors.transparent,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(4),
-                            margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9),
-                              child: TextFormField(
-                                enabled: true,
-                                controller: secondaryContactNumberController,
-                                obscureText: false,
-                                cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                                keyboardType: TextInputType.phone,
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  focusColor: Theme.of(context).primaryColor,
-                                  hintText: "",
-                                ),
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isSecContactNumberControllerInvalid = false;
-                                    changesSaved = false;
-                                    isCompleted = false;
-                                    isButtonPressed = false;
-                                  });
-                                  if(value.length == 10) {
-                                    setState(() {
-                                      isSecContactNumberCompleted = true;
-                                    });
-                                  }
-                                  else {
-                                    setState(() {
-                                      isSecContactNumberCompleted = false;
-                                    });
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    //Show "Invalid Contact number"
-                    if (_isSecContactNumberControllerInvalid == true && isSecContactNumberCompleted == false)
-                      const Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 35),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                SizedBox(height: 2),
-                                Text("Enter a valid contact number",
+
+                                TextButton(
+                                  onPressed: () => _getImage(),
+
+                                  child: const Text(
+                                    "Upload Image",
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontFamily: "Poppins",
-                                      color: Colors.red,
-                                    )
+                                      color: Color.fromARGB(255, 242, 198, 65),
+                                    ),
+                                  ),
                                 ),
+
+                                // Remove image button
+                                if (riderProfile != null)
+                                  TextButton(
+                                    onPressed: () => _removeImage(),
+                                    child: const Text(
+                                      "Remove",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
+                          ],
+                        ),
+
+                        //Header
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 18),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Make sure you meet all the requirements",
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontFamily: "Poppins",
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                      )),
+                                  Text("    • Avoid wearing accessories.",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                        fontFamily: "Poppins",
+                                      )),
+                                  Text("    • Make sure you're in well-lit environment.",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                        fontFamily: "Poppins",
+                                      )),
+                                  Text("    • Take a picture with white background.",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                        fontFamily: "Poppins",
+                                      )),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        //spacing
+                        const SizedBox(height: 20),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Secondary Contact Number (Optional)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                              // Secondary contact number text field
+
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
 
-                    //Spacing
-                    const SizedBox(height: 10),
+                        //Secondary contact number text field,
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 2,
+                              child: CustomTextField(
+                                data: Icons.phone,
+                                hintText: "+63",
+                                isObsecure: false,
+                                keyboardType: TextInputType.none,
+                                noLeftMargin: false,
+                                noRightMargin: true,
+                                redBorder: false,
+                                enabled: false,
+                              ),
+                            ),
+                            Expanded(
+                              flex: 5,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE0E3E7),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _isSecContactNumberControllerInvalid
+                                        ? Colors.red
+                                        : isSecContactNumberCompleted ? Colors.green : Colors.transparent,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.all(4),
+                                margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.9),
+                                  child: TextFormField(
+                                    enabled: true,
+                                    controller: secondaryContactNumberController,
+                                    obscureText: false,
+                                    cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      focusColor: Theme.of(context).primaryColor,
+                                      hintText: "",
+                                    ),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _isSecContactNumberControllerInvalid = false;
+                                        changesSaved = false;
+                                        isCompleted = false;
+                                        isButtonPressed = false;
+                                      });
+                                      if(value.length == 10) {
+                                        setState(() {
+                                          isSecContactNumberCompleted = true;
+                                        });
+                                      }
+                                      else {
+                                        setState(() {
+                                          isSecContactNumberCompleted = false;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
 
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Nationality (Required)",
+                        //Show "Invalid Contact number"
+                        if (_isSecContactNumberControllerInvalid == true && isSecContactNumberCompleted == false)
+                          const Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 35),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 2),
+                                    Text("Enter a valid contact number",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: "Poppins",
+                                          color: Colors.red,
+                                        )
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                        //Spacing
+                        const SizedBox(height: 10),
+
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Nationality (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                              // Secondary contact number text field
+
+                            ],
+                          ),
+                        ),
+                        // Nationality dropdown
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E3E7),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: SizedBox(
+                            width: MediaQuery.of(context).orientation == Orientation.landscape ? MediaQuery.of(context).size.width * 0.6 : double.infinity,
+                            child: DropdownButtonFormField<String>(
+                              decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                hintText: 'Select an item', // Hint text
+                                hintStyle: TextStyle(color: Colors.grey),
+                                prefixIcon: Icon(Icons.flag_rounded),
+                              ),
+                              isExpanded: true,
+                              value: nationalityController.text,
+                              onChanged: (String? newValue) async {
+                                setState(() {
+                                  nationalityController.text = newValue!;
+                                  changesSaved = false;
+                                  isCompleted = false;
+                                });
+                              },
+                              items: _dropdownItems.map((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                              dropdownColor: Colors.white,
+                              // Set the background color of the dropdown list
+                              elevation: 2, // Set the elevation of the dropdown list
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  //Spacing
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  // Submit button
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: isButtonPressed ? null : () => _saveUserDataToPrefs(),
+                            // Register button styling
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                              elevation: 4, // Elevation for the shadow
+                              shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                            ),
+                            child: Text(
+                              isButtonPressed ? "Saved" : "Save",
                               style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
+                                color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
                                 fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )),
-                          // Secondary contact number text field
-
-                        ],
-                      ),
-                    ),
-                    // Nationality dropdown
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0E3E7),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: SizedBox(
-                        width: MediaQuery.of(context).orientation == Orientation.landscape ? MediaQuery.of(context).size.width * 0.6 : double.infinity,
-                        child: DropdownButtonFormField<String>(
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            hintText: 'Select an item', // Hint text
-                            hintStyle: TextStyle(color: Colors.grey),
-                            prefixIcon: Icon(Icons.flag_rounded),
-                          ),
-                          isExpanded: true,
-                          value: nationalityController.text,
-                          onChanged: (String? newValue) async {
-                            setState(() {
-                              nationalityController.text = newValue!;
-                              changesSaved = false;
-                              isCompleted = false;
-                            });
-                          },
-                          items: _dropdownItems.map((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
-                          dropdownColor: Colors.white,
-                          // Set the background color of the dropdown list
-                          elevation: 2, // Set the elevation of the dropdown list
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              //Spacing
-              const SizedBox(
-                height: 10,
-              ),
-              // Submit button
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: isButtonPressed ? null : () => _saveUserDataToPrefs(),
-                        // Register button styling
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          elevation: 4, // Elevation for the shadow
-                          shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                        ),
-                        child: Text(
-                          isButtonPressed ? "Saved" : "Save",
-                          style: TextStyle(
-                            color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
-    );
+      );
   }
 }

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-
-import '../authentication/additionalRegistrationPage/drivers_license_screen.dart';
 import '../authentication/register.dart';
 import '../authentication/register2.dart';
 

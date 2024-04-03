@@ -286,7 +286,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       await sharedPreferences?.setBool('personalDetailsCompleted', true);
 
       //Save changesSaved value to true
-      await sharedPreferences?.setBool('changesSaved', true);
+      await sharedPreferences?.setBool('isChangesSavedInDriversLicenseScreen', true);
       await sharedPreferences?.setBool('isButtonPressedDriversLicenseScreen', true);
 
       setState(() {
@@ -350,7 +350,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       //Load residentialPermanentAddress data
       residentialPermanentAddressController  = sharedPreferences?.getString('residentialPermanentAddress') ?? 'Yes';
 
-      changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
+      changesSaved  = sharedPreferences?.getBool('isChangesSavedInDriversLicenseScreen') ?? false;
       isButtonPressedDriversLicenseScreen = sharedPreferences?.getBool('isButtonPressedDriversLicenseScreen') ?? false;
     });
 
@@ -382,10 +382,10 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
   }
 
   void _navigateToCamera(bool isFrontLicense) async {
-    final XFile? capturedImage = await Navigator.push(
+
+    XFile? capturedImage = await Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CameraWidget(isFrontLicense: isFrontLicense),
+      MaterialPageRoute(builder: (context) => CameraWidget(isFrontLicense: isFrontLicense),
       ),
     );
 
@@ -399,6 +399,14 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
         }
       });
     }
+
+    setState(() {
+      capturedImage = null;
+    });
+
+    changesSaved = false;
+    isCompleted = false;
+    isButtonPressedDriversLicenseScreen = false;
   }
 
   @override
@@ -407,56 +415,59 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     _loadUserDetails();
   }
 
+  Future<bool> _onWillPop() async {
+    if (!changesSaved) {
+      final result = await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Discard Changes?'),
+          content: const Text('Are you sure you want to discard changes?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                // Reset the screen to its initial state
+                setState(() {
+                  // Reset necessary variables or fields here
+                  licenseNumberController.text = '';
+                });
+                Navigator.pop(context, true);
+              },
+              child: const Text('Discard'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      );
+
+      if (result == true) {
+        // If changes are discarded, reload user details or reset fields
+        sharedPreferences = await SharedPreferences.getInstance();
+        setState(() {
+          if (sharedPreferences!.containsKey('licenseNumber') &&
+              sharedPreferences!.containsKey('issueDate') &&
+              sharedPreferences!.containsKey('frontLicense') &&
+              sharedPreferences!.containsKey('backLicense') &&
+              sharedPreferences!.containsKey('age') &&
+              sharedPreferences!.containsKey('motherMaiden') &&
+              sharedPreferences!.containsKey('residentialPermanentAddress')) {
+
+            _loadUserDetails();
+          }
+        });
+        return true; // Allow pop after changes are discarded
+      }
+      return false; // Prevent pop if changes are not discarded
+    }
+    return true; // Allow pop if changes are saved
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    return WillPopScope (
-        onWillPop: () async {
-      if (!changesSaved) {
-        final result = await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Discard Changes?'),
-            content: const Text('Are you sure you want to discard changes?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    const RegisterScreen2();
-                  });
-                  Navigator.pop(context, true);
-                },
-                child: const Text('Discard'),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
-              ),
-            ],
-          ),
-        );
-
-        if (result == true) {
-          sharedPreferences = await SharedPreferences.getInstance();
-          setState(() {
-            if (sharedPreferences!.containsKey('licenseNumber') &&
-                sharedPreferences!.containsKey('issueDate') &&
-                sharedPreferences!.containsKey('frontLicense') &&
-                sharedPreferences!.containsKey('backLicense') &&
-                sharedPreferences!.containsKey('age') &&
-                sharedPreferences!.containsKey('motherMaiden') &&
-                sharedPreferences!.containsKey('residentialPermanentAddress')) {
-
-              _loadUserDetails();
-
-            }
-          });
-          return true; // Allow pop after changes are discarded
-        }
-        return false; // Prevent pop if changes are not discarded
-      }
-      return true; // Allow pop if changes are saved
-    },
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           backgroundColor: const Color.fromARGB(255, 242, 198, 65),
           title: const Column(
@@ -486,691 +497,703 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
             padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-              onPressed: () {
-                // Add functionality to go back
-                Navigator.of(context).pop();
+              onPressed: () async {
+                // Call _onWillPop to handle the back button press
+                final bool canPop = await _onWillPop();
+                if (canPop) {
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ),
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              // Text Fields
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    //spacing
-                    const SizedBox(height: 20),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("License Number (Required)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )),
-                          // Secondary contact number text field
-
-                        ],
-                      ),
-                    ),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0E3E7),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _isLicenseNumberControllerInvalid
-                              ? Colors.red
-                              : _isLicenseNumberCompleted ? Colors.green : Colors.transparent,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                      child: LayoutBuilder(
-                        builder: (BuildContext context, BoxConstraints constraints) {
-                          double maxWidth = MediaQuery.of(context).size.width * 0.9;
-                          return ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: maxWidth),
-                            child: TextFormField(
-                              enabled: true,
-                              controller: licenseNumberController,
-                              obscureText: false,
-                              cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                              keyboardType: TextInputType.text,
-                              textCapitalization: TextCapitalization.sentences,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                focusColor: Theme.of(context).primaryColor,
-                                hintText: "",
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _isLicenseNumberControllerInvalid = false;
-                                  changesSaved = false;
-                                  isCompleted = false;
-                                  isButtonPressedDriversLicenseScreen = false;
-                                });
-                                if(isLicenseNumberFormatValid(value)) {
-                                  setState(() {
-                                    _isLicenseNumberCompleted = true;
-                                  });
-                                }
-                                else {
-                                  setState(() {
-                                    _isLicenseNumberCompleted = false;
-                                  });
-                                }
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const Row(
+        body: WillPopScope(
+          onWillPop: _onWillPop,
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height, // Adjust the height as needed
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  // Text Fields
+                  Form(
+                    key: _formKey,
+                    child: Column(
                       children: [
-                        Padding(
+                        //spacing
+                        const SizedBox(height: 20),
+                        const Padding(
                           padding: EdgeInsets.only(left: 18),
-                          child: Column(
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              SizedBox(height: 2),
-                              Text("Standard format: N01-23-456789",
+                              Text("License Number (Required)",
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 67, 83, 89),
                                     fontFamily: "Poppins",
-                                    color: Colors.grey,
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                              // Secondary contact number text field
+
+                            ],
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E3E7),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _isLicenseNumberControllerInvalid
+                                  ? Colors.red
+                                  : _isLicenseNumberCompleted ? Colors.green : Colors.transparent,
+                            ),
+                          ),
+                          padding: const EdgeInsets.all(4),
+                          margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                          child: LayoutBuilder(
+                            builder: (BuildContext context, BoxConstraints constraints) {
+                              double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                              return ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: maxWidth),
+                                child: TextFormField(
+                                  enabled: true,
+                                  controller: licenseNumberController,
+                                  obscureText: false,
+                                  cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                  keyboardType: TextInputType.text,
+                                  textCapitalization: TextCapitalization.sentences,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    focusColor: Theme.of(context).primaryColor,
+                                    hintText: "",
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isLicenseNumberControllerInvalid = false;
+                                      changesSaved = false;
+                                      isCompleted = false;
+                                      isButtonPressedDriversLicenseScreen = false;
+                                    });
+                                    if(isLicenseNumberFormatValid(value)) {
+                                      setState(() {
+                                        _isLicenseNumberCompleted = true;
+                                      });
+                                    }
+                                    else {
+                                      setState(() {
+                                        _isLicenseNumberCompleted = false;
+                                      });
+                                    }
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 18),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(height: 2),
+                                  Text("Standard format: N01-23-456789",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Colors.grey,
+                                      )
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        //Please enter your valid license number"
+                        if (_isLicenseNumberControllerInvalid == true)
+                          const Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 35),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 2),
+                                    Text("Please enter your valid license number",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: "Poppins",
+                                          color: Colors.red,
+                                        )
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                        //License Issue Date
+                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("License Issue Date (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
                                   )
                               ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-
-                    //Please enter your valid license number"
-                    if (_isLicenseNumberControllerInvalid == true)
-                      const Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 35),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 2),
-                                Text("Please enter your valid license number",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: "Poppins",
-                                      color: Colors.red,
-                                    )
-                                ),
-                              ],
+                        //License Issue Date
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E3E7),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _isIssueDateControllerInvalid
+                                  ? Colors.red
+                                  : Colors.transparent,
                             ),
                           ),
-                        ],
-                      ),
-
-                    //License Issue Date
-                    const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("License Issue Date (Required)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )
-                          ),
-                        ],
-                      ),
-                    ),
-                    //License Issue Date
-                    Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0E3E7),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: _isIssueDateControllerInvalid
-                              ? Colors.red
-                              : Colors.transparent,
-                        ),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                      child: LayoutBuilder(
-                        builder: (BuildContext context, BoxConstraints constraints) {
-                          double maxWidth = MediaQuery.of(context).size.width * 0.9;
-                          return ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: maxWidth),
-                            child: TextFormField(
-                              enabled: true,
-                              controller: issueDateController,
-                              obscureText: false,
-                              showCursor: false,
-                              keyboardType: TextInputType.none,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                suffixIcon: IconButton(
-                                  icon: (const Icon(Icons.calendar_month_rounded)),
-                                  onPressed: () {
-                                    _showDatePicker(context);
+                          padding: const EdgeInsets.all(4),
+                          margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                          child: LayoutBuilder(
+                            builder: (BuildContext context, BoxConstraints constraints) {
+                              double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                              return ConstrainedBox(
+                                constraints: BoxConstraints(maxWidth: maxWidth),
+                                child: TextFormField(
+                                  enabled: true,
+                                  controller: issueDateController,
+                                  obscureText: false,
+                                  showCursor: false,
+                                  keyboardType: TextInputType.none,
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    suffixIcon: IconButton(
+                                      icon: (const Icon(Icons.calendar_month_rounded)),
+                                      onPressed: () {
+                                        _showDatePicker(context);
+                                      },
+                                    ),
+                                    focusColor: Theme.of(context).primaryColor,
+                                    hintText: "",
+                                  ),
+                                  onChanged: (value) {
                                   },
                                 ),
-                                focusColor: Theme.of(context).primaryColor,
-                                hintText: "",
-                              ),
-                              onChanged: (value) {
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                              );
+                            },
+                          ),
+                        ),
 
-                    // Show "Please select the issue date of your driver's license"
-                    if (_isIssueDateControllerInvalid == true)
-                      const Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 35),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        // Show "Please select the issue date of your driver's license"
+                        if (_isIssueDateControllerInvalid == true)
+                          const Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 35),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 2),
+                                    Text("Please select the issue date of your driver's license",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: "Poppins",
+                                          color: Colors.red,
+                                        )
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                        //Front Image
+                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Front Image (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+                        // Image Picker
+                        InkWell(
+                          //get image from gallery
+                            onTap: () {
+                              _navigateToCamera(true);
+                              setState(() {
+                                _isfrontLicenseHasNoImage = false;
+                                _isFrontImageSelected = true;
+                              });
+                            },
+                            //display selected image
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.23 * 4,
+                                height: MediaQuery.of(context).size.width * 0.27 * 2,
+                                color: const Color.fromARGB(255, 230, 229, 229),
+                                child: frontLicense == null
+                                    ? Icon(
+                                  Icons.add_photo_alternate,
+                                  size: MediaQuery.of(context).size.width * 0.20,
+                                  color: Colors.grey,
+                                )
+                                    : Image.file(File(frontLicense!.path), fit: BoxFit.cover),
+                              ),
+                            )
+                        ),
+
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                SizedBox(height: 2),
-                                Text("Please select the issue date of your driver's license",
+
+                                TextButton(
+                                  onPressed: () {
+                                    _isfrontLicenseHasNoImage = false;
+                                    _navigateToCamera(true);
+                                  } ,
+                                  child: const Text(
+                                    "Upload Image",
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontFamily: "Poppins",
-                                      color: Colors.red,
-                                    )
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                    //Front Image
-                    const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Front Image (Required)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-                    // Image Picker
-                    InkWell(
-                      //get image from gallery
-                      onTap: () {
-                        _navigateToCamera(true);
-                        setState(() {
-                          _isFrontImageSelected = true;
-                        });
-                      },
-                      //display selected image
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.23 * 4,
-                            height: MediaQuery.of(context).size.width * 0.27 * 2,
-                            color: const Color.fromARGB(255, 230, 229, 229),
-                            child: frontLicense == null
-                                ? Icon(
-                              Icons.add_photo_alternate,
-                              size: MediaQuery.of(context).size.width * 0.20,
-                              color: Colors.grey,
-                            )
-                                : Image.file(File(frontLicense!.path), fit: BoxFit.cover),
-                          ),
-                        )
-                    ),
-
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-
-                            TextButton(
-                              onPressed: () {
-                                _navigateToCamera(true);
-                                } ,
-                              child: const Text(
-                                "Upload Image",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: "Poppins",
-                                  color: Color.fromARGB(255, 242, 198, 65),
-                                ),
-                              ),
-                            ),
-
-                            // Remove image button
-                            if (frontLicense != null)
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _isFrontImageWillDeleted = true;
-                                  });
-
-                                  _removeLicenseImage();
-                              },
-                                child: const Text(
-                                  "Remove",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: "Poppins",
-                                    color: Color.fromARGB(255, 67, 83, 89),
+                                      color: Color.fromARGB(255, 242, 198, 65),
+                                    ),
                                   ),
                                 ),
-                              ),
+
+                                // Remove image button
+                                if (frontLicense != null)
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _isFrontImageWillDeleted = true;
+                                      });
+
+                                      _removeLicenseImage();
+                                    },
+                                    child: const Text(
+                                      "Remove",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
-                      ],
-                    ),
 
-                    //Back Image
-                    const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Back Image (Required)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-                    // Image Picker
-                    InkWell(
-                      //get image from gallery
-                      onTap: () {
-                        _navigateToCamera(false);
-                      },
-
-                        //display selected image
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                          child: Container(
-                            width: MediaQuery.of(context).size.width * 0.23 * 4,
-                            height: MediaQuery.of(context).size.width * 0.27 * 2,
-                            color: const Color.fromARGB(255, 230, 229, 229),
-                            child: backLicense == null
-                                ? Icon(
-                              Icons.add_photo_alternate,
-                              size: MediaQuery.of(context).size.width * 0.20,
-                              color: Colors.grey,
-                            )
-                                : Image.file(File(backLicense!.path), fit: BoxFit.cover),
-                          ),
-                        )
-                    ),
-
-                    Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            TextButton(
-                              onPressed: () {
-                                _navigateToCamera(false);
-                                },
-
-                              child: const Text(
-                                "Upload Image",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontFamily: "Poppins",
-                                  color: Color.fromARGB(255, 242, 198, 65),
-                                ),
-                              ),
-                            ),
-
-                            // Remove image button
-                            if (backLicense != null)
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _isFrontImageWillDeleted = false;
-                                  });
-
-                                  _removeLicenseImage();
-                                },
-                                child: const Text(
-                                  "Remove",
+                        //Back Image
+                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Back Image (Required)",
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: "Poppins",
+                                    fontSize: 16,
                                     color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 10),
+                        // Image Picker
+                        InkWell(
+                          //get image from gallery
+                            onTap: () {
+                              _isbackLicenseHasNoImage = false;
+                              _navigateToCamera(false);
+                            },
+
+                            //display selected image
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                              child: Container(
+                                width: MediaQuery.of(context).size.width * 0.23 * 4,
+                                height: MediaQuery.of(context).size.width * 0.27 * 2,
+                                color: const Color.fromARGB(255, 230, 229, 229),
+                                child: backLicense == null
+                                    ? Icon(
+                                  Icons.add_photo_alternate,
+                                  size: MediaQuery.of(context).size.width * 0.20,
+                                  color: Colors.grey,
+                                )
+                                    : Image.file(File(backLicense!.path), fit: BoxFit.cover),
+                              ),
+                            )
+                        ),
+
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    _isbackLicenseHasNoImage = false;
+                                    _navigateToCamera(false);
+                                  },
+
+                                  child: const Text(
+                                    "Upload Image",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins",
+                                      color: Color.fromARGB(255, 242, 198, 65),
+                                    ),
                                   ),
                                 ),
-                              ),
+
+                                // Remove image button
+                                if (backLicense != null)
+                                  TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _isFrontImageWillDeleted = false;
+                                      });
+
+                                      _removeLicenseImage();
+                                    },
+                                    child: const Text(
+                                      "Remove",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
-                      ],
-                    ),
-                    //Age
-                    const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Age (Required)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )
+                        //Age
+                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Age (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    //Age
-                    CustomTextField(
-                        data: Icons.phone,
-                        controller: ageController,
-                        hintText: "",
-                        isObsecure: false,
-                        keyboardType: TextInputType.number,
-                        redBorder: _isAgeInvalid,
-                        noLeftMargin: false,
-                        noRightMargin: false,
-                        onChanged:(value) {
-                          setState(() {
-                            changesSaved = false;
-                            isCompleted = false;
-                            isButtonPressedDriversLicenseScreen = false;
-                            _isAgeInvalid = false;
+                        ),
+                        //Age
+                        CustomTextField(
+                            data: Icons.phone,
+                            controller: ageController,
+                            hintText: "",
+                            isObsecure: false,
+                            keyboardType: TextInputType.number,
+                            redBorder: _isAgeInvalid,
+                            noLeftMargin: false,
+                            noRightMargin: false,
+                            onChanged:(value) {
+                              setState(() {
+                                changesSaved = false;
+                                isCompleted = false;
+                                isButtonPressedDriversLicenseScreen = false;
+                                _isAgeInvalid = false;
 
-                          });
-                        }
-                    ),
+                              });
+                            }
+                        ),
 
-                    if (_isAgeInvalid == true)
-                      const Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 35),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 2),
-                                Text("Please enter your age",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: "Poppins",
-                                      color: Colors.red,
-                                    )
+                        if (_isAgeInvalid == true)
+                          const Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 35),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 2),
+                                    Text("Please enter your age",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: "Poppins",
+                                          color: Colors.red,
+                                        )
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
 
-                    //Mother's Maiden Name
-                    const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Mother's Maiden Name (Required)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )
+                        //Mother's Maiden Name
+                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Mother's Maiden Name (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                    //Mother's Maiden Name
-                    CustomTextField(
-                        data: Icons.phone,
-                        controller: motherMaidenNameController,
-                        hintText: "",
-                        isObsecure: false,
-                        keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.sentences,
-                        redBorder: _isMotherMaidenNameInvalid,
-                        noLeftMargin: false,
-                        noRightMargin: false,
-                        onChanged:(value) {
-                          setState(() {
-                            changesSaved = false;
-                            isCompleted = false;
-                            isButtonPressedDriversLicenseScreen = false;
-                            _isMotherMaidenNameInvalid = false;
-                          });
-                        }
-                    ),
+                        ),
+                        //Mother's Maiden Name
+                        CustomTextField(
+                            data: Icons.phone,
+                            controller: motherMaidenNameController,
+                            hintText: "",
+                            isObsecure: false,
+                            keyboardType: TextInputType.text,
+                            textCapitalization: TextCapitalization.sentences,
+                            redBorder: _isMotherMaidenNameInvalid,
+                            noLeftMargin: false,
+                            noRightMargin: false,
+                            onChanged:(value) {
+                              setState(() {
+                                changesSaved = false;
+                                isCompleted = false;
+                                isButtonPressedDriversLicenseScreen = false;
+                                _isMotherMaidenNameInvalid = false;
+                              });
+                            }
+                        ),
 
-                    if (_isMotherMaidenNameInvalid == true)
-                      const Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 35),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(height: 2),
-                                Text("Please enter your mother's maiden name",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: "Poppins",
-                                      color: Colors.red,
-                                    )
+                        if (_isMotherMaidenNameInvalid == true)
+                          const Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 35),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 2),
+                                    Text("Please enter your mother's maiden name",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: "Poppins",
+                                          color: Colors.red,
+                                        )
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
 
-                    //Residential Address
-                    const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Residential Address (Optional)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )
+                        //Residential Address
+                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Residential Address (Optional)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
 
-                    //Residential Address
-                    CustomTextField(
-                        data: Icons.phone,
-                        controller: residentialAddressController,
-                        hintText: "",
-                        isObsecure: false,
-                        keyboardType: TextInputType.text,
-                        textCapitalization: TextCapitalization.sentences,
-                        redBorder: false,
-                        noLeftMargin: false,
-                        noRightMargin: false,
-                        onChanged:(value) {
-                          setState(() {
-                            changesSaved = false;
-                            isCompleted = false;
-                            isButtonPressedDriversLicenseScreen = false;
-                          });
-                        }
-                    ),
+                        //Residential Address
+                        CustomTextField(
+                            data: Icons.phone,
+                            controller: residentialAddressController,
+                            hintText: "",
+                            isObsecure: false,
+                            keyboardType: TextInputType.text,
+                            textCapitalization: TextCapitalization.sentences,
+                            redBorder: false,
+                            noLeftMargin: false,
+                            noRightMargin: false,
+                            onChanged:(value) {
+                              setState(() {
+                                changesSaved = false;
+                                isCompleted = false;
+                                isButtonPressedDriversLicenseScreen = false;
+                              });
+                            }
+                        ),
 
-                    //Residential is permanent Address?
-                    const SizedBox(height: 10),
-                    const Padding(
-                      padding: EdgeInsets.only(left: 18),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Is your residential address the same as you permanent address?(Required)",
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )
+                        //Residential is permanent Address?
+                        const SizedBox(height: 10),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 18),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text("Is your residential address the same as you permanent address?(Required)",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Color.fromARGB(255, 67, 83, 89),
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
 
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE0E3E7),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: DropdownButtonFormField2<String>(
-                        isExpanded: true,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                        ),
-                        hint: const Text(
-                          'Select an option',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        value: residentialPermanentAddressController, // Set default value to 'Yes'
-                        items: ['Yes', 'No'].map((item) => DropdownMenuItem<String>(
-                          value: item,
-                          child: Text(
-                            item,
-                            style: const TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                        ))
-                            .toList(),
-                        validator: (value) {
-                          if (value == null) {
-                            return 'Select an option';
-                          }
-                          return null;
-                        },
-                        onChanged: (value) {
-                          setState(() {
-                            changesSaved = false;
-                            isCompleted = false;
-                            isButtonPressedDriversLicenseScreen = false;
-                            _isResidentialPermanentAddressEmpty = false;
-                            residentialPermanentAddressController = value.toString();
-                          });
-                        },
-                        buttonStyleData: const ButtonStyleData(
-                          padding: EdgeInsets.only(right: 8),
-                        ),
-                        iconStyleData: const IconStyleData(
-                          icon: Icon(
-                            Icons.arrow_drop_down,
-                            color: Colors.black45,
-                          ),
-                          iconSize: 24,
-                        ),
-                        dropdownStyleData: DropdownStyleData(
+                        Container(
+                          padding: const EdgeInsets.all(4),
+                          margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
+                            color: const Color(0xFFE0E3E7),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-                        menuItemStyleData: const MenuItemStyleData(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                        ),
-                      ),
-                    ),
-
-                    //Spacing
-                    const SizedBox(
-                      height: 10,
-                    ),
-
-                    //Submit button
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: isButtonPressedDriversLicenseScreen ? null : () => _saveUserDataToPrefs(),
-                              // Register button styling
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isButtonPressedDriversLicenseScreen ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                                padding: const EdgeInsets.symmetric(vertical: 10),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                elevation: 4, // Elevation for the shadow
-                                shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                              ),
+                          child: DropdownButtonFormField2<String>(
+                            isExpanded: true,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                            ),
+                            hint: const Text(
+                              'Select an option',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            value: residentialPermanentAddressController, // Set default value to 'Yes'
+                            items: ['Yes', 'No'].map((item) => DropdownMenuItem<String>(
+                              value: item,
                               child: Text(
-                                isButtonPressedDriversLicenseScreen ? "Saved" : "Save",
-                                style: TextStyle(
-                                  color: isButtonPressedDriversLicenseScreen ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 20,
+                                item,
+                                style: const TextStyle(
+                                  fontSize: 16,
                                 ),
+                              ),
+                            ))
+                                .toList(),
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Select an option';
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              setState(() {
+                                changesSaved = false;
+                                isCompleted = false;
+                                isButtonPressedDriversLicenseScreen = false;
+                                _isResidentialPermanentAddressEmpty = false;
+                                residentialPermanentAddressController = value.toString();
+                              });
+                            },
+                            buttonStyleData: const ButtonStyleData(
+                              padding: EdgeInsets.only(right: 8),
+                            ),
+                            iconStyleData: const IconStyleData(
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.black45,
+                              ),
+                              iconSize: 24,
+                            ),
+                            dropdownStyleData: DropdownStyleData(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
                               ),
                             ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+
+                        //Spacing
+                        const SizedBox(
+                          height: 10,
+                        ),
+
+                        //Submit button
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: isButtonPressedDriversLicenseScreen ? null : () => _saveUserDataToPrefs(),
+                                  // Register button styling
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: isButtonPressedDriversLicenseScreen ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
+                                    ),
+                                    elevation: 4, // Elevation for the shadow
+                                    shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                                  ),
+                                  child: Text(
+                                    isButtonPressedDriversLicenseScreen ? "Saved" : "Save",
+                                    style: TextStyle(
+                                      color: isButtonPressedDriversLicenseScreen ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        //spacing
+                        const SizedBox(
+                          height: 30,
+                        ),
+                      ],
                     ),
-                    //spacing
-                    const SizedBox(
-                      height: 30,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
