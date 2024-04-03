@@ -22,7 +22,7 @@ class CameraWidget extends StatefulWidget {
 }
 
 class _CameraWidgetState extends State<CameraWidget> {
-  late CameraController _controller;
+  CameraController? _controller;
   XFile? _capturedImage;
   FlashMode _currentFlashMode = FlashMode.off;
 
@@ -42,25 +42,22 @@ class _CameraWidgetState extends State<CameraWidget> {
       return;
     }
     _controller = CameraController(cameras[0], ResolutionPreset.high);
-    await _controller.initialize();
+    await _controller?.initialize();
     if (!mounted) return;
     setState(() {});
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_controller.value.isInitialized) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return const Center(
+        child: CircularProgressIndicator(),
       );
     }
     return Scaffold(
@@ -109,11 +106,11 @@ class _CameraWidgetState extends State<CameraWidget> {
               children: <Widget>[
                 CustomPaint(
                   foregroundPainter: MyPainter(),
-                  child: CameraPreview(_controller),
+                  child: CameraPreview(_controller!),
                 ),
                 ClipPath(
                   clipper: MyClipper(),
-                  child: CameraPreview(_controller),
+                  child: CameraPreview(_controller!),
                 ),
                 Positioned(
                   left: 0,
@@ -150,7 +147,7 @@ class _CameraWidgetState extends State<CameraWidget> {
                             FloatingActionButton(
                               onPressed: () async {
                                 try {
-                                  final image = await _controller.takePicture();
+                                  final image = await _controller?.takePicture();
                                   setState(() {
                                     _capturedImage = image;
                                   });
@@ -185,7 +182,7 @@ class _CameraWidgetState extends State<CameraWidget> {
         _currentFlashMode = FlashMode.off;
       }
     });
-    _controller.setFlashMode(_currentFlashMode);
+    _controller?.setFlashMode(_currentFlashMode);
   }
 
   IconData _getFlashIcon() {
