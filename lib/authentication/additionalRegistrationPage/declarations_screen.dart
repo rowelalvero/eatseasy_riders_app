@@ -27,11 +27,11 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
   bool box5 = false;
 
   Map<String, bool> checkboxes = {
-    'Checkbox 1': false,
-    'Checkbox 2': false,
-    'Checkbox 3': false,
-    'Checkbox 4': false,
-    'Checkbox 5': false,
+    "My driver's license has not been suspended or disqualified.": false,
+    "I have never been convicted by any court.": false,
+    'I allow EatsEasy to check my criminal record.': false,
+    "I'm not waiting for any kind of court trial against me.": false,
+    "I don't have any medical condition to be unfit driving safely.": false,
   };
 
   bool _allChecked() {
@@ -98,11 +98,6 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
   }
 
   Future<bool> _onWillPop() async {
-    checkboxes['Checkbox 1'] = box1;
-    checkboxes['Checkbox 2'] = box2;
-    checkboxes['Checkbox 3'] = box3;
-    checkboxes['Checkbox 4'] = box4;
-    checkboxes['Checkbox 5'] = box5;
     if (!changesSaved) {
       final result = await showDialog(
         context: context,
@@ -149,11 +144,11 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    checkboxes['Checkbox 1'] = box1;
-    checkboxes['Checkbox 2'] = box2;
-    checkboxes['Checkbox 3'] = box3;
-    checkboxes['Checkbox 4'] = box4;
-    checkboxes['Checkbox 5'] = box5;
+    checkboxes["My driver's license has not been suspended or disqualified."] = box1;
+    checkboxes["I have never been convicted by any court."] = box2;
+    checkboxes['I allow EatsEasy to check my criminal record.'] = box3;
+    checkboxes["I'm not waiting for any kind of court trial against me."] = box4;
+    checkboxes["I don't have any medical condition to be unfit driving safely."] = box5;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 242, 198, 65),
@@ -203,6 +198,7 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
+                const SizedBox(height: 20),
                 Form(
                   key: _formKey,
                   child: Column(
@@ -214,35 +210,33 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
                         onChanged: (bool? value) {
                           setState(() {
                             switch (text) {
-                              case 'Checkbox 1':
+                              case "My driver's license has not been suspended or disqualified.":
                                 box1 = value!;
                                 break;
-                              case 'Checkbox 2':
+                              case "I have never been convicted by any court.":
                                 box2 = value!;
                                 break;
-                              case 'Checkbox 3':
+                              case 'I allow EatsEasy to check my criminal record.':
                                 box3 = value!;
                                 break;
-                              case 'Checkbox 4':
+                              case "I'm not waiting for any kind of court trial against me.":
                                 box4 = value!;
                                 break;
-                              case 'Checkbox 5':
+                              case "I don't have any medical condition to be unfit driving safely.":
                                 box5 = value!;
                                 break;
                             }
-                            setState(() {
-                              changesSaved = false;
-                              isCompleted = false;
-                              isButtonPressedInDeclarations = false;
-                              isCheckboxesCompleted = false;
-                            });
+                            changesSaved = false;
+                            isCompleted = false;
+                            isButtonPressedInDeclarations = false;
+                            isCheckboxesCompleted = false;
                           });
                         },
                       );
                     }).toList(),
                   ),
                 ),
-
+                const SizedBox(height: 20),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0),
                   child: Row(

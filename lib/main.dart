@@ -17,7 +17,6 @@ import 'authentication/additionalRegistrationPage/vehicle_info_screen.dart';
 import 'authentication/additionalRegistrationPage/orcr_screen.dart';
 import 'authentication/additionalRegistrationPage/vehicle_documents_screen.dart';
 
-import 'authentication/cameraPage/camera_page.dart';
 import 'global/global.dart';
 
 Future main() async {
@@ -38,10 +37,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color color = Theme.of(context).primaryColor;
     return MaterialApp(
       title: 'EatsEasy Riders App',
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        primarySwatch: Colors.red,
       ),
       home: const MySplashScreen(),
       routes: {
