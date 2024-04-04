@@ -400,7 +400,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
           if (sharedPreferences!.containsKey('nationality') &&
               sharedPreferences!.containsKey('user_image_path')) {
 
-            _loadUserDetails();
+            //_loadUserDetails();
 
           } else {
             riderProfile = XFile('');

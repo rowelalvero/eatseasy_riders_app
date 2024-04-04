@@ -70,8 +70,9 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   Future<void> formValidation() async {
     isButtonPressed = !isButtonPressed;
     bool isPersonalDetailsCompleted = await _checkPersonalDetailsCompleted();
+    bool isDriverLicenseCompleted = await _checkDriverLicenseCompleted();
     //check if image is empty
-    if (!isPersonalDetailsCompleted) {
+    if (!isPersonalDetailsCompleted && !isDriverLicenseCompleted) {
       showDialog(
           context: context,
           builder: (c) {
@@ -80,7 +81,6 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
             );
           });
     }
-    //image is selected
     else {
       showDialog(
           context: context,

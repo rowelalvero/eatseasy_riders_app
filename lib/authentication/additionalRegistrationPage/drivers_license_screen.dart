@@ -282,20 +282,18 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       }
       //Save residentialPermanentAddressController locally
       await sharedPreferences?.setString('isResidentialPermanentAddress', residentialPermanentAddressController );
-      // Store completion status in shared preferences
-      await sharedPreferences?.setBool('personalDetailsCompleted', true);
 
+      // Store completion status in shared preferences
+      await sharedPreferences?.setBool('driverLicenseCompleted', true);
       //Save changesSaved value to true
       await sharedPreferences?.setBool('isChangesSavedInDriversLicenseScreen', true);
+      // Save isButtonPressed value to true
       await sharedPreferences?.setBool('isButtonPressedDriversLicenseScreen', true);
 
       setState(() {
         changesSaved  = true;
         isCompleted = true;
       });
-
-      // Store completion status in shared preferences
-      await sharedPreferences?.setBool('driverLicenseCompleted', true);
 
       // Toggle the button state
       isButtonPressedDriversLicenseScreen = !isButtonPressedDriversLicenseScreen;
