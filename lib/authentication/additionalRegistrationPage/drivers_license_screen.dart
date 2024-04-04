@@ -721,50 +721,88 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
                         //Front Image
                         const SizedBox(height: 10),
-                        const Padding(
-                          padding: EdgeInsets.only(left: 18),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Front Image (Required)",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                    fontFamily: "Poppins",
-                                    fontWeight: FontWeight.w500,
-                                  )
-                              ),
-                            ],
-                          ),
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                //Back Image
+                                const SizedBox(height: 10),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 18),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Back Image (Required)",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Color.fromARGB(255, 67, 83, 89),
+                                            fontFamily: "Poppins",
+                                            fontWeight: FontWeight.w500,
+                                          )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                if (_isfrontLicenseHasNoImage == true)
+                                  const Row(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(left: 35),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(height: 2),
+                                            Text("Please provide license image",
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontFamily: "Poppins",
+                                                  color: Colors.red,
+                                                )
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            )
+                          ],
                         ),
 
                         const SizedBox(height: 10),
                         // Image Picker
                         InkWell(
-                          //get image from gallery
-                            onTap: () {
-                              _navigateToCamera(true);
-                              setState(() {
-                                _isfrontLicenseHasNoImage = false;
-                                _isFrontImageSelected = true;
-                              });
-                            },
-                            //display selected image
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.23 * 4,
-                                height: MediaQuery.of(context).size.width * 0.27 * 2,
+                          onTap: () {
+                            _navigateToCamera(true);
+                            setState(() {
+                              _isfrontLicenseHasNoImage = false;
+                              _isFrontImageSelected = true;
+                            });
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.23 * 4,
+                              height: MediaQuery.of(context).size.width * 0.27 * 2,
+                              decoration: BoxDecoration(
                                 color: const Color.fromARGB(255, 230, 229, 229),
-                                child: frontLicense == null
-                                    ? Icon(
-                                  Icons.add_photo_alternate,
-                                  size: MediaQuery.of(context).size.width * 0.20,
-                                  color: Colors.grey,
-                                )
-                                    : Image.file(File(frontLicense!.path), fit: BoxFit.cover),
+                                borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                                  border: Border.all(
+                                    color: _isfrontLicenseHasNoImage ? Colors.red : Colors.transparent, // Choose your border color
+                                    width: 1, // Choose the border width
+                                  )
                               ),
-                            )
+                              child: frontLicense == null
+                                  ? Icon(
+                                Icons.add_photo_alternate,
+                                size: MediaQuery.of(context).size.width * 0.20,
+                                color: Colors.grey,
+                              )
+                                  : Image.file(File(frontLicense!.path), fit: BoxFit.cover),
+                            ),
+                          ),
                         ),
 
                         Column(
@@ -812,50 +850,88 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           ],
                         ),
 
-                        //Back Image
-                        const SizedBox(height: 10),
-                        const Padding(
-                          padding: EdgeInsets.only(left: 18),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text("Back Image (Required)",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Color.fromARGB(255, 67, 83, 89),
-                                    fontFamily: "Poppins",
-                                    fontWeight: FontWeight.w500,
-                                  )
-                              ),
-                            ],
-                          ),
+                         // Back License
+                         Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                //Back Image
+                                const SizedBox(height: 10),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 18),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("Back Image (Required)",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Color.fromARGB(255, 67, 83, 89),
+                                            fontFamily: "Poppins",
+                                            fontWeight: FontWeight.w500,
+                                          )
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                if (_isbackLicenseHasNoImage == true)
+                                  const Row(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(left: 35),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(height: 2),
+                                            Text("Please provide license image",
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontFamily: "Poppins",
+                                                  color: Colors.red,
+                                                )
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            )
+                          ],
                         ),
 
                         const SizedBox(height: 10),
                         // Image Picker
                         InkWell(
-                          //get image from gallery
-                            onTap: () {
+                          onTap: () {
+                            _navigateToCamera(true);
+                            setState(() {
                               _isbackLicenseHasNoImage = false;
-                              _navigateToCamera(false);
-                            },
-
-                            //display selected image
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                              child: Container(
-                                width: MediaQuery.of(context).size.width * 0.23 * 4,
-                                height: MediaQuery.of(context).size.width * 0.27 * 2,
+                            });
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width * 0.23 * 4,
+                              height: MediaQuery.of(context).size.width * 0.27 * 2,
+                              decoration: BoxDecoration(
                                 color: const Color.fromARGB(255, 230, 229, 229),
-                                child: backLicense == null
-                                    ? Icon(
-                                  Icons.add_photo_alternate,
-                                  size: MediaQuery.of(context).size.width * 0.20,
-                                  color: Colors.grey,
-                                )
-                                    : Image.file(File(backLicense!.path), fit: BoxFit.cover),
+                                borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                                border: Border.all(
+                                  color: _isbackLicenseHasNoImage ? Colors.red : Colors.transparent, // Choose your border color
+                                  width: 1, // Choose the border width
+                                ),
                               ),
-                            )
+                              child: backLicense == null
+                                  ? Icon(
+                                Icons.add_photo_alternate,
+                                size: MediaQuery.of(context).size.width * 0.20,
+                                color: Colors.grey,
+                              )
+                                  : Image.file(File(backLicense!.path), fit: BoxFit.cover),
+                            ),
+                          ),
                         ),
 
                         Column(
@@ -903,7 +979,6 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           ],
                         ),
                         //Age
-                        const SizedBox(height: 10),
                         const Padding(
                           padding: EdgeInsets.only(left: 18),
                           child: Row(
@@ -922,7 +997,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         ),
                         //Age
                         CustomTextField(
-                            data: Icons.phone,
+                            data: Icons.person_outline_rounded,
                             controller: ageController,
                             hintText: "",
                             isObsecure: false,
@@ -983,7 +1058,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         ),
                         //Mother's Maiden Name
                         CustomTextField(
-                            data: Icons.phone,
+                            data: Icons.girl_rounded,
                             controller: motherMaidenNameController,
                             hintText: "",
                             isObsecure: false,
@@ -1045,7 +1120,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
                         //Residential Address
                         CustomTextField(
-                            data: Icons.phone,
+                            data: Icons.house_rounded,
                             controller: residentialAddressController,
                             hintText: "",
                             isObsecure: false,

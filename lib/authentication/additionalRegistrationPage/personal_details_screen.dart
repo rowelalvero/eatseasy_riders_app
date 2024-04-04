@@ -23,6 +23,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   bool isCompleted = false; // Flag to track if form is completed
   bool isButtonPressed = false; // Flag to track if button is pressed
 
+  bool _isRiderProfileEmpty = false;
   bool isSecContactNumberCompleted = false;
   bool _isSecContactNumberControllerInvalid = false;
 
@@ -69,6 +70,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
         .pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
     riderProfile = XFile(file!.path);
     setState(() {
+      _isRiderProfileEmpty = false;
       isButtonPressed = false;
       changesSaved = false;
       isCompleted = false;
@@ -313,6 +315,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   void _saveUserDataToPrefs() async {
     //return error message if user pressed the save button without selecting an image
     if (riderProfile == null) {
+      setState(() {
+        _isRiderProfileEmpty = true;
+      });
       showDialog(
           context: context,
           builder: (c) {
@@ -515,25 +520,28 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
                         // Image Picker
                         InkWell(
-                          //get image from gallery
                           onTap: () => _getImage(),
-
-                          //display selected image
-                          child: CircleAvatar(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: _isRiderProfileEmpty ? Colors.red : Colors.transparent, // Choose your border color
+                                width: 2, // Choose the border width
+                              ),
+                            ),
+                            child: CircleAvatar(
                               radius: MediaQuery.of(context).size.width * 0.20,
                               backgroundColor: const Color.fromARGB(255, 230, 229, 229),
-                              backgroundImage: riderProfile == null
-                                  ? null
-                                  : FileImage(File(riderProfile!.path)),
-
-                              //alternative icon
+                              backgroundImage: riderProfile == null ? null : FileImage(File(riderProfile!.path)),
                               child: riderProfile == null
                                   ? Icon(
                                 Icons.add_photo_alternate,
                                 size: MediaQuery.of(context).size.width * 0.20,
                                 color: Colors.grey,
                               )
-                                  : null),
+                                  : null,
+                            ),
+                          ),
                         ),
 
                         Column(
