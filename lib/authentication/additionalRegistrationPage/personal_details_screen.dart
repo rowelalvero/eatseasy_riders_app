@@ -26,6 +26,14 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   bool isSecContactNumberCompleted = false;
   bool _isSecContactNumberControllerInvalid = false;
 
+  @override
+  void initState() {
+    super.initState();
+    nationalityController = TextEditingController();
+    // Set the initial value of the controller to the first item in the dropdown
+    nationalityController.text = _dropdownItems.first;
+    _loadUserDetails();
+  }
 
   //Get image and save it to imageXFile
   _getImage() async {
@@ -335,7 +343,9 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       //Load nationality data
       nationalityController.text = sharedPreferences?.getString('nationality') ?? _dropdownItems.first;
       //
-      changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
+      if (sharedPreferences!.containsKey('personalDetailsCompleted')) {
+        changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
+      }
       isButtonPressed = sharedPreferences?.getBool('isButtonPressed') ?? false;
       //isSecContactNumberCompleted = sharedPreferences?.getBool('isSecContactNumberCompleted') ?? false;
     });
@@ -360,15 +370,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     setState(() {
       riderProfile = null;
     });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    nationalityController = TextEditingController();
-    // Set the initial value of the controller to the first item in the dropdown
-    nationalityController.text = _dropdownItems.first;
-    _loadUserDetails();
   }
 
   Future<bool> _onWillPop() async {

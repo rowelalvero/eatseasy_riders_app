@@ -348,7 +348,9 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       //Load residentialPermanentAddress data
       residentialPermanentAddressController  = sharedPreferences?.getString('residentialPermanentAddress') ?? 'Yes';
 
-      changesSaved  = sharedPreferences?.getBool('isChangesSavedInDriversLicenseScreen') ?? false;
+      if (sharedPreferences!.containsKey('driverLicenseCompleted')) {
+        changesSaved  = sharedPreferences?.getBool('isChangesSavedInDriversLicenseScreen') ?? false;
+      }
       isButtonPressedDriversLicenseScreen = sharedPreferences?.getBool('isButtonPressedDriversLicenseScreen') ?? false;
     });
 
