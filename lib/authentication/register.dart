@@ -1195,34 +1195,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "Have an account?",
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontFamily: "Poppins",
-                          color: Colors.black54,
-                        ),
+                  TextButton(
+                    onPressed: () => Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RegisterScreen2()),
+                    ),
+                    child: const Text(
+                      "Navigate to RegistrationScreen2();",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: "Poppins",
                       ),
-
-                      TextButton(
-                        onPressed: () => Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const RegisterScreen2()),
-                        ),
-                        child: const Text(
-                          "Login here",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: "Poppins",
-                            color: Color.fromARGB(255, 242, 198, 65),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
+                    ),
+                  ),
                 ],
               ),
             ],

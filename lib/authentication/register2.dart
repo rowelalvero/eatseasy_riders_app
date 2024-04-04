@@ -21,6 +21,7 @@ class RegisterScreen2 extends StatefulWidget {
 class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isPersonalDetailsCompleted;
   late Future<bool> _isDriverLicenseCompleted;
+  late Future<bool> _isDeclarationsCompleted;
   bool isButtonPressed = false;
 
   Future<bool> _checkPersonalDetailsCompleted() async {
@@ -31,6 +32,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   Future<bool> _checkDriverLicenseCompleted() async {
     sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences?.getBool('driverLicenseCompleted') ?? false;
+  }
+
+  Future<bool> _checkDeclarationsCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('declarationsCompleted') ?? false;
   }
 
   //The business logo will upload to Firestorage
@@ -71,8 +77,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     isButtonPressed = !isButtonPressed;
     bool isPersonalDetailsCompleted = await _checkPersonalDetailsCompleted();
     bool isDriverLicenseCompleted = await _checkDriverLicenseCompleted();
+    bool isDeclarationsCompleted = await _checkDeclarationsCompleted();
     //check if image is empty
-    if (!isPersonalDetailsCompleted && !isDriverLicenseCompleted) {
+    if (!isPersonalDetailsCompleted &&
+        !isDriverLicenseCompleted &&
+        !isDeclarationsCompleted) {
       showDialog(
           context: context,
           builder: (c) {
@@ -166,6 +175,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     //Initialize the status of every sections
     _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
     _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
+    _isDeclarationsCompleted = _checkDeclarationsCompleted();
   }
 
   @override
@@ -271,7 +281,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
             });
           },),
-          //LinkTile(title: 'Declarations', destination: '/declarations', isRequired: true, isCompleted: false),
+          LinkTile(title: 'Declarations', destination: '/declarations', isRequiredBasedOnCompletion: true, isCompleted: _isDeclarationsCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isDeclarationsCompleted = _checkDeclarationsCompleted();
+            });
+          },),
           //LinkTile(title: 'Consents', destination: '/consents', isRequired: true, isCompleted: false),
           //LinkTile(title: 'EatsEasy Wallet', destination: '/eatsEasyWallet', isRequired: true, isCompleted: false),
           //LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isCompleted: false),
@@ -335,31 +349,16 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "Have an account?",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: "Poppins",
-                      color: Colors.black54,
-                    ),
+              TextButton(
+                onPressed: () => sharedPreferences?.clear(),
+                child: const Text(
+                  "RegistrationScreen2() Reset",
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontFamily: "Poppins",
                   ),
-
-                  TextButton(
-                    onPressed: () => sharedPreferences?.clear(),
-                    child: const Text(
-                      "Login here",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: "Poppins",
-                        color: Color.fromARGB(255, 242, 198, 65),
-                      ),
-                    ),
-                  ),
-                ],
-              )
+                ),
+              ),
             ],
           ),
           //spacing

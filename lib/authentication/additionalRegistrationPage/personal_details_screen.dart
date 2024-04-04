@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,7 +18,8 @@ class PersonalDetailsScreen extends StatefulWidget {
 class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController secondaryContactNumberController = TextEditingController();
-  TextEditingController nationalityController = TextEditingController();
+
+  late String nationalityController = 'Filipino';
 
   bool changesSaved = true; // Flag to track if changes are saved
   bool isCompleted = false; // Flag to track if form is completed
@@ -30,9 +32,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    nationalityController = TextEditingController();
-    // Set the initial value of the controller to the first item in the dropdown
-    nationalityController.text = _dropdownItems.first;
     _loadUserDetails();
   }
 
@@ -289,7 +288,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
     //Save secondaryContactNumber locally
     await sharedPreferences?.setString('secondaryContactNumber', secondaryContactNumberController.text);
     //Save nationality locally
-    await sharedPreferences?.setString('nationality', nationalityController.text);
+    await sharedPreferences?.setString('nationality', nationalityController);
     //Save image locally
     if (riderProfile != null) {
       await sharedPreferences?.setString('user_image_path', riderProfile!.path);
@@ -346,7 +345,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       //Load secondary contact number data
       secondaryContactNumberController.text = sharedPreferences?.getString('secondaryContactNumber') ?? '';
       //Load nationality data
-      nationalityController.text = sharedPreferences?.getString('nationality') ?? _dropdownItems.first;
+      nationalityController = sharedPreferences?.getString('nationality') ?? 'Filipino';
       //
       if (sharedPreferences!.containsKey('personalDetailsCompleted')) {
         changesSaved  = sharedPreferences?.getBool('changesSaved') ?? false;
@@ -410,7 +409,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
           } else {
             riderProfile = XFile('');
-            nationalityController.text = _dropdownItems.first;
+            nationalityController = 'Filipino';
             secondaryContactNumberController.text = '';
           }
         });
@@ -758,6 +757,68 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                             color: const Color(0xFFE0E3E7),
                             borderRadius: BorderRadius.circular(12),
                           ),
+                          child: DropdownButtonFormField2<String>(
+                            isExpanded: true,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                            ),
+                            hint: const Text(
+                              'Select an option',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            value: nationalityController, // Set default value to 'Yes'
+                            items: _dropdownItems.map((item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(
+                                item,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ))
+                                .toList(),
+                            validator: (value) {
+                              if (value == null) {
+                                return 'Select your nationality';
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              setState(() {
+                                changesSaved = false;
+                                isCompleted = false;
+                                isButtonPressed = false;
+                                nationalityController = value.toString();
+                              });
+                            },
+                            buttonStyleData: const ButtonStyleData(
+                              padding: EdgeInsets.only(right: 8),
+                            ),
+                            iconStyleData: const IconStyleData(
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: Colors.black45,
+                              ),
+                              iconSize: 24,
+                            ),
+                            dropdownStyleData: DropdownStyleData(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            menuItemStyleData: const MenuItemStyleData(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                            ),
+                          ),
+                        ),
+
+                        /*Container(
+                          padding: const EdgeInsets.all(4),
+                          margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0E3E7),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: SizedBox(
                             width: MediaQuery.of(context).orientation == Orientation.landscape ? MediaQuery.of(context).size.width * 0.6 : double.infinity,
                             child: DropdownButtonFormField<String>(
@@ -787,7 +848,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                               elevation: 2, // Set the elevation of the dropdown list
                             ),
                           ),
-                        ),
+                        ),*/
                       ],
                     ),
                   ),

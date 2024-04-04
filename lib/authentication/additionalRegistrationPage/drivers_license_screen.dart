@@ -161,6 +161,37 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     });
   }*/
 
+  _showLicensePreviewDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop(); // Close dialog
+        },
+        child: FractionallySizedBox(
+          widthFactor: 1.0, // Cover entire width
+          heightFactor: 2.0, // Cover entire height
+          child: Container(
+            color: Colors.black26, // Set background color for the content area
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 10),
+                Image.asset(_isFrontImageSelected
+                    ? "images/frontLicenseExample.jpg" : "images/backLicenseExample.jpg",
+                  fit: BoxFit.cover, // Ensure the image covers the available space
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+
   Future<void> _removeLicenseImage() async {
     setState(() {
       isButtonPressedDriversLicenseScreen = false;
@@ -733,7 +764,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text("Back Image (Required)",
+                                      Text("Front Image (Required)",
                                           style: TextStyle(
                                             fontSize: 16,
                                             color: Color.fromARGB(255, 67, 83, 89),
@@ -745,27 +776,53 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                   ),
                                 ),
 
-                                if (_isfrontLicenseHasNoImage == true)
-                                  const Row(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 35),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            SizedBox(height: 2),
-                                            Text("Please provide license image",
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontFamily: "Poppins",
-                                                  color: Colors.red,
-                                                )
+                                _isfrontLicenseHasNoImage
+                                    ? const Row(
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.only(left: 35),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(height: 2),
+                                                Text("Please provide license image",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontFamily: "Poppins",
+                                                      color: Colors.red,
+                                                    )
+                                                ),
+                                              ],
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                          ),
+                                        ],
+                                      )
+                                    :  Row(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 35),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    _isFrontImageSelected = true;
+                                                    _showLicensePreviewDialog();
+                                                  },
+                                                  child: const Text(
+                                                    "See example",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontFamily: "Poppins",
+                                                      color: Color.fromARGB(255, 242, 198, 65),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      )
                               ],
                             )
                           ],
@@ -875,27 +932,53 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                   ),
                                 ),
 
-                                if (_isbackLicenseHasNoImage == true)
-                                  const Row(
-                                    children: [
-                                      Padding(
-                                        padding: EdgeInsets.only(left: 35),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            SizedBox(height: 2),
-                                            Text("Please provide license image",
-                                                style: TextStyle(
-                                                  fontSize: 14,
-                                                  fontFamily: "Poppins",
-                                                  color: Colors.red,
-                                                )
-                                            ),
-                                          ],
-                                        ),
+                                _isbackLicenseHasNoImage
+                                    ? const Row(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.only(left: 35),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(height: 2),
+                                          Text("Please provide license image",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: "Poppins",
+                                                color: Colors.red,
+                                              )
+                                          ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
+                                )
+                                    :  Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 35),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () {
+                                              _isFrontImageSelected = false;
+                                              _showLicensePreviewDialog();
+                                            },
+                                            child: const Text(
+                                              "See example",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: "Poppins",
+                                                color: Color.fromARGB(255, 242, 198, 65),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
                               ],
                             )
                           ],
@@ -905,7 +988,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         // Image Picker
                         InkWell(
                           onTap: () {
-                            _navigateToCamera(true);
+                            _navigateToCamera(false);
                             setState(() {
                               _isbackLicenseHasNoImage = false;
                             });
