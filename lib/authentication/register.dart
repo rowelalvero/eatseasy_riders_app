@@ -374,11 +374,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     await FirebaseFirestore.instance.collection("riders").doc(currentUser.uid).set({
       "riderUID": currentUser.uid, // Storing user's UID
       "riderEmail": currentUser.email, // Storing user's email
-      "cityAddress": cityController.text.trim(), // Storing city address after trimming leading/trailing whitespace
-      "lastName": lastNameController.text.trim(), // Storing last name after trimming leading/trailing whitespace
-      "firstName": firstNameController.text.trim(), // Storing first name after trimming leading/trailing whitespace
-      "M.I.": middleInitialController.text.trim(), // Storing middle initial after trimming leading/trailing whitespace
-      "suffix": suffixController, // Storing suffix after trimming leading/trailing whitespace
+      "cityAddress": cityController.text.toUpperCase().trim(), // Storing city address after trimming leading/trailing whitespace
+      "lastName": lastNameController.text.toUpperCase().trim(), // Storing last name after trimming leading/trailing whitespace
+      "firstName": firstNameController.text.toUpperCase().trim(), // Storing first name after trimming leading/trailing whitespace
+      "M.I.": middleInitialController.text.toUpperCase().trim(), // Storing middle initial after trimming leading/trailing whitespace
+      "suffix": suffixController?.toUpperCase(), // Storing suffix after trimming leading/trailing whitespace
       "contactNumber": "+63${contactNumberController.text.trim()}", // Storing contact number after trimming leading/trailing whitespace
       "serviceType": serviceTypeController, //Storing the service type of the rider
       "status": "pending", // Setting the status to 'pending'
@@ -562,7 +562,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           onChanged: (value) {
                             setState(() {
                               _isServiceTypeEmpty = false;
-                              serviceTypeController = value.toString();
+                              serviceTypeController = value?['text']; // Extracting text from the selected item
                             });
                           },
                           buttonStyleData: const ButtonStyleData(

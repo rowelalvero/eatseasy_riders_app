@@ -18,7 +18,7 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
   bool isCompleted = false; // Flag to track if form is completed
   bool isButtonPressedInDeclarations = false; // Flag to track if button is pressed
 
-  bool isCheckboxesCompleted = false;
+  bool isCheckboxesCompleted = true;
 
   bool box1 = false;
   bool box2 = false;
@@ -231,10 +231,16 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
                             changesSaved = false;
                             isCompleted = false;
                             isButtonPressedInDeclarations = false;
-                            isCheckboxesCompleted = false;
                           });
                         },
-                        activeColor: Colors.green, // Set the checkbox color when checked
+                        side: BorderSide(color: isCheckboxesCompleted ? Colors.black : Colors.red), // Set border color
+                        fillColor: MaterialStateColor.resolveWith((states) {
+                          // Set fill color
+                          if (states.contains(MaterialState.selected)) {
+                            return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
+                          }
+                          return Colors.transparent; // Default color
+                        }),
                       );
                     }).toList(),
                   ),

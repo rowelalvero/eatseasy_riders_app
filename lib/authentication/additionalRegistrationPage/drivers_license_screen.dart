@@ -294,7 +294,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       sharedPreferences = await SharedPreferences.getInstance();
 
       //Save licenseNumberController locally
-      await sharedPreferences?.setString('licenseNumber', licenseNumberController.text);
+      await sharedPreferences?.setString('licenseNumber', licenseNumberController.text.trim());
       //Save issueDateController locally
       await sharedPreferences?.setString('issueDate', issueDateController.text);
 
@@ -304,12 +304,12 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       await sharedPreferences?.setBool('isDateTimeSelected', true);
 
       //Save age locally
-      await sharedPreferences?.setString('age', ageController.text);
+      await sharedPreferences?.setString('age', ageController.text.trim());
       //Save motherMaidenName locally
-      await sharedPreferences?.setString('motherMaiden', motherMaidenNameController.text);
+      await sharedPreferences?.setString('motherMaiden', motherMaidenNameController.text.trim());
       //Save residentialAddressController locally
       if (residentialAddressController.text.isNotEmpty) {
-        await sharedPreferences?.setString('residentialAddress', residentialAddressController.text);
+        await sharedPreferences?.setString('residentialAddress', residentialAddressController.text.trim());
       }
       //Save residentialPermanentAddressController locally
       await sharedPreferences?.setString('isResidentialPermanentAddress', residentialPermanentAddressController );

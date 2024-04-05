@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 import 'additionalRegistrationPage/personal_details_screen.dart';
 import '../global/global.dart';
+import 'package:image/image.dart' as img;
 import 'auth_screen.dart';
 import 'imageGetters/rider_profile.dart';
 import 'imageUpload/image_upload.dart';
@@ -23,6 +25,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isPersonalDetailsCompleted;
   late Future<bool> _isDriverLicenseCompleted;
   late Future<bool> _isDeclarationsCompleted;
+  late Future<bool> _isConsentsCompleted;
   bool isButtonPressed = false;
 
   Future<bool> _checkPersonalDetailsCompleted() async {
@@ -40,6 +43,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return sharedPreferences?.getBool('declarationsCompleted') ?? false;
   }
 
+  Future<bool> _checkConsentsCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('consentsCompleted') ?? false;
+  }
+
   String riderImageUrl = "";
   String frontLicenseImageUrl = "";
   String backLicenseImageUrl = "";
@@ -48,47 +56,18 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   String fLicenseType = 'fLicense';
   String bLicenseType = 'bLicense';
 
-  /*Future<void> _uploadRiderImage() async {
-    String? riderEmail = sharedPreferences?.getString('email');
-    // Get time and date and store it in imageFileName
-    String imageFileName = DateTime.now().millisecondsSinceEpoch.toString();
-
-    // Save the image to reference path and replace image file name with imageFileName
-    fStorage.Reference reference = fStorage.FirebaseStorage.instance
-        .ref()
-        .child("ridersAssets")
-        .child(riderEmail!)
-        .child("profile")
-        .child(imageFileName);
-
-    // Get the image file extension (assuming it's either jpg/jpeg or png)
-    String fileExtension = riderProfile!.path.split('.').last.toLowerCase();
-
-    // Set the content type based on the file extension
-    fStorage.SettableMetadata metadata = fStorage.SettableMetadata(contentType: 'image/$fileExtension');
-
-    // Upload the image to the path reference in Firebase storage
-    fStorage.UploadTask uploadTask = reference.putFile(File(riderProfile!.path), metadata);
-
-    // Get the download URL of the image after the upload is complete
-    fStorage.TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() async {
-      print("File uploaded");
-    });
-
-    //Store the URL to vendorImageUrl
-    riderImageUrl = await reference.getDownloadURL();
-  }*/
-
   //Form validation
   Future<void> formValidation() async {
     isButtonPressed = !isButtonPressed;
     bool isPersonalDetailsCompleted = await _checkPersonalDetailsCompleted();
     bool isDriverLicenseCompleted = await _checkDriverLicenseCompleted();
     bool isDeclarationsCompleted = await _checkDeclarationsCompleted();
+    bool isConsentsCompleted = await _checkConsentsCompleted();
     //check if image is empty
     if (!isPersonalDetailsCompleted &&
         !isDriverLicenseCompleted &&
-        !isDeclarationsCompleted) {
+        !isDeclarationsCompleted &&
+        !isConsentsCompleted) {
       showDialog(
           context: context,
           builder: (c) {
@@ -168,20 +147,20 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
       // Personal Details Screen
       "secondaryContactNumber": "+63$savedSecondaryContactNumber",
-      "nationality": savedNationality,
+      "nationality": savedNationality?.toUpperCase(),
       "riderAvatarUrl": riderImageUrl,
       // Driver License Screen
       "licenseNumber": savedLicenseNumber,
-      "issueDate": savedIssueDate,
+      "licenseIssueDate": savedIssueDate,
       "frontLicenseUrl": frontLicenseImageUrl,
       "backLicenseUrl": backLicenseImageUrl,
       "age": savedAge,
-      "motherMaidenName": savedMotherMaidenName,
-      "residentialAddress": savedResidentialAddress,
+      "motherMaidenName": savedMotherMaidenName?.toUpperCase(),
+      "residentialAddress": savedResidentialAddress?.toUpperCase(),
       "isResidentialPermanentAddress": savedIsResidentialPermanentAddress,
-
       //Declaration Screen
-      "declarationAccepted": savedIsRiderAcceptedDeclaration,
+      "declarationsAccepted": savedIsRiderAcceptedDeclaration,
+      //
     }, SetOptions(merge: true));
 
     /*//Save rider's data locally
@@ -200,6 +179,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
     _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
     _isDeclarationsCompleted = _checkDeclarationsCompleted();
+    _isConsentsCompleted = _checkConsentsCompleted();
   }
 
   @override
@@ -310,7 +290,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               _isDeclarationsCompleted = _checkDeclarationsCompleted();
             });
           },),
-          //LinkTile(title: 'Consents', destination: '/consents', isRequired: true, isCompleted: false),
+          LinkTile(title: 'Consents', destination: '/consents', isRequiredBasedOnCompletion: true, isCompleted: _isConsentsCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isConsentsCompleted = _checkConsentsCompleted();
+            });
+          },),
           //LinkTile(title: 'EatsEasy Wallet', destination: '/eatsEasyWallet', isRequired: true, isCompleted: false),
           //LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isCompleted: false),
           //LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptional: true, isCompleted: false),

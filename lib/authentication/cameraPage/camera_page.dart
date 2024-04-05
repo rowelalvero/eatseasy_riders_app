@@ -24,7 +24,7 @@ class CameraWidget extends StatefulWidget {
 class _CameraWidgetState extends State<CameraWidget> {
   CameraController? _controller;
   XFile? _capturedImage;
-  FlashMode _currentFlashMode = FlashMode.off;
+  FlashMode _currentFlashMode = FlashMode.auto;
 
   @override
   void initState() {
@@ -104,14 +104,20 @@ class _CameraWidgetState extends State<CameraWidget> {
           Expanded(
             child: Stack(
               children: <Widget>[
+
+                // Dark overlay background
                 CustomPaint(
                   foregroundPainter: MyPainter(),
                   child: CameraPreview(_controller!),
                 ),
+
+                // Clipped rectangle overlay background
                 ClipPath(
                   clipper: MyClipper(),
                   child: CameraPreview(_controller!),
                 ),
+
+                // Shutter button and flash button
                 Positioned(
                   left: 0,
                   right: 0,
@@ -198,9 +204,11 @@ class _CameraWidgetState extends State<CameraWidget> {
     }
   }
 
+  // Show the dialog after capture
   void _showPreviewDialog() async {
 
     if (_capturedImage != null) {
+      // Crop the chosen image
       final Uint8List bytes = await File(_capturedImage!.path).readAsBytes();
       final img.Image capturedImg = img.decodeImage(bytes)!;
 
@@ -222,6 +230,14 @@ class _CameraWidgetState extends State<CameraWidget> {
 
       final img.Image finalImage = img.copyRotate(croppedImage, 90);
 
+      // Save to corresponding img.Image in rider_profile.dart
+      if (widget.isFrontLicense) {
+        frontLicenseToBeCropped = finalImage;
+      } else {
+        backLicenseToBeCropped = finalImage;
+      }
+
+      // Display the chosen cropped image
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -233,7 +249,9 @@ class _CameraWidgetState extends State<CameraWidget> {
           actions: [
             TextButton(
               onPressed: () {
+
                 // Update the state to store the captured image
+                // Navigate back to the previous screen
                 Navigator.pop(context);
                 if (widget.isFrontLicense) {
                   Navigator.pop(context);
@@ -242,8 +260,6 @@ class _CameraWidgetState extends State<CameraWidget> {
                   Navigator.pop(context);
                   backLicense = _capturedImage;
                 }
-                // Navigate back to the previous screen
-
               },
               child: const Text('Confirm'),
             ),

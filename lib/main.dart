@@ -39,7 +39,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'EatsEasy Riders App',
       theme: ThemeData(
-          primarySwatch: Colors.green
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
       ),
       home: const MySplashScreen(),
       routes: {
