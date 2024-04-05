@@ -26,7 +26,6 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
 
   bool _isEmergencyContactNameControllerInvalid = false;
 
-  bool _isRelationshipControllerInvalid = false;
   bool _isRelationshipEmpty = false;
   bool _isEmergencyNumberCompleted = true;
   bool _isUserTypingEmergencyNumber = false;
@@ -481,7 +480,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
                                       decoration: InputDecoration(
                                         border: InputBorder.none,
                                         focusColor: Theme.of(context).primaryColor,
-                                        hintText: "Contact Number*",
+                                        hintText: "",
                                       ),
                                       onChanged: (value) {
                                         setState(() {

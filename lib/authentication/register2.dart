@@ -32,6 +32,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isEmergencyContactCompleted;
   late Future<bool> _isVehicleInfoCompleted;
   late Future<bool> _isORCRCompleted;
+  late Future<bool> _isVehicleDocumentsCompleted;
 
   bool isButtonPressed = false;
 
@@ -83,6 +84,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   Future<bool> _checkORCRCompleted() async {
     sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences?.getBool('orCrCompleted') ?? false;
+  }
+
+  Future<bool> _checkVehicleDocumentsCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('vehicleDocumentsCompleted') ?? false;
   }
 
   String riderImageUrl = "";
@@ -292,6 +298,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     _isEmergencyContactCompleted = _checkEmergencyContactCompleted();
     _isVehicleInfoCompleted = _checkVehicleInfoCompleted();
     _isORCRCompleted = _checkORCRCompleted();
+    _isVehicleDocumentsCompleted = _checkVehicleDocumentsCompleted();
   }
 
   @override
@@ -451,7 +458,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               _isORCRCompleted = _checkORCRCompleted();
             });
           },),
-          //LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptional: true, isCompleted: false),
+          LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isVehicleDocumentsCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isVehicleDocumentsCompleted = _checkVehicleDocumentsCompleted();
+            });
+          },),
 
           //spacing
           const SizedBox(

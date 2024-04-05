@@ -9,3 +9,4 @@ img.Image? backLicenseToBeCropped;
 XFile? nbiImage;
 XFile? orImage;
 XFile? crImage;
+XFile? vehicleDoc;
