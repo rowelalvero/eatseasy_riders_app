@@ -1305,7 +1305,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
                         //Spacing
                         const SizedBox(
-                          height: 10,
+                          height: 20,
                         ),
 
                         //Submit button

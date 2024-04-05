@@ -10,6 +10,7 @@ import 'additionalRegistrationPage/personal_details_screen.dart';
 import '../global/global.dart';
 import 'auth_screen.dart';
 import 'imageGetters/rider_profile.dart';
+import 'imageUpload/image_upload.dart';
 
 class RegisterScreen2 extends StatefulWidget {
   const RegisterScreen2({Key? key}) : super(key: key);
@@ -39,9 +40,15 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return sharedPreferences?.getBool('declarationsCompleted') ?? false;
   }
 
-  //The business logo will upload to Firestorage
   String riderImageUrl = "";
-  Future<void> _uploadRiderImage() async {
+  String frontLicenseImageUrl = "";
+  String backLicenseImageUrl = "";
+
+  String riderImageType = 'riderImage';
+  String fLicenseType = 'fLicense';
+  String bLicenseType = 'bLicense';
+
+  /*Future<void> _uploadRiderImage() async {
     String? riderEmail = sharedPreferences?.getString('email');
     // Get time and date and store it in imageFileName
     String imageFileName = DateTime.now().millisecondsSinceEpoch.toString();
@@ -70,7 +77,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 
     //Store the URL to vendorImageUrl
     riderImageUrl = await reference.getDownloadURL();
-  }
+  }*/
 
   //Form validation
   Future<void> formValidation() async {
@@ -112,8 +119,18 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 
     //If the rider is authenticated
     if (currentUserUid != null) {
-      //The business logo will upload to Firestorage
-      await _uploadRiderImage();
+
+      String riderProfilePath = riderProfile!.path;
+      String frontLicensePath = frontLicense!.path;
+      String backLicensePath = backLicense!.path;
+
+      //The Rider profile image will upload to Firestorage
+      riderImageUrl = await uploadImage(riderProfilePath, riderImageType);
+      //The Front License image will upload to Firestorage
+      frontLicenseImageUrl = await uploadImage(frontLicensePath, fLicenseType);
+      //The Back License image will upload to Firestorage
+      backLicenseImageUrl = await uploadImage(backLicensePath, bLicenseType);
+      //await _uploadRiderImage();
 
       //save rider's credential to Firestore by calling the function
       await _saveDataToFirestore().then((value) {
@@ -144,6 +161,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     String? savedMotherMaidenName = sharedPreferences?.getString('motherMaiden');
     String? savedResidentialAddress = sharedPreferences?.getString('residentialAddress');
     String? savedIsResidentialPermanentAddress = sharedPreferences?.getString('isResidentialPermanentAddress');
+    // Declaration Screen
+    bool? savedIsRiderAcceptedDeclaration = sharedPreferences?.getBool('isRiderAcceptedDeclaration');
 
     // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
     await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
@@ -154,10 +173,15 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       // Driver License Screen
       "licenseNumber": savedLicenseNumber,
       "issueDate": savedIssueDate,
+      "frontLicenseUrl": frontLicenseImageUrl,
+      "backLicenseUrl": backLicenseImageUrl,
       "age": savedAge,
       "motherMaidenName": savedMotherMaidenName,
       "residentialAddress": savedResidentialAddress,
       "isResidentialPermanentAddress": savedIsResidentialPermanentAddress,
+
+      //Declaration Screen
+      "declarationAccepted": savedIsRiderAcceptedDeclaration,
     }, SetOptions(merge: true));
 
     /*//Save rider's data locally

@@ -27,21 +27,19 @@ Future main() async {
   sharedPreferences = await SharedPreferences.getInstance();
 
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
-      .then((_) {
-    runApp(const MyApp());
+      .then((_) {runApp(const MyApp());
   });
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    Color color = Theme.of(context).primaryColor;
     return MaterialApp(
       title: 'EatsEasy Riders App',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+          primarySwatch: Colors.green
       ),
       home: const MySplashScreen(),
       routes: {

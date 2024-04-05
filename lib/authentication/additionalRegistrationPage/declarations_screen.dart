@@ -50,6 +50,8 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
       await sharedPreferences?.setBool('isButtonPressedInDeclarations', true);
       // Store completion status in shared preferences
       await sharedPreferences?.setBool('declarationsCompleted', true);
+
+      await sharedPreferences?.setBool('isRiderAcceptedDeclaration', true);
       setState(() {
         changesSaved  = true;
         isCompleted = true;
@@ -232,6 +234,7 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
                             isCheckboxesCompleted = false;
                           });
                         },
+                        activeColor: Colors.green, // Set the checkbox color when checked
                       );
                     }).toList(),
                   ),
