@@ -69,12 +69,6 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
             );
           });
 
-      setState(() {
-        changesSaved = false;
-        isCompleted = false;
-        isButtonPressedInDeclarations = false;
-        isCheckboxesCompleted = false;
-      });
     }
   }
 

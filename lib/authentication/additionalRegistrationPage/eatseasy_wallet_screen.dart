@@ -60,12 +60,6 @@ class _EatsEasyPayWalletScreenState extends State<EatsEasyPayWalletScreen> {
             );
           });
 
-      setState(() {
-        changesSaved = false;
-        isCompleted = false;
-        isButtonPressedInEatsEasyPayWallet = false;
-        isCheckboxesCompleted = false;
-      });
     }
   }
 

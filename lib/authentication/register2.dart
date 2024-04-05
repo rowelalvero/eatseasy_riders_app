@@ -29,6 +29,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isEatsEasyPayWalletCompleted;
   late Future<bool> _isTINNumberCompleted;
   late Future<bool> _isNBIClearanceCompleted;
+  late Future<bool> _isEmergencyContactCompleted;
+  late Future<bool> _isVehicleInfoCompleted;
 
   bool isButtonPressed = false;
 
@@ -67,6 +69,16 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return sharedPreferences?.getBool('NBIClearanceCompleted') ?? false;
   }
 
+  Future<bool> _checkEmergencyContactCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('emergencyContactCompleted') ?? false;
+  }
+
+  Future<bool> _checkVehicleInfoCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('vehicleInfoCompleted') ?? false;
+  }
+
   String riderImageUrl = "";
   String frontLicenseImageUrl = "";
   String backLicenseImageUrl = "";
@@ -85,6 +97,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool isDeclarationsCompleted = await _checkDeclarationsCompleted();
     bool isConsentsCompleted = await _checkConsentsCompleted();
     bool isEatsEasyPayWalletCompleted = await _checkEatsEasyPayWalletCompleted();
+    bool isVehicleInfoCompleted = await _checkVehicleInfoCompleted();
     //check if image is empty
     if (!isPersonalDetailsCompleted &&
         !isDriverLicenseCompleted &&
@@ -181,7 +194,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool? savedIsRiderAcceptedEasyPayWallet = sharedPreferences?.getBool('isRiderAcceptedDeclaration');
     // TIN Number
     String? savedTinNumber = sharedPreferences?.getString('TINNumber');
-    //
+    // Emergency Contact
+    String? savedContactName = sharedPreferences?.getString('emergencyContactName');
+    String? savedRelationship = sharedPreferences?.getString('relationship');
+    String? savedEmergencyNumber = sharedPreferences?.getString('emergencyNumber');
+    String? savedEmergencyAddress = sharedPreferences?.getString('emergencyAddress');
 
     // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
     await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
@@ -215,8 +232,12 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       // TIN Number
       "tinNumber": savedTinNumber,
       // NBI Clearance Image
-      "nbiClearnce": nbiClearanceImageUrl,
-      //
+      "nbiClearance": nbiClearanceImageUrl,
+      // Emergency Contact Screen
+      "emergencyContactName": savedContactName,
+      "emergencyContactRelationship": savedRelationship,
+      "emergencyNumber": savedEmergencyNumber,
+      "emergencyAddress": savedEmergencyAddress,
 
     }, SetOptions(merge: true));
 
@@ -240,6 +261,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
     _isTINNumberCompleted = _checkTINNumberCompleted();
     _isNBIClearanceCompleted = _checkNBIClearanceCompleted();
+    _isEmergencyContactCompleted = _checkEmergencyContactCompleted();
+    _isVehicleInfoCompleted = _checkVehicleInfoCompleted();
   }
 
   @override
@@ -370,8 +393,12 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               _isNBIClearanceCompleted = _checkNBIClearanceCompleted();
             });
           },),
-          //LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptional: true, isCompleted: false),
-          //SizedBox(height: 20),
+          LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isEmergencyContactCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isEmergencyContactCompleted = _checkEmergencyContactCompleted();
+            });
+          },),
+          const SizedBox(height: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20.0),
             child: const Text(
@@ -385,7 +412,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               textAlign: TextAlign.left,
             ),
           ),
-          //LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isRequired: true, isCompleted: false),
+          LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isVehicleInfoCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isVehicleInfoCompleted = _checkVehicleInfoCompleted();
+            });
+          },),
           //LinkTile(title: 'OR/CR', destination: '/orCr', isRequired: true, isCompleted: false),
           //LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptional: true, isCompleted: false),
 
