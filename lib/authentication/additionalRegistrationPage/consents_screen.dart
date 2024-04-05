@@ -106,12 +106,6 @@ class _ConsentsScreenState extends State<ConsentsScreen> {
             );
           });
 
-      setState(() {
-        changesSaved = false;
-        isCompleted = false;
-        isButtonPressedInConsents = false;
-        isCheckboxesCompleted = false;
-      });
     }
   }
   Future<void> _loadUserDetails() async {
@@ -229,7 +223,7 @@ class _ConsentsScreenState extends State<ConsentsScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  "Declarations",
+                  "Consents",
                   style: TextStyle(
                     fontSize: 25,
                     fontFamily: "Poppins",

@@ -145,7 +145,7 @@ class _EatsEasyPayWalletScreenState extends State<EatsEasyPayWalletScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  "Declarations",
+                  "EatsEasyPay Wallet",
                   style: TextStyle(
                     fontSize: 25,
                     fontFamily: "Poppins",

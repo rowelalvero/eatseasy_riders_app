@@ -122,7 +122,7 @@ class _TINNumberScreenState extends State<TINNumberScreen> {
         sharedPreferences = await SharedPreferences.getInstance();
 
         setState(() {
-          if (sharedPreferences!.containsKey('firstBox1')) {
+          if (sharedPreferences!.containsKey('TINNumber')) {
 
             _loadUserDetails();
 
@@ -149,7 +149,7 @@ class _TINNumberScreenState extends State<TINNumberScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  "Declarations",
+                  "TIN Number",
                   style: TextStyle(
                     fontSize: 25,
                     fontFamily: "Poppins",
@@ -198,7 +198,7 @@ class _TINNumberScreenState extends State<TINNumberScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("License Number (Required)",
+                            Text("TIN Number (Optional)",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Color.fromARGB(255, 67, 83, 89),

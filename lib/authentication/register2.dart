@@ -28,6 +28,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isConsentsCompleted;
   late Future<bool> _isEatsEasyPayWalletCompleted;
   late Future<bool> _isTINNumberCompleted;
+  late Future<bool> _isNBIClearanceCompleted;
+
   bool isButtonPressed = false;
 
   Future<bool> _checkPersonalDetailsCompleted() async {
@@ -60,13 +62,20 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return sharedPreferences?.getBool('TINNumberCompleted') ?? false;
   }
 
+  Future<bool> _checkNBIClearanceCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('NBIClearanceCompleted') ?? false;
+  }
+
   String riderImageUrl = "";
   String frontLicenseImageUrl = "";
   String backLicenseImageUrl = "";
+  String nbiClearanceImageUrl = "";
 
   String riderImageType = 'riderImage';
   String fLicenseType = 'fLicense';
   String bLicenseType = 'bLicense';
+  String nbiClearanceType = 'nbiClearance';
 
   //Form validation
   Future<void> formValidation() async {
@@ -76,14 +85,12 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool isDeclarationsCompleted = await _checkDeclarationsCompleted();
     bool isConsentsCompleted = await _checkConsentsCompleted();
     bool isEatsEasyPayWalletCompleted = await _checkEatsEasyPayWalletCompleted();
-    bool isTINNumberCompleted = await _checkTINNumberCompleted();
     //check if image is empty
     if (!isPersonalDetailsCompleted &&
         !isDriverLicenseCompleted &&
         !isDeclarationsCompleted &&
         !isConsentsCompleted &&
-        !isEatsEasyPayWalletCompleted &&
-        !isTINNumberCompleted) {
+        !isEatsEasyPayWalletCompleted) {
       showDialog(
           context: context,
           builder: (c) {
@@ -125,6 +132,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       frontLicenseImageUrl = await uploadImage(frontLicensePath, fLicenseType);
       //The Back License image will upload to Firestorage
       backLicenseImageUrl = await uploadImage(backLicensePath, bLicenseType);
+      //The NBI Clearance image will upload to Firestorage
+      nbiClearanceImageUrl = await uploadImage(backLicensePath, nbiClearanceType);
       //await _uploadRiderImage();
 
       //save rider's credential to Firestore by calling the function
@@ -170,6 +179,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool? savedOpportunitiesPushNotif = sharedPreferences?.getBool('additionalConsentBox4') ?? false;
     // EatsEasyPay Wallet Screen
     bool? savedIsRiderAcceptedEasyPayWallet = sharedPreferences?.getBool('isRiderAcceptedDeclaration');
+    // TIN Number
+    String? savedTinNumber = sharedPreferences?.getString('TINNumber');
     //
 
     // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
@@ -201,8 +212,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       "opportunitiesPushNotif": savedOpportunitiesPushNotif,
       // EatsEasyPay Wallet Screen
       "eatseasyPayWalletAccepted": savedIsRiderAcceptedEasyPayWallet,
+      // TIN Number
+      "tinNumber": savedTinNumber,
+      // NBI Clearance Image
+      "nbiClearnce": nbiClearanceImageUrl,
       //
-
 
     }, SetOptions(merge: true));
 
@@ -225,6 +239,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     _isConsentsCompleted = _checkConsentsCompleted();
     _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
     _isTINNumberCompleted = _checkTINNumberCompleted();
+    _isNBIClearanceCompleted = _checkNBIClearanceCompleted();
   }
 
   @override
@@ -320,37 +335,41 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               textAlign: TextAlign.left,
             ),
           ),
-          LinkTile(title: 'Personal Details', destination: '/personalDetails', isRequiredBasedOnCompletion : true, isCompleted: _isPersonalDetailsCompleted, updateCompletionStatus: () {
+          LinkTile(title: 'Personal Details', destination: '/personalDetails', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion : true, isCompleted: _isPersonalDetailsCompleted, updateCompletionStatus: () {
             setState(() {
               _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
             });
           },),
-          LinkTile(title: 'Driver License', destination: '/driversLicense', isRequiredBasedOnCompletion: true, isCompleted: _isDriverLicenseCompleted, updateCompletionStatus: () {
+          LinkTile(title: 'Driver License', destination: '/driversLicense', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isDriverLicenseCompleted, updateCompletionStatus: () {
             setState(() {
               _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
             });
           },),
-          LinkTile(title: 'Declarations', destination: '/declarations', isRequiredBasedOnCompletion: true, isCompleted: _isDeclarationsCompleted, updateCompletionStatus: () {
+          LinkTile(title: 'Declarations', destination: '/declarations', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isDeclarationsCompleted, updateCompletionStatus: () {
             setState(() {
               _isDeclarationsCompleted = _checkDeclarationsCompleted();
             });
           },),
-          LinkTile(title: 'Consents', destination: '/consents', isRequiredBasedOnCompletion: true, isCompleted: _isConsentsCompleted, updateCompletionStatus: () {
+          LinkTile(title: 'Consents', destination: '/consents', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isConsentsCompleted, updateCompletionStatus: () {
             setState(() {
               _isConsentsCompleted = _checkConsentsCompleted();
             });
           },),
-          LinkTile(title: 'EatsEasyPay Wallet', destination: '/eatsEasyPayWallet', isRequiredBasedOnCompletion: true, isCompleted: _isEatsEasyPayWalletCompleted, updateCompletionStatus: () {
+          LinkTile(title: 'EatsEasyPay Wallet', destination: '/eatsEasyPayWallet', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isEatsEasyPayWalletCompleted, updateCompletionStatus: () {
             setState(() {
               _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
             });
           },),
-          LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isRequiredBasedOnCompletion: false, isCompleted: _isTINNumberCompleted, updateCompletionStatus: () {
+          LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isTINNumberCompleted, updateCompletionStatus: () {
             setState(() {
               _isTINNumberCompleted = _checkTINNumberCompleted();
             });
           },),
-          //LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptional: true, isCompleted: false),
+          LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isNBIClearanceCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isNBIClearanceCompleted = _checkNBIClearanceCompleted();
+            });
+          },),
           //LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptional: true, isCompleted: false),
           //SizedBox(height: 20),
           Container(
@@ -436,7 +455,7 @@ class LinkTile extends StatelessWidget {
   final String title;
   final String destination;
   final bool isRequiredBasedOnCompletion ;
-  final bool isOptional;
+  final bool isOptionalBasedOnCompletion;
   final Future<bool> isCompleted;
   final VoidCallback? updateCompletionStatus;
 
@@ -445,7 +464,7 @@ class LinkTile extends StatelessWidget {
     required this.title,
     required this.destination,
     required this.isRequiredBasedOnCompletion,
-    this.isOptional = false,
+    required this.isOptionalBasedOnCompletion,
     required this.isCompleted,
     this.updateCompletionStatus,
   }) : super(key: key);
@@ -457,6 +476,7 @@ class LinkTile extends StatelessWidget {
       builder: (context, snapshot) {
         bool completed = snapshot.data ?? false;
         bool isRequired = isRequiredBasedOnCompletion && !completed;
+        bool isOptional  = isOptionalBasedOnCompletion && !completed;
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
           child: Card(
