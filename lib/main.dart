@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
         '/driversLicense': (context) => const DriversLicenseScreen(),
         '/declarations': (context) => const DeclarationsScreen(),
         '/consents': (context) => const ConsentsScreen(),
-        '/eatsEasyWallet': (context) => const EatsEasyWalletScreen(),
+        '/eatsEasyPayWallet': (context) => const EatsEasyPayWalletScreen(),
         '/tinNumber': (context) => const TINNumberScreen(),
         '/nbiClearance': (context) => const NBIClearanceScreen(),
         '/emergencyContact': (context) => const EmergencyContactScreen(),

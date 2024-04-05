@@ -79,11 +79,13 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
   }
 
   Future<void> _loadUserDetails() async {
-    box1 = sharedPreferences?.getBool('box1') ?? false;
-    box2 = sharedPreferences?.getBool('box2') ?? false;
-    box3 = sharedPreferences?.getBool('box3') ?? false;
-    box4 = sharedPreferences?.getBool('box4') ?? false;
-    box5 = sharedPreferences?.getBool('box5') ?? false;
+    setState(() {
+      box1 = sharedPreferences?.getBool('box1') ?? false;
+      box2 = sharedPreferences?.getBool('box2') ?? false;
+      box3 = sharedPreferences?.getBool('box3') ?? false;
+      box4 = sharedPreferences?.getBool('box4') ?? false;
+      box5 = sharedPreferences?.getBool('box5') ?? false;
+    });
 
     setState(() {
       if (sharedPreferences!.containsKey('declarationsCompleted')) {
@@ -200,14 +202,20 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 Form(
                   key: _formKey,
                   child: Column(
                     children: checkboxes.keys.map((String text) {
                       return CheckboxListTile(
                         controlAffinity: ListTileControlAffinity.leading,
-                        title: Text(text),
+                        title: Text(text,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontFamily: "Poppins", // Change the font family here
+                          ),
+                        ),
                         value: checkboxes[text],
                         onChanged: (bool? value) {
                           setState(() {

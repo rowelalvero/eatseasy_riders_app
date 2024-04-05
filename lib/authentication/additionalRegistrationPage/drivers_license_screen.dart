@@ -1342,7 +1342,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                         ),
                         //spacing
                         const SizedBox(
-                          height: 30,
+                          height: 20,
                         ),
                       ],
                     ),

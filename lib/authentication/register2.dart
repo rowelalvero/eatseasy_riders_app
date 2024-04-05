@@ -26,6 +26,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isDriverLicenseCompleted;
   late Future<bool> _isDeclarationsCompleted;
   late Future<bool> _isConsentsCompleted;
+  late Future<bool> _isEatsEasyPayWalletCompleted;
   bool isButtonPressed = false;
 
   Future<bool> _checkPersonalDetailsCompleted() async {
@@ -48,6 +49,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return sharedPreferences?.getBool('consentsCompleted') ?? false;
   }
 
+  Future<bool> _checkEatsEasyPayWalletCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('eatsEasyPayWalletCompleted') ?? false;
+  }
+
   String riderImageUrl = "";
   String frontLicenseImageUrl = "";
   String backLicenseImageUrl = "";
@@ -63,11 +69,13 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool isDriverLicenseCompleted = await _checkDriverLicenseCompleted();
     bool isDeclarationsCompleted = await _checkDeclarationsCompleted();
     bool isConsentsCompleted = await _checkConsentsCompleted();
+    bool isEatsEasyPayWalletCompleted = await _checkEatsEasyPayWalletCompleted();
     //check if image is empty
     if (!isPersonalDetailsCompleted &&
         !isDriverLicenseCompleted &&
         !isDeclarationsCompleted &&
-        !isConsentsCompleted) {
+        !isConsentsCompleted &&
+        !isEatsEasyPayWalletCompleted) {
       showDialog(
           context: context,
           builder: (c) {
@@ -180,6 +188,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
     _isDeclarationsCompleted = _checkDeclarationsCompleted();
     _isConsentsCompleted = _checkConsentsCompleted();
+    _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
   }
 
   @override
@@ -295,7 +304,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               _isConsentsCompleted = _checkConsentsCompleted();
             });
           },),
-          //LinkTile(title: 'EatsEasy Wallet', destination: '/eatsEasyWallet', isRequired: true, isCompleted: false),
+          LinkTile(title: 'EatsEasyPay Wallet', destination: '/eatsEasyPayWallet', isRequiredBasedOnCompletion: true, isCompleted: _isEatsEasyPayWalletCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
+            });
+          },),
           //LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isCompleted: false),
           //LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptional: true, isCompleted: false),
           //LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptional: true, isCompleted: false),

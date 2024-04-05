@@ -632,7 +632,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                                     fontFamily: "Poppins",
                                     fontWeight: FontWeight.w500,
                                   )),
-                              // Secondary contact number text field
 
                             ],
                           ),
