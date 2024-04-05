@@ -173,12 +173,14 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
         sharedPreferences = await SharedPreferences.getInstance();
 
         setState(() {
-          if (sharedPreferences!.containsKey('firstBox1')) {
+          if (sharedPreferences!.containsKey('emergencyContactName')) {
 
             _loadUserDetails();
 
           } else {
-
+            emergencyContactNameController.text = '';
+            emergencyNumberController.text = '';
+            emergencyAddressController.text = '';
           }
         });
         return true; // Allow pop after changes are discarded
@@ -200,7 +202,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  "EatsEasyPay Wallet",
+                  "Emergency Contact",
                   style: TextStyle(
                     fontSize: 25,
                     fontFamily: "Poppins",

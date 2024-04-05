@@ -7,3 +7,5 @@ XFile? frontLicense;
 img.Image? frontLicenseToBeCropped;
 img.Image? backLicenseToBeCropped;
 XFile? nbiImage;
+XFile? orImage;
+XFile? crImage;

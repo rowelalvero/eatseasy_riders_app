@@ -31,6 +31,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isNBIClearanceCompleted;
   late Future<bool> _isEmergencyContactCompleted;
   late Future<bool> _isVehicleInfoCompleted;
+  late Future<bool> _isORCRCompleted;
 
   bool isButtonPressed = false;
 
@@ -79,15 +80,24 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return sharedPreferences?.getBool('vehicleInfoCompleted') ?? false;
   }
 
+  Future<bool> _checkORCRCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('orCrCompleted') ?? false;
+  }
+
   String riderImageUrl = "";
   String frontLicenseImageUrl = "";
   String backLicenseImageUrl = "";
   String nbiClearanceImageUrl = "";
+  String orImageUrl = "";
+  String crImageUrl = "";
 
   String riderImageType = 'riderImage';
   String fLicenseType = 'fLicense';
   String bLicenseType = 'bLicense';
   String nbiClearanceType = 'nbiClearance';
+  String orType = 'officialReceipt';
+  String crType = 'certReg';
 
   //Form validation
   Future<void> formValidation() async {
@@ -98,12 +108,16 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool isConsentsCompleted = await _checkConsentsCompleted();
     bool isEatsEasyPayWalletCompleted = await _checkEatsEasyPayWalletCompleted();
     bool isVehicleInfoCompleted = await _checkVehicleInfoCompleted();
+    bool isORCRCompleted = await _checkORCRCompleted();
     //check if image is empty
     if (!isPersonalDetailsCompleted &&
         !isDriverLicenseCompleted &&
         !isDeclarationsCompleted &&
         !isConsentsCompleted &&
-        !isEatsEasyPayWalletCompleted) {
+        !isEatsEasyPayWalletCompleted &&
+        !isVehicleInfoCompleted &&
+        !isORCRCompleted) {
+
       showDialog(
           context: context,
           builder: (c) {
@@ -138,6 +152,9 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       String riderProfilePath = riderProfile!.path;
       String frontLicensePath = frontLicense!.path;
       String backLicensePath = backLicense!.path;
+      String nbiClearancePath = nbiImage!.path;
+      String orPath = orImage!.path;
+      String crPath = crImage!.path;
 
       //The Rider profile image will upload to Firestorage
       riderImageUrl = await uploadImage(riderProfilePath, riderImageType);
@@ -146,7 +163,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       //The Back License image will upload to Firestorage
       backLicenseImageUrl = await uploadImage(backLicensePath, bLicenseType);
       //The NBI Clearance image will upload to Firestorage
-      nbiClearanceImageUrl = await uploadImage(backLicensePath, nbiClearanceType);
+      nbiClearanceImageUrl = await uploadImage(nbiClearancePath, nbiClearanceType);
+      //The OR image will upload to Firestorage
+      orImageUrl = await uploadImage(orPath, orType);
+      //The CR image will upload to Firestorage
+      crImageUrl = await uploadImage(crPath, crType);
       //await _uploadRiderImage();
 
       //save rider's credential to Firestore by calling the function
@@ -194,11 +215,13 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool? savedIsRiderAcceptedEasyPayWallet = sharedPreferences?.getBool('isRiderAcceptedDeclaration');
     // TIN Number
     String? savedTinNumber = sharedPreferences?.getString('TINNumber');
-    // Emergency Contact
+    // Emergency Contact Screen
     String? savedContactName = sharedPreferences?.getString('emergencyContactName');
     String? savedRelationship = sharedPreferences?.getString('relationship');
     String? savedEmergencyNumber = sharedPreferences?.getString('emergencyNumber');
     String? savedEmergencyAddress = sharedPreferences?.getString('emergencyAddress');
+    // Vehicle Info Screen
+    String? savedPlateNumber = sharedPreferences?.getString('plateNumber') ?? '';
 
     // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
     await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
@@ -234,10 +257,15 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       // NBI Clearance Image
       "nbiClearance": nbiClearanceImageUrl,
       // Emergency Contact Screen
-      "emergencyContactName": savedContactName,
-      "emergencyContactRelationship": savedRelationship,
-      "emergencyNumber": savedEmergencyNumber,
-      "emergencyAddress": savedEmergencyAddress,
+      "emergencyContactName": savedContactName?.toUpperCase(),
+      "emergencyContactRelationship": savedRelationship?.toUpperCase(),
+      "emergencyNumber": "63$savedEmergencyNumber",
+      "emergencyAddress": savedEmergencyAddress?.toUpperCase(),
+      // Vehicle Info Screen
+      "plateNumber": savedPlateNumber,
+      // OR/CR Screen
+      "OR": orImageUrl,
+      "CR": crImageUrl,
 
     }, SetOptions(merge: true));
 
@@ -263,6 +291,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     _isNBIClearanceCompleted = _checkNBIClearanceCompleted();
     _isEmergencyContactCompleted = _checkEmergencyContactCompleted();
     _isVehicleInfoCompleted = _checkVehicleInfoCompleted();
+    _isORCRCompleted = _checkORCRCompleted();
   }
 
   @override
@@ -417,7 +446,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               _isVehicleInfoCompleted = _checkVehicleInfoCompleted();
             });
           },),
-          //LinkTile(title: 'OR/CR', destination: '/orCr', isRequired: true, isCompleted: false),
+          LinkTile(title: 'OR/CR', destination: '/orCr', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isORCRCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isORCRCompleted = _checkORCRCompleted();
+            });
+          },),
           //LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptional: true, isCompleted: false),
 
           //spacing
