@@ -89,6 +89,7 @@ class _ConsentsScreenState extends State<ConsentsScreen> {
       // Store completion status in shared preferences
       await sharedPreferences?.setBool('consentsCompleted', true);
 
+      await sharedPreferences?.setBool('isRiderAcceptedConsent', true);
       setState(() {
         changesSaved  = true;
         isCompleted = true;

@@ -24,8 +24,8 @@ class _EatsEasyPayWalletScreenState extends State<EatsEasyPayWalletScreen> {
   bool secondBox1 = false;
 
   Map<String, bool> checkboxes = {
-    "My driver's license has not been suspended or disqualified.": false,
-    "I have never been convicted by any court.": false,
+    "I have already informed EatsEasy about the personal information I have (including my government ID, profile details, and status) in order to: Provide financial products and services; Perform background checks; Link my personal information to the EatsEasy Customer app (if I have access to them); and Provide reasonable compensation based on EatsEasy privacy policy.": false,
+    "I understand that they are linking the EatsEasyPay Wallet to my EatsEasyPay Customer App. If I don't have a EatsEasyPay Wallet, I may need to sign up to get it.": false,
   };
 
   bool _allChecked() {
@@ -133,8 +133,8 @@ class _EatsEasyPayWalletScreenState extends State<EatsEasyPayWalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    checkboxes["My driver's license has not been suspended or disqualified."] = firstBox1;
-    checkboxes["I have never been convicted by any court."] = secondBox1;
+    checkboxes["I have already informed EatsEasy about the personal information I have (including my government ID, profile details, and status) in order to: Provide financial products and services; Perform background checks; Link my personal information to the EatsEasy Customer app (if I have access to them); and Provide reasonable compensation based on EatsEasy privacy policy."] = firstBox1;
+    checkboxes["I understand that they are linking the EatsEasyPay Wallet to my EatsEasyPay Customer App. If I don't have a EatsEasyPay Wallet, I may need to sign up to get it."] = secondBox1;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 242, 198, 65),
@@ -202,10 +202,10 @@ class _EatsEasyPayWalletScreenState extends State<EatsEasyPayWalletScreen> {
                         onChanged: (bool? value) {
                           setState(() {
                             switch (text) {
-                              case "My driver's license has not been suspended or disqualified.":
+                              case "I have already informed EatsEasy about the personal information I have (including my government ID, profile details, and status) in order to: Provide financial products and services; Perform background checks; Link my personal information to the EatsEasy Customer app (if I have access to them); and Provide reasonable compensation based on EatsEasy privacy policy.":
                                 firstBox1 = value!;
                                 break;
-                              case "I have never been convicted by any court.":
+                              case "I understand that they are linking the EatsEasyPay Wallet to my EatsEasyPay Customer App. If I don't have a EatsEasyPay Wallet, I may need to sign up to get it.":
                                 secondBox1 = value!;
                                 break;
                             }

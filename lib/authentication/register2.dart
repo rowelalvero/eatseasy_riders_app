@@ -27,6 +27,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isDeclarationsCompleted;
   late Future<bool> _isConsentsCompleted;
   late Future<bool> _isEatsEasyPayWalletCompleted;
+  late Future<bool> _isTINNumberCompleted;
   bool isButtonPressed = false;
 
   Future<bool> _checkPersonalDetailsCompleted() async {
@@ -54,6 +55,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return sharedPreferences?.getBool('eatsEasyPayWalletCompleted') ?? false;
   }
 
+  Future<bool> _checkTINNumberCompleted() async {
+    sharedPreferences = await SharedPreferences.getInstance();
+    return sharedPreferences?.getBool('TINNumberCompleted') ?? false;
+  }
+
   String riderImageUrl = "";
   String frontLicenseImageUrl = "";
   String backLicenseImageUrl = "";
@@ -70,12 +76,14 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool isDeclarationsCompleted = await _checkDeclarationsCompleted();
     bool isConsentsCompleted = await _checkConsentsCompleted();
     bool isEatsEasyPayWalletCompleted = await _checkEatsEasyPayWalletCompleted();
+    bool isTINNumberCompleted = await _checkTINNumberCompleted();
     //check if image is empty
     if (!isPersonalDetailsCompleted &&
         !isDriverLicenseCompleted &&
         !isDeclarationsCompleted &&
         !isConsentsCompleted &&
-        !isEatsEasyPayWalletCompleted) {
+        !isEatsEasyPayWalletCompleted &&
+        !isTINNumberCompleted) {
       showDialog(
           context: context,
           builder: (c) {
@@ -150,6 +158,19 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     String? savedIsResidentialPermanentAddress = sharedPreferences?.getString('isResidentialPermanentAddress');
     // Declaration Screen
     bool? savedIsRiderAcceptedDeclaration = sharedPreferences?.getBool('isRiderAcceptedDeclaration');
+    // Consent Screen
+    bool? savedIsRiderAcceptedConsent = sharedPreferences?.getBool('isRiderAcceptedConsent');
+    bool? savedPromotionsSMS = sharedPreferences?.getBool('offersConsentBox1') ?? false;
+    bool? savedPromotionsCall = sharedPreferences?.getBool('offersConsentBox2') ?? false;
+    bool? savedPromotionsEmail = sharedPreferences?.getBool('offersConsentBox3') ?? false;
+    bool? savedPromotionsPushNotif = sharedPreferences?.getBool('offersConsentBox4') ?? false;
+    bool? savedOpportunitiesSMS = sharedPreferences?.getBool('additionalConsentBox1') ?? false;
+    bool? savedOpportunitiesCall = sharedPreferences?.getBool('additionalConsentBox2') ?? false;
+    bool? savedOpportunitiesEmail = sharedPreferences?.getBool('additionalConsentBox3') ?? false;
+    bool? savedOpportunitiesPushNotif = sharedPreferences?.getBool('additionalConsentBox4') ?? false;
+    // EatsEasyPay Wallet Screen
+    bool? savedIsRiderAcceptedEasyPayWallet = sharedPreferences?.getBool('isRiderAcceptedDeclaration');
+    //
 
     // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
     await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
@@ -166,9 +187,23 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       "motherMaidenName": savedMotherMaidenName?.toUpperCase(),
       "residentialAddress": savedResidentialAddress?.toUpperCase(),
       "isResidentialPermanentAddress": savedIsResidentialPermanentAddress,
-      //Declaration Screen
+      // Declaration Screen
       "declarationsAccepted": savedIsRiderAcceptedDeclaration,
+      // Consent Screen
+      "consentAccepted": savedIsRiderAcceptedConsent,
+      "promotionsSMS": savedPromotionsSMS,
+      "promotionsCall": savedPromotionsCall,
+      "promotionsEmail": savedPromotionsEmail,
+      "promotionsPushNotif": savedPromotionsPushNotif,
+      "opportunitiesSMS": savedOpportunitiesSMS,
+      "opportunitiesCall": savedOpportunitiesCall,
+      "opportunitiesEmail": savedOpportunitiesEmail,
+      "opportunitiesPushNotif": savedOpportunitiesPushNotif,
+      // EatsEasyPay Wallet Screen
+      "eatseasyPayWalletAccepted": savedIsRiderAcceptedEasyPayWallet,
       //
+
+
     }, SetOptions(merge: true));
 
     /*//Save rider's data locally
@@ -189,6 +224,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     _isDeclarationsCompleted = _checkDeclarationsCompleted();
     _isConsentsCompleted = _checkConsentsCompleted();
     _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
+    _isTINNumberCompleted = _checkTINNumberCompleted();
   }
 
   @override
@@ -309,7 +345,11 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
               _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
             });
           },),
-          //LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isCompleted: false),
+          LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptional: true, isRequiredBasedOnCompletion: false, isCompleted: _isTINNumberCompleted, updateCompletionStatus: () {
+            setState(() {
+              _isTINNumberCompleted = _checkTINNumberCompleted();
+            });
+          },),
           //LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptional: true, isCompleted: false),
           //LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptional: true, isCompleted: false),
           //SizedBox(height: 20),
