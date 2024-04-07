@@ -30,26 +30,30 @@ class LoadingDialog extends StatelessWidget {
 
     return Material(
       color: isRegisterPage ? fillerColor : Colors.transparent, // Set the background color here
-      child: AlertDialog(
-        key: key,
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 10,),
-            LoadingAnimationWidget.inkDrop(
-              color: const Color.fromARGB(255, 242, 198, 65),
-              size: 35,
-            ),
-            const SizedBox(height: 10,),
-            Text(
-              "${message!}, Please wait...",
-              style: const TextStyle(
-                fontFamily: "Poppins",
-                fontSize: 12,
-                color: Colors.black54,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {}, // Do nothing on tap to prevent dismiss
+        child: AlertDialog(
+          key: key,
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 10,),
+              LoadingAnimationWidget.inkDrop(
+                color: const Color.fromARGB(255, 242, 198, 65),
+                size: 35,
               ),
-            ),
-          ],
+              const SizedBox(height: 10,),
+              Text(
+                "${message!}, Please wait...",
+                style: const TextStyle(
+                  fontFamily: "Poppins",
+                  fontSize: 12,
+                  color: Colors.black54,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
