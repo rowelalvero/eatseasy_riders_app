@@ -127,7 +127,7 @@ class _TINNumberScreenState extends State<TINNumberScreen> {
             _loadUserDetails();
 
           } else {
-
+            TINNumberController.text = '';
           }
         });
         return true; // Allow pop after changes are discarded
@@ -198,7 +198,7 @@ class _TINNumberScreenState extends State<TINNumberScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("TIN Number (Optional)",
+                            Text("TIN Number",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Color.fromARGB(255, 67, 83, 89),
@@ -206,6 +206,13 @@ class _TINNumberScreenState extends State<TINNumberScreen> {
                                   fontWeight: FontWeight.w500,
                                 )
                             ),
+                            Text(" (Optional)",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black45,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                )),
                           ],
                         ),
                       ),

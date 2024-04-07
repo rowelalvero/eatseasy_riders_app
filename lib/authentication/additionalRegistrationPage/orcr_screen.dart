@@ -197,12 +197,13 @@ class _OrCrScreenState extends State<OrCrScreen> {
         sharedPreferences = await SharedPreferences.getInstance();
 
         setState(() {
-          if (sharedPreferences!.containsKey('nbiImagePath')) {
+          if (sharedPreferences!.containsKey('orImagePath')) {
 
             _loadUserDetails();
 
           } else {
             orImage = null;
+            crImage = null;
           }
         });
         return true; // Allow pop after changes are discarded
@@ -287,7 +288,7 @@ class _OrCrScreenState extends State<OrCrScreen> {
                                 color: Color.fromARGB(255, 67, 83, 89),
                               )),
                           const SizedBox(height: 10),
-                          const Text("Upload your profile logo: ",
+                          const Text("Upload your OR/CR: ",
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Color.fromARGB(255, 67, 83, 89),
@@ -304,16 +305,16 @@ class _OrCrScreenState extends State<OrCrScreen> {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  const Text("OR",
+                                  const Text("Original Receipt",
                                       style: TextStyle(
-                                        fontSize: 25,
+                                        fontSize: 20,
                                         fontFamily: "Poppins",
                                         color: Color.fromARGB(255, 67, 83, 89),
                                       )),
                                   const Text(" (Required)",
                                       style: TextStyle(
                                         fontSize: 14,
-                                        color: Colors.black54,
+                                        color: Colors.orangeAccent,
                                         fontFamily: "Poppins",
                                       )),
                                   const SizedBox(width: 10),
@@ -427,16 +428,17 @@ class _OrCrScreenState extends State<OrCrScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          const Text("CR",
+                          const Text("Certificate of Registration",
                               style: TextStyle(
-                                fontSize: 25,
+                                fontSize: 20,
                                 fontFamily: "Poppins",
                                 color: Color.fromARGB(255, 67, 83, 89),
+                                fontWeight: FontWeight.w400,
                               )),
                           const Text(" (Required)",
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.black54,
+                                color: Colors.orangeAccent,
                                 fontFamily: "Poppins",
                               )),
                           const SizedBox(width: 10),

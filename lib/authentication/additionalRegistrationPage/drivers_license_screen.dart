@@ -558,14 +558,20 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("License Number (Required)",
+                              Text("License Number",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Color.fromARGB(255, 67, 83, 89),
                                     fontFamily: "Poppins",
                                     fontWeight: FontWeight.w500,
                                   )),
-                              // Secondary contact number text field
+                              Text(" (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.orangeAccent,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
 
                             ],
                           ),
@@ -673,7 +679,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("License Issue Date (Required)",
+                              Text("License Issue Date",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Color.fromARGB(255, 67, 83, 89),
@@ -681,6 +687,13 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                     fontWeight: FontWeight.w500,
                                   )
                               ),
+                              Text(" (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.orangeAccent,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
                             ],
                           ),
                         ),
@@ -752,19 +765,50 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
                         //Front Image
                         const SizedBox(height: 10),
+
+                        const Row(
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.only(left: 18),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Upload Document",
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontFamily: "Poppins",
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                      )),
+                                  SizedBox(height: 10),
+                                  Text("Upload your license: ",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Color.fromARGB(255, 67, 83, 89),
+                                        fontFamily: "Poppins",
+                                      )),
+                                  Text("Accepted file formats: .jpg, .png, .jpeg",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black54,
+                                        fontFamily: "Poppins",
+                                      )),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                         Column(
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 //Back Image
-                                const SizedBox(height: 10),
                                 const Padding(
                                   padding: EdgeInsets.only(left: 18),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text("Front Image (Required)",
+                                      Text("Front Image",
                                           style: TextStyle(
                                             fontSize: 16,
                                             color: Color.fromARGB(255, 67, 83, 89),
@@ -772,6 +816,13 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                             fontWeight: FontWeight.w500,
                                           )
                                       ),
+                                      Text(" (Required)",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.orangeAccent,
+                                            fontFamily: "Poppins",
+                                            fontWeight: FontWeight.w500,
+                                          )),
                                     ],
                                   ),
                                 ),
@@ -920,7 +971,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text("Back Image (Required)",
+                                      Text("Back Image",
                                           style: TextStyle(
                                             fontSize: 16,
                                             color: Color.fromARGB(255, 67, 83, 89),
@@ -928,6 +979,13 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                             fontWeight: FontWeight.w500,
                                           )
                                       ),
+                                      Text(" (Required)",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.orangeAccent,
+                                            fontFamily: "Poppins",
+                                            fontWeight: FontWeight.w500,
+                                          )),
                                     ],
                                   ),
                                 ),
@@ -1067,7 +1125,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Age (Required)",
+                              Text("Age",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Color.fromARGB(255, 67, 83, 89),
@@ -1075,6 +1133,13 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                     fontWeight: FontWeight.w500,
                                   )
                               ),
+                              Text(" (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.orangeAccent,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
                             ],
                           ),
                         ),
@@ -1128,7 +1193,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Mother's Maiden Name (Required)",
+                              Text("Mother's Maiden Name",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Color.fromARGB(255, 67, 83, 89),
@@ -1136,6 +1201,13 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                     fontWeight: FontWeight.w500,
                                   )
                               ),
+                              Text(" (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.orangeAccent,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
                             ],
                           ),
                         ),
@@ -1189,7 +1261,7 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Residential Address (Optional)",
+                              Text("Residential Address",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Color.fromARGB(255, 67, 83, 89),
@@ -1197,6 +1269,13 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
                                     fontWeight: FontWeight.w500,
                                   )
                               ),
+                              Text(" (Optional)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black45,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
                             ],
                           ),
                         ),
@@ -1223,22 +1302,35 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
 
                         //Residential is permanent Address?
                         const SizedBox(height: 10),
-                        const Padding(
-                          padding: EdgeInsets.only(left: 18),
-                          child: Row(
+                        Container(
+                          padding: const EdgeInsets.only(left: 18.0, right: 18.0),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Is your residential address the same as you permanent address?(Required)",
+                              RichText(
+                                text: const TextSpan(
                                   style: TextStyle(
-                                    fontSize: 10,
+                                    fontSize: 14,
                                     color: Color.fromARGB(255, 67, 83, 89),
                                     fontFamily: "Poppins",
-                                    fontWeight: FontWeight.w500,
-                                  )
+                                  ),
+                                  children: [
+                                    TextSpan(
+                                      text: "Is your residential address the same as your permanent address? ",
+                                    ),
+                                    TextSpan(
+                                      text: "(Required)",
+                                      style: TextStyle(
+                                        color: Colors.orangeAccent, // Change this to the desired color
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
+
 
                         Container(
                           padding: const EdgeInsets.all(4),

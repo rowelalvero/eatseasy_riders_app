@@ -97,12 +97,12 @@ class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
         sharedPreferences = await SharedPreferences.getInstance();
 
         setState(() {
-          if (sharedPreferences!.containsKey('firstBox1')) {
+          if (sharedPreferences!.containsKey('plateNumber')) {
 
             _loadUserDetails();
 
           } else {
-
+            plateNumberController.text = '';
           }
         });
         return true; // Allow pop after changes are discarded
@@ -176,10 +176,17 @@ class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Plate Number (Required)",
+                            Text("Plate Number",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Color.fromARGB(255, 67, 83, 89),
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                )),
+                            Text(" (Required)",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.orangeAccent,
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.w500,
                                 )),

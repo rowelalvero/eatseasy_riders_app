@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global/global.dart';
+import '../../widgets/error_dialog.dart';
 import '../imageGetters/rider_profile.dart';
 
 class VehicleDocumentsScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
 
   String? documentDropdownController;
   bool _isDocumentDropdownEmpty = false;
-  bool _isDocumentmageEmpty = false;
+  bool _isDocumentImageEmpty = false;
 
   final List<String> _documentDropdownItems = [
     'Authorization Letter',
@@ -63,7 +64,7 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
     XFile? file = await ImagePicker().pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
     vehicleDoc = XFile(file!.path);
     setState(() {
-      _isDocumentmageEmpty = false;
+      _isDocumentImageEmpty = false;
       isButtonPressedInVehicleDocuments = false;
       changesSaved = false;
       isCompleted = false;
@@ -110,22 +111,60 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
   }
 
   void _saveUserDataToPrefs() async {
-    await sharedPreferences?.setString('documentTypeItemDropdown', documentDropdownController!);
+    if (documentDropdownController != null) {
+      if (vehicleDoc != null) {
+        await sharedPreferences?.setString('documentTypeItemDropdown', documentDropdownController!);
+        await sharedPreferences?.setString('vehicleDocImagePath', vehicleDoc!.path);
 
-    //Save changesSaved value to true
-    await sharedPreferences?.setBool('isChangesSavedInVehicleDocuments', true);
-    await sharedPreferences?.setBool('isButtonPressedInVehicleDocuments', true);
-    setState(() {
-      changesSaved  = true;
-      isCompleted = true;
-    });
+        //Save changesSaved value to true
+        await sharedPreferences?.setBool('isChangesSavedInVehicleDocuments', true);
+        await sharedPreferences?.setBool('isButtonPressedInVehicleDocuments', true);
+        setState(() {
+          changesSaved  = true;
+          isCompleted = true;
+        });
 
-    await sharedPreferences?.setBool('vehicleDocumentsCompleted', true);
+        await sharedPreferences?.setBool('vehicleDocumentsCompleted', true);
 
-    isButtonPressedInVehicleDocuments = !isButtonPressedInVehicleDocuments;
+        isButtonPressedInVehicleDocuments = !isButtonPressedInVehicleDocuments;
+      } else {
+        setState(() {
+          _isDocumentImageEmpty = true;
+        });
+        showDialog(
+            context: context,
+            builder: (c) {
+              return const ErrorDialog(
+                message: "Please provide your document",
+              );
+            });
+      }
+
+    } else {
+      setState(() {
+        _isDocumentDropdownEmpty = true;
+      });
+      showDialog(
+          context: context,
+          builder: (c) {
+            return const ErrorDialog(
+              message: "Please select document type",
+            );
+          });
+
+    }
   }
 
   Future<void> _loadUserDetails() async {
+    String? imagePath = sharedPreferences?.getString('vehicleDocImagePath');
+    if (imagePath != null && imagePath.isNotEmpty) {
+      setState(() {
+        vehicleDoc = XFile(imagePath);
+      });
+    } else {
+      vehicleDoc = null;
+    }
+
     setState(() {
       documentDropdownController = sharedPreferences?.getString('documentTypeItemDropdown');
     });
@@ -168,12 +207,13 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
         sharedPreferences = await SharedPreferences.getInstance();
 
         setState(() {
-          if (sharedPreferences!.containsKey('emergencyContactName')) {
+          if (sharedPreferences!.containsKey('vehicleDocImagePath')) {
 
             _loadUserDetails();
 
           } else {
-
+            vehicleDoc = null;
+            documentDropdownController = null;
           }
         });
         return true; // Allow pop after changes are discarded
@@ -286,7 +326,7 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
                         .toList(),
                     validator: (value) {
                       if (value == null) {
-                        return 'Select relationship';
+                        return 'Select document';
                       }
                       return null;
                     },
@@ -345,14 +385,14 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Upload Image",
+                          const Text("Upload Document",
                               style: TextStyle(
                                 fontSize: 25,
                                 fontFamily: "Poppins",
                                 color: Color.fromARGB(255, 67, 83, 89),
                               )),
                           const SizedBox(height: 10),
-                          const Text("Upload your profile logo: ",
+                          const Text("Upload your document: ",
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Color.fromARGB(255, 67, 83, 89),
@@ -385,7 +425,22 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
 
                 // Image Picker
                 InkWell(
-                  onTap: () => _getImage(),
+                  onTap: ()  {
+                    if (documentDropdownController == null) {
+                      setState(() {
+                        _isDocumentImageEmpty = true;
+                      });
+                      showDialog(
+                          context: context,
+                          builder: (c) {
+                            return const ErrorDialog(
+                              message: "Please select a document to upload.",
+                            );
+                          });
+                    } else {
+                      _getImage();
+                    }
+                  },
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
                     child: Container(
@@ -395,7 +450,7 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
                         color: const Color.fromARGB(255, 230, 229, 229),
                         borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
                         border: Border.all(
-                          color: _isDocumentmageEmpty ? Colors.red : Colors.transparent, // Choose your border color
+                          color: _isDocumentImageEmpty ? Colors.red : Colors.transparent, // Choose your border color
                           width: 1, // Choose the border width
                         ),
                       ),
@@ -416,7 +471,22 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         TextButton(
-                          onPressed: () => _getImage(),
+                          onPressed: () {
+                            setState(() {
+                              _isDocumentImageEmpty = true;
+                            });
+                            if (documentDropdownController == null) {
+                              showDialog(
+                                  context: context,
+                                  builder: (c) {
+                                    return const ErrorDialog(
+                                      message: "Please select a document to upload.",
+                                    );
+                                  });
+                            } else {
+                              _getImage();
+                            }
+                          },
 
                           child: const Text(
                             "Upload Image",
@@ -484,7 +554,6 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
         ),
       ),
     );
-
   }
 }
 

@@ -625,14 +625,20 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Secondary Contact Number (Optional)",
+                              Text("Secondary Contact Number",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Color.fromARGB(255, 67, 83, 89),
                                     fontFamily: "Poppins",
                                     fontWeight: FontWeight.w500,
                                   )),
-
+                              Text(" (Optional)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black45,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
                             ],
                           ),
                         ),
@@ -736,14 +742,20 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text("Nationality (Required)",
+                              Text("Nationality",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Color.fromARGB(255, 67, 83, 89),
                                     fontFamily: "Poppins",
                                     fontWeight: FontWeight.w500,
                                   )),
-                              // Secondary contact number text field
+                              Text(" (Required)",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.orangeAccent,
+                                    fontFamily: "Poppins",
+                                    fontWeight: FontWeight.w500,
+                                  )),
 
                             ],
                           ),

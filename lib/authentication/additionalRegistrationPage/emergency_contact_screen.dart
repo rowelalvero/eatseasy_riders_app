@@ -253,10 +253,17 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Emergency Contact Name (Required)",
+                            Text("Emergency Contact Name",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Color.fromARGB(255, 67, 83, 89),
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                )),
+                            Text(" (Required)",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.orangeAccent,
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.w500,
                                 )),
@@ -314,14 +321,20 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Relationship (Required)",
+                            Text("Relationship",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Color.fromARGB(255, 67, 83, 89),
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.w500,
                                 )),
-
+                            Text(" (Required)",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.orangeAccent,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                )),
                           ],
                         ),
                       ),
@@ -423,7 +436,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Emergency Contact Number (Required)",
+                            Text("Emergency Contact Number",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Color.fromARGB(255, 67, 83, 89),
@@ -431,7 +444,13 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
                                   fontWeight: FontWeight.w500,
                                 )
                             ),
-
+                            Text(" (Required)",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.orangeAccent,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                )),
                           ],
                         ),
                       ),
@@ -546,7 +565,7 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Emergency Address (Required)",
+                            Text("Emergency Address",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: Color.fromARGB(255, 67, 83, 89),
@@ -554,6 +573,13 @@ class _EmergencyContactScreenState extends State<EmergencyContactScreen> {
                                   fontWeight: FontWeight.w500,
                                 )
                             ),
+                            Text(" (Required)",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.orangeAccent,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.w500,
+                                )),
                           ],
                         ),
                       ),

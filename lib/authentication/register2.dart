@@ -97,17 +97,18 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   String nbiClearanceImageUrl = "";
   String orImageUrl = "";
   String crImageUrl = "";
+  String vehicleDocUrl = "";
 
   String riderImageType = 'riderImage';
   String fLicenseType = 'fLicense';
   String bLicenseType = 'bLicense';
   String nbiClearanceType = 'nbiClearance';
   String orType = 'officialReceipt';
-  String crType = 'certReg';
+  String crType = 'certOfReg';
+  String? vehicleDocType = sharedPreferences?.getString('documentTypeItemDropdown');
 
   //Form validation
   Future<void> formValidation() async {
-    isButtonPressed = !isButtonPressed;
     bool isPersonalDetailsCompleted = await _checkPersonalDetailsCompleted();
     bool isDriverLicenseCompleted = await _checkDriverLicenseCompleted();
     bool isDeclarationsCompleted = await _checkDeclarationsCompleted();
@@ -115,24 +116,15 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     bool isEatsEasyPayWalletCompleted = await _checkEatsEasyPayWalletCompleted();
     bool isVehicleInfoCompleted = await _checkVehicleInfoCompleted();
     bool isORCRCompleted = await _checkORCRCompleted();
-    //check if image is empty
-    if (!isPersonalDetailsCompleted &&
-        !isDriverLicenseCompleted &&
-        !isDeclarationsCompleted &&
-        !isConsentsCompleted &&
-        !isEatsEasyPayWalletCompleted &&
-        !isVehicleInfoCompleted &&
-        !isORCRCompleted) {
 
-      showDialog(
-          context: context,
-          builder: (c) {
-            return const ErrorDialog(
-              message: "Please complete the required sections.",
-            );
-          });
-    }
-    else {
+    if (isPersonalDetailsCompleted &&
+        isDriverLicenseCompleted &&
+        isDeclarationsCompleted &&
+        isConsentsCompleted &&
+        isEatsEasyPayWalletCompleted &&
+        isVehicleInfoCompleted &&
+        isORCRCompleted) {
+
       showDialog(
           context: context,
           builder: (c) {
@@ -142,6 +134,15 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
           });
       //Authenticate the rider
       authenticateRiderAndSignUp();
+    }
+    else {
+      showDialog(
+          context: context,
+          builder: (c) {
+            return const ErrorDialog(
+              message: "Please complete the required sections.",
+            );
+          });
     }
   }
 
@@ -154,13 +155,14 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 
     //If the rider is authenticated
     if (currentUserUid != null) {
-
+      isButtonPressed = !isButtonPressed;
       String riderProfilePath = riderProfile!.path;
       String frontLicensePath = frontLicense!.path;
       String backLicensePath = backLicense!.path;
       String nbiClearancePath = nbiImage!.path;
       String orPath = orImage!.path;
       String crPath = crImage!.path;
+      String vehicleDocPath = vehicleDoc!.path;
 
       //The Rider profile image will upload to Firestorage
       riderImageUrl = await uploadImage(riderProfilePath, riderImageType);
@@ -174,8 +176,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       orImageUrl = await uploadImage(orPath, orType);
       //The CR image will upload to Firestorage
       crImageUrl = await uploadImage(crPath, crType);
-      //await _uploadRiderImage();
-
+      //The Vehicle Document Type will upload to Firestorage
+      vehicleDocUrl = await uploadImage(vehicleDocPath, vehicleDocType!);
       //save rider's credential to Firestore by calling the function
       await _saveDataToFirestore().then((value) {
         //Stop the loading screen
@@ -272,7 +274,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       // OR/CR Screen
       "OR": orImageUrl,
       "CR": crImageUrl,
-
+      // Vehicle Documents Screen
+      "vehicleDocument": vehicleDocUrl,
     }, SetOptions(merge: true));
 
     /*//Save rider's data locally
@@ -586,7 +589,7 @@ class LinkTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14.0,
                           fontFamily: "Poppins",
-                          color: Colors.orange,
+                          color: Colors.orangeAccent,
                         ),
                         textAlign: TextAlign.right,
                       ),
@@ -598,7 +601,7 @@ class LinkTile extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 14.0,
                           fontFamily: "Poppins",
-                          color: Colors.black,
+                          color: Colors.black45,
                         ),
                         textAlign: TextAlign.right,
                       ),

@@ -270,7 +270,7 @@ class _NBIClearanceScreenState extends State<NBIClearanceScreen> {
                                 color: Color.fromARGB(255, 67, 83, 89),
                               )),
                           const SizedBox(height: 10),
-                          const Text("Upload your profile logo: ",
+                          const Text("Upload your NBI Clearance: ",
                               style: TextStyle(
                                 fontSize: 14,
                                 color: Color.fromARGB(255, 67, 83, 89),
