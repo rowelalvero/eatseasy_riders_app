@@ -9,7 +9,7 @@ import '../global/global.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
-import 'login.dart';
+
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -18,7 +18,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  bool changesSaved = true;
+  bool changesSaved = false;
   bool isButtonPressed = false;
   bool isContactNumberCompleted = true;
   String _password = '';
@@ -252,8 +252,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-
-
   //Check if the format of email is valid
   bool isValidEmail(email) {
     // Regular expression for email validation
@@ -379,17 +377,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     //If the rider is authenticated
     if (currentUser != null) {
+
       //save rider's credential to Firestore by calling the function
       await saveDataToFirestore(currentUser!).then((value) {
         //Stop the loading screen
         Navigator.pop(context);
 
         //To prevent the user to go directly to home screen after restarted the app
-        firebaseAuth.signOut();
+        //firebaseAuth.signOut();
 
         //Going back to Login page to login rider's credentials
         Route newRoute = MaterialPageRoute(builder: (c) => const RegisterScreen2());
-        Navigator.pushReplacement(context, newRoute);
+        Navigator.pushNamed(context, '/registerScreen2');
       });
     }
   }
@@ -464,6 +463,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return true; // Allow pop if changes are saved or no changes were made
   }
 
+   _navigateToRegisterScreen2() {
+    Navigator.pushNamed(context, '/registerScreen2');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -499,9 +502,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
             child: IconButton(
               icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-              onPressed: () {
-                // Add functionality to go back
-                Navigator.pop(context);
+              onPressed: () async {
+                // Call _onWillPop to handle the back button press
+                final bool canPop = await _onWillPop();
+                if (canPop) {
+                  Navigator.of(context).pop();
+                }
               },
             ),
           ),
@@ -517,14 +523,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   const SizedBox(height: 20),
-                  const Row(
+                   Row(
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(left: 20),
+                        padding: const EdgeInsets.only(left: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "Fill-out the required details and start driving with EatsEasy!",
                               style: TextStyle(
                                 fontSize: 14,
@@ -532,7 +538,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 fontFamily: "Poppins",
                               ),
                             ),
-                            Text(
+                            const Text(
                               "Please provide the following information.",
                               style: TextStyle(
                                 fontSize: 14,
@@ -540,13 +546,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 fontFamily: "Poppins",
                               ),
                             ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "View the requirements",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontFamily: "Poppins",
+                                    color: Colors.black54,
+                                  ),
+                                ),
+
+                                TextButton(
+                                  onPressed: () => _showPreviewDialog(),
+                                  child: const Text(
+                                    "here!",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins",
+                                      color: Color.fromARGB(255, 242, 198, 65),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
                           ],
                         ),
                       ),
                     ],
                   ),
                   //Text Fields
-                  const SizedBox(height: 10),
                   Form(
                       key: _formKey,
                       child: Column(
@@ -1263,7 +1293,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         Expanded(
                           child: ElevatedButton(
-                            onPressed: isButtonPressed ? null : () => _formValidation(),
+                            onPressed: isButtonPressed
+                                ? null
+                                : changesSaved
+                                  ? _navigateToRegisterScreen2()
+                                  : () => _formValidation(),
                             // Register button styling
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
@@ -1325,10 +1359,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextButton(
-                        onPressed: () => Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const RegisterScreen2()),
-                        ),
+                        onPressed: () => Navigator.pushNamed(context, '/registerScreen2'),
                         child: const Text(
                           "Navigate to RegistrationScreen2();",
                           style: TextStyle(
@@ -1367,5 +1398,75 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ],
     );
   }
+  void _showPreviewDialog() async {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Requirements'),
+        content: const SizedBox(
+          height: 80, // Set your desired height here
+          child: SingleChildScrollView(
+            child: Row(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(left: 18),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "• Drivers License",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: "Poppins",
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        "• OR/CR",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: "Poppins",
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        "• NBI Clearance",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: "Poppins",
+                          color: Colors.black,
+                        ),
+                      ),
+                      Text(
+                        "• TIN Number",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: "Poppins",
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              setState(() {
+                Navigator.of(context).pop();
+              });
+            },
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
+
+
 

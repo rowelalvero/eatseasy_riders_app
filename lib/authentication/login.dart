@@ -94,7 +94,7 @@ class _LogInScreenState extends State<LogInScreen> {
   }
 
   void registrationPage() {
-    Navigator.push(context,MaterialPageRoute(builder: (c) => const LoadingDialog(message: "Loading", isRegisterPage: true)));
+    Navigator.pushNamed(context, '/registerScreen');
   }
 
   @override

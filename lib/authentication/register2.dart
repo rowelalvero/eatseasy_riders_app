@@ -35,7 +35,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   late Future<bool> _isVehicleDocumentsCompleted;
 
   bool isButtonPressed = false;
-
+  bool changesSaved = false;
+  String? currentUserUid;
   Future<bool> _checkPersonalDetailsCompleted() async {
     sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences?.getBool('personalDetailsCompleted') ?? false;
@@ -149,7 +150,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   //Authenticate the rider
   void authenticateRiderAndSignUp() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    String? currentUserUid = sharedPreferences?.getString('currentUserUid');
+    currentUserUid = sharedPreferences?.getString('currentUserUid');
     /*String? savedEmail = sharedPreferences!.getString('email');
     String? savedPassword = sharedPreferences!.getString('password');*/
 
@@ -291,6 +292,52 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     return null;
   }
 
+  Future<bool> _onWillPop() async {
+    if (!changesSaved) {
+      final result = await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Discard Changes?'),
+          content: const Text('Are you sure you want to discard changes?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context, true);
+              },
+              child: const Text('Discard'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+          ],
+        ),
+      );
+
+      if (result == true) {
+        sharedPreferences = await SharedPreferences.getInstance();
+
+        if (sharedPreferences!.containsKey('currentUserUid')) {
+
+          try {
+            User? user = FirebaseAuth.instance.currentUser;
+            await user?.delete();
+            print("User account deleted successfully.");
+          } catch (error) {
+            print("Failed to delete user account: $error");
+          }
+
+          await sharedPreferences?.clear();
+        } else {
+
+        }
+        return true; // Allow pop after changes are discarded
+      }
+      return false; // Prevent pop if changes are not discarded
+    }
+    return true; // Allow pop if changes are saved or no changes were made
+  }
+
   @override
   void initState() {
     super.initState();
@@ -349,186 +396,196 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
           padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
           child: IconButton(
             icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-            onPressed: () {
-              // Add functionality to go back
-              Navigator.pop(context);
+            onPressed: () async {
+              // Call _onWillPop to handle the back button press
+              final bool canPop = await _onWillPop();
+              if (canPop) {
+                Navigator.of(context).pop();
+              }
             },
           ),
         ),
       ),
-      body: ListView(
-        children: [
-          const SizedBox(height: 20),
-          const Row(
+      body: WillPopScope(
+        onWillPop: _onWillPop,
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: ListView(
             children: [
-              Padding(
-                padding: EdgeInsets.only(left: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Complete your application and start driving with EatsEasy!",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color.fromARGB(255, 67, 83, 89),
-                        fontFamily: "Poppins",
-                      ),
+              const SizedBox(height: 20),
+              const Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Complete your application and start driving with EatsEasy!",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color.fromARGB(255, 67, 83, 89),
+                            fontFamily: "Poppins",
+                          ),
+                        ),
+                        Text(
+                          "Provide the following information.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Color.fromARGB(255, 67, 83, 89),
+                            fontFamily: "Poppins",
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      "Provide the following information.",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color.fromARGB(255, 67, 83, 89),
-                        fontFamily: "Poppins",
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: const Text(
+                  'Personal',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Poppins",
+                    color: Colors.black54,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+
+              LinkTile(title: 'Personal Details', destination: '/personalDetails', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion : true, isCompleted: _isPersonalDetailsCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
+                });
+              },),
+              LinkTile(title: 'Driver License', destination: '/driversLicense', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isDriverLicenseCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
+                });
+              },),
+              LinkTile(title: 'Declarations', destination: '/declarations', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isDeclarationsCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isDeclarationsCompleted = _checkDeclarationsCompleted();
+                });
+              },),
+              LinkTile(title: 'Consents', destination: '/consents', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isConsentsCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isConsentsCompleted = _checkConsentsCompleted();
+                });
+              },),
+              LinkTile(title: 'EatsEasyPay Wallet', destination: '/eatsEasyPayWallet', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isEatsEasyPayWalletCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
+                });
+              },),
+              LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isTINNumberCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isTINNumberCompleted = _checkTINNumberCompleted();
+                });
+              },),
+              LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isNBIClearanceCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isNBIClearanceCompleted = _checkNBIClearanceCompleted();
+                });
+              },),
+              LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isEmergencyContactCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isEmergencyContactCompleted = _checkEmergencyContactCompleted();
+                });
+              },),
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: const Text(
+                  'Transport',
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: "Poppins",
+                    color: Colors.black54,
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isVehicleInfoCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isVehicleInfoCompleted = _checkVehicleInfoCompleted();
+                });
+              },),
+              LinkTile(title: 'OR/CR', destination: '/orCr', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isORCRCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isORCRCompleted = _checkORCRCompleted();
+                });
+              },),
+              LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isVehicleDocumentsCompleted, updateCompletionStatus: () {
+                setState(() {
+                  _isVehicleDocumentsCompleted = _checkVehicleDocumentsCompleted();
+                });
+              },),
+
+              //spacing
+              const SizedBox(
+                height: 20,
+              ),
+
+              //submit button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: isButtonPressed ? null : () => formValidation(),
+                        // Register button styling
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          elevation: 4, // Elevation for the shadow
+                          shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                        ),
+                        child: Text(
+                          isButtonPressed ? "Submitted" : "Submit",
+                          style: TextStyle(
+                            color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                            fontFamily: "Poppins",
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: const Text(
-              'Personal',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                fontFamily: "Poppins",
-                color: Colors.black54,
-              ),
-              textAlign: TextAlign.left,
-            ),
-          ),
-          LinkTile(title: 'Personal Details', destination: '/personalDetails', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion : true, isCompleted: _isPersonalDetailsCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
-            });
-          },),
-          LinkTile(title: 'Driver License', destination: '/driversLicense', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isDriverLicenseCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
-            });
-          },),
-          LinkTile(title: 'Declarations', destination: '/declarations', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isDeclarationsCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isDeclarationsCompleted = _checkDeclarationsCompleted();
-            });
-          },),
-          LinkTile(title: 'Consents', destination: '/consents', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isConsentsCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isConsentsCompleted = _checkConsentsCompleted();
-            });
-          },),
-          LinkTile(title: 'EatsEasyPay Wallet', destination: '/eatsEasyPayWallet', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isEatsEasyPayWalletCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
-            });
-          },),
-          LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isTINNumberCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isTINNumberCompleted = _checkTINNumberCompleted();
-            });
-          },),
-          LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isNBIClearanceCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isNBIClearanceCompleted = _checkNBIClearanceCompleted();
-            });
-          },),
-          LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isEmergencyContactCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isEmergencyContactCompleted = _checkEmergencyContactCompleted();
-            });
-          },),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: const Text(
-              'Transport',
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                fontFamily: "Poppins",
-                color: Colors.black54,
-              ),
-              textAlign: TextAlign.left,
-            ),
-          ),
-          LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isVehicleInfoCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isVehicleInfoCompleted = _checkVehicleInfoCompleted();
-            });
-          },),
-          LinkTile(title: 'OR/CR', destination: '/orCr', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isORCRCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isORCRCompleted = _checkORCRCompleted();
-            });
-          },),
-          LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isVehicleDocumentsCompleted, updateCompletionStatus: () {
-            setState(() {
-              _isVehicleDocumentsCompleted = _checkVehicleDocumentsCompleted();
-            });
-          },),
-
-          //spacing
-          const SizedBox(
-            height: 20,
-          ),
-
-          //submit button
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: isButtonPressed ? null : () => formValidation(),
-                    // Register button styling
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
-                      ),
-                      elevation: 4, // Elevation for the shadow
-                      shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                    ),
-                    child: Text(
-                      isButtonPressed ? "Submitted" : "Submit",
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => sharedPreferences?.clear(),
+                    child: const Text(
+                      "RegistrationScreen2() Reset",
                       style: TextStyle(
-                        color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                        fontSize: 14,
                         fontFamily: "Poppins",
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              TextButton(
-                onPressed: () => sharedPreferences?.clear(),
-                child: const Text(
-                  "RegistrationScreen2() Reset",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontFamily: "Poppins",
-                  ),
-                ),
+                ],
+              ),
+              //spacing
+              const SizedBox(
+                height: 20,
               ),
             ],
           ),
-          //spacing
-          const SizedBox(
-            height: 20,
-          ),
-        ],
-      ),
+        ),
+      )
     );
   }
 }

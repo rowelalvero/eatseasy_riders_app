@@ -1,4 +1,5 @@
 
+import 'package:eatseasy_riders_app/authentication/register2.dart';
 import 'package:eatseasy_riders_app/splashScreen/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,9 @@ import 'authentication/additionalRegistrationPage/vehicle_info_screen.dart';
 import 'authentication/additionalRegistrationPage/orcr_screen.dart';
 import 'authentication/additionalRegistrationPage/vehicle_documents_screen.dart';
 
+import 'authentication/auth_screen.dart';
+import 'authentication/login.dart';
+import 'authentication/register.dart';
 import 'global/global.dart';
 
 Future main() async {
@@ -45,6 +49,10 @@ class MyApp extends StatelessWidget {
       ),
       home: const MySplashScreen(),
       routes: {
+        '/authScreen': (context) => const AuthScreen(),
+        '/logInScreen': (context) => const LogInScreen(),
+        '/registerScreen': (context) => const RegisterScreen(),
+        '/registerScreen2': (context) => const RegisterScreen2(),
         '/personalDetails': (context) => const PersonalDetailsScreen(),
         '/driversLicense': (context) => const DriversLicenseScreen(),
         '/declarations': (context) => const DeclarationsScreen(),

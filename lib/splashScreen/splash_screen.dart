@@ -23,7 +23,7 @@ class _MySplashScreenState extends State<MySplashScreen> {
       }
       //If vendor is not logged in send them to Authentication and LogIn screen
       else {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const AuthScreen()));
+        Navigator.pushNamed(context, '/authScreen');
       }
     });
   }

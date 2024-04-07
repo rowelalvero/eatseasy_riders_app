@@ -22,6 +22,7 @@ class LoadingDialog extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (context) => const RegisterScreen()),
         );
+        Navigator.pushNamed(context, '/registerScreen');
       });
     }
 
