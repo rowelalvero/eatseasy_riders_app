@@ -75,8 +75,6 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       isCompleted = false;
     });
   }
-
-
   //Nationality dropdown items
   final List<String> _dropdownItems = [
     'Filipino',

@@ -10,7 +10,6 @@ import '../widgets/custom_text_field.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 import 'login.dart';
-
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
@@ -38,7 +37,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   //Text fields controllers
-  TextEditingController cityController = TextEditingController();
   TextEditingController contactNumberController = TextEditingController();
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
@@ -46,6 +44,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+
+  final List<String> _cities = [
+    "Alaminos (Pangasinan)", "Angeles", "Antipolo (Rizal)", "Bacolod", "Bacoor (Cavite)", "Bago (Negros Occidental)",
+    "Baguio", "Bais (Negros Oriental)", "Balanga (Bataan)", "Batac (Ilocos Norte)", "Batangas City (Batangas)",
+    "Bayawan (Negros Oriental)", "Baybay (Leyte)", "Bayugan (Agusan del Sur)", "Biñan (Laguna)", "Bislig (Surigao del Sur)",
+    "Bogo (Cebu)", "Borongan (Eastern Samar)", "Butuan", "Cabadbaran (Agusan del Norte)", "Cabanatuan (Nueva Ecija)",
+    "Cabuyao (Laguna)", "Cagayan de Oro", "Calamba (Laguna)", "Calapan (Oriental Mindoro)", "Calbayog (Samar)",
+    "Caloocan", "Candon (Ilocos Sur)", "Cauayan (Isabela)", "Cavite City (Cavite)", "Cebu City", "Cotabato City",
+    "Dagupan (Pangasinan)", "Danao (Cebu)", "Dapitan (Zamboanga del Norte)", "Dasmarinas (Cavite)", "Davao City",
+    "Digos (Davao del Sur)", "Dipolog (Zamboanga del Norte)", "Dumaguete (Negros Oriental)", "El Salvador (Misamis Oriental)",
+    "Escalante (Negros Occidental)", "Gapan (Nueva Ecija)", "General Santos", "General Trias (Cavite)", "Gingoog (Misamis Oriental)",
+    "Guihulngan (Negros Oriental)", "Himamaylan (Negros Occidental)", "Iligan", "Iloilo City", "Iriga (Camarines Sur)",
+    "Isabela City (Basilan)", "Kabankalan (Negros Occidental)", "Kidapawan (Cotabato)", "Koronadal (South Cotabato)",
+    "La Carlota (Negros Occidental)", "Lamitan (Basilan)", "Laoag (Ilocos Norte)", "Lapu-Lapu", "Las Piñas",
+    "Legazpi (Albay)", "Ligao (Albay)", "Lipa (Batangas)", "Lucena", "Mabalacat (Pampanga)", "Makati", "Malabon",
+    "Malaybalay (Bukidnon)", "Malolos (Bulacan)", "Mandaluyong", "Mandaue", "Manila", "Marawi (Lanao del Sur)",
+    "Marikina", "Masbate City (Masbate)", "Mati (Davao Oriental)", "Muntinlupa", "Muñoz (Nueva Ecija)",
+    "Naga (Camarines Sur)", "Naga (Cebu)", "Navotas", "Olongapo", "Ormoc (Leyte)", "Oroquieta (Misamis Occidental)",
+    "Ozamiz (Misamis Occidental)", "Pagadian (Zamboanga del Sur)", "Palayan (Nueva Ecija)", "Panabo (Davao del Norte)",
+    "Parañaque", "Pasay", "Pasig", "Passi (Iloilo)", "Puerto Princesa", "Quezon City", "Roxas City (Capiz)",
+    "Sagay (Negros Occidental)", "Samal (Davao del Norte)", "San Carlos (Negros Occidental)", "San Carlos (Pangasinan)",
+    "San Fernando (La Union)", "San Fernando (Pampanga)", "San Jose (Nueva Ecija)", "San Jose del Monte (Bulacan)",
+    "San Juan", "San Pablo (Laguna)", "San Pedro (Laguna)", "Santa Rosa (Laguna)", "Santiago", "Santo Tomas (Batangas)",
+    "Silay (Negros Occidental)", "Sipalay (Negros Occidental)", "Sorsogon City (Sorsogon)", "Surigao City (Surigao del Norte)",
+    "Tacloban", "Tacurong (Sultan Kudarat)", "Tagaytay (Cavite)", "Tagbilaran (Bohol)", "Taguig", "Tagum (Davao del Norte)",
+    "Talisay (Cebu)", "Talisay (Negros Occidental)", "Tanauan (Batangas)", "Tandag (Surigao del Sur)", "Tangub (Misamis Occidental)",
+    "Tanjay (Negros Oriental)", "Tarlac City (Tarlac)", "Tayabas (Quezon)", "Toledo (Cebu)", "Trece Martires (Cavite)",
+    "Tuguegarao (Cagayan)", "Urdaneta (Pangasinan)", "Valencia (Bukidnon)", "Valenzuela", "Victorias (Negros Occidental)",
+    "Vigan (Ilocos Sur)", "Zamboanga City"
+  ];
 
   //Dropdown items of service type
   final List<String> _serviceTypeDropdownItems = [
@@ -70,6 +98,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? suffixController;
   //String var of service type dropdown
   String? serviceTypeController;
+  // String var for cities
+  String? cityController;
 
   @override
   void initState() {
@@ -163,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   //Check if the required fields are all filled
   void _validateTextFields() {
-    if (cityController.text.isEmpty) {
+    if (cityController == null) {
       setState(() {
         _isCityControllerInvalid = true;
         _isFormComplete = false;
@@ -211,7 +241,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
        _isFormComplete = false;
      });
     }
-    if (cityController.text.isNotEmpty &&
+    if (cityController != null &&
         firstNameController.text.isNotEmpty &&
         lastNameController.text.isNotEmpty &&
         emailController.text.isNotEmpty &&
@@ -374,7 +404,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     await FirebaseFirestore.instance.collection("riders").doc(currentUser.uid).set({
       "riderUID": currentUser.uid, // Storing user's UID
       "riderEmail": currentUser.email, // Storing user's email
-      "cityAddress": cityController.text.toUpperCase().trim(), // Storing city address after trimming leading/trailing whitespace
+      "cityAddress": cityController?.toUpperCase(), // Storing city address after trimming leading/trailing whitespace
       "lastName": lastNameController.text.toUpperCase().trim(), // Storing last name after trimming leading/trailing whitespace
       "firstName": firstNameController.text.toUpperCase().trim(), // Storing first name after trimming leading/trailing whitespace
       "M.I.": middleInitialController.text.toUpperCase().trim(), // Storing middle initial after trimming leading/trailing whitespace
@@ -444,8 +474,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisSize: MainAxisSize.max,
             children: [
               const SizedBox(height: 20),
-
-
               const Row(
                 children: [
                   Padding(
@@ -481,21 +509,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: Column(
                     children: [
                       //City text field
-                      CustomTextField(
-                        data: Icons.location_city_rounded,
-                        controller: cityController,
-                        hintText: "City*",
-                        isObsecure: false,
-                        keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.sentences,
-                        redBorder: _isCityControllerInvalid,
-                          noLeftMargin: false,
-                          noRightMargin: false,
-                          onChanged:(value) {
-                          setState(() {
-                            _isCityControllerInvalid = false;
-                          });
-                          }
+                      Container(
+                        padding: const EdgeInsets.all(4),
+                        margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0E3E7),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _isCityControllerInvalid ? Colors.red : Colors.transparent,
+                          ),
+                        ),
+                        child: DropdownButtonFormField2<String>(
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                          ),
+                          hint: const Text(
+                            'Select your City',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          items: _cities.map((item) => DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(
+                              item,
+                              style: const TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                          ))
+                              .toList(),
+                          validator: (value) {
+                            if (value == null) {
+                              return 'Select your city';
+                            }
+                            return null;
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              cityController = value.toString();
+                              _isCityControllerInvalid = false;
+                            });
+                          },
+                          buttonStyleData: const ButtonStyleData(
+                            padding: EdgeInsets.only(right: 8),
+                          ),
+                          iconStyleData: const IconStyleData(
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.black45,
+                            ),
+                            iconSize: 24,
+                          ),
+                          dropdownStyleData: DropdownStyleData(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                          ),
+                          menuItemStyleData: const MenuItemStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                          ),
+                        ),
                       ),
 
                       //Show "Please enter your city"
