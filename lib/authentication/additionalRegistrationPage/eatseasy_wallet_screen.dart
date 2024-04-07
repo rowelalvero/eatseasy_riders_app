@@ -52,6 +52,9 @@ class _EatsEasyPayWalletScreenState extends State<EatsEasyPayWalletScreen> {
       isButtonPressedInEatsEasyPayWallet = !isButtonPressedInEatsEasyPayWallet;
 
     } else {
+      setState(() {
+        isCheckboxesCompleted = false;
+      });
       showDialog(
           context: context,
           builder: (c) {

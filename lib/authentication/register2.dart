@@ -105,7 +105,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   String nbiClearanceType = 'nbiClearance';
   String orType = 'officialReceipt';
   String crType = 'certOfReg';
-  String? vehicleDocType = sharedPreferences?.getString('documentTypeItemDropdown');
+  String? vehicleDocType;
 
   //Form validation
   Future<void> formValidation() async {
@@ -155,6 +155,10 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 
     //If the rider is authenticated
     if (currentUserUid != null) {
+      setState(() {
+        vehicleDocType = sharedPreferences!.getString('documentTypeItemDropdown');
+      });
+
       isButtonPressed = !isButtonPressed;
       String riderProfilePath = riderProfile!.path;
       String frontLicensePath = frontLicense!.path;

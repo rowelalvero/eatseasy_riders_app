@@ -61,6 +61,9 @@ class _DeclarationsScreenState extends State<DeclarationsScreen> {
       isButtonPressedInDeclarations = !isButtonPressedInDeclarations;
 
     } else {
+      setState(() {
+        isCheckboxesCompleted = false;
+      });
       showDialog(
           context: context,
           builder: (c) {

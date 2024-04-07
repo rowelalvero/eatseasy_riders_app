@@ -98,6 +98,9 @@ class _ConsentsScreenState extends State<ConsentsScreen> {
       // Toggle the button state
       isButtonPressedInConsents = !isButtonPressedInConsents;
     } else {
+      setState(() {
+        isCheckboxesCompleted = false;
+      });
       showDialog(
           context: context,
           builder: (c) {
@@ -313,13 +316,25 @@ class _ConsentsScreenState extends State<ConsentsScreen> {
                   child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Offers from EatsEasy",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color.fromARGB(255, 67, 83, 89),
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.w500,
-                          )),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Offers from EatsEasy",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )),
+                          Text(" (Optional)",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black45,
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )),
+                        ],
+                      ),
                       SizedBox(height: 10),
 
                       Text(
@@ -384,13 +399,26 @@ class _ConsentsScreenState extends State<ConsentsScreen> {
                   child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Additional Income Opportunities",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Color.fromARGB(255, 67, 83, 89),
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.w500,
-                          )),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Additional Income Opportunities",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 67, 83, 89),
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )),
+                          Text(" (Optional)",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black45,
+                                fontFamily: "Poppins",
+                                fontWeight: FontWeight.w500,
+                              )),
+                        ],
+                      ),
+
                       SizedBox(height: 10),
 
                       Text(
