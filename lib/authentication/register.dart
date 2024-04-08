@@ -843,7 +843,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ],
                           ),
 
-                          //Show "Please enter your first name"
+                          //Show "Please enter your last name"
                           if (_isLastNameControllerInvalid == true)
                             const Row(
                               children: [
@@ -853,7 +853,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       SizedBox(height: 2),
-                                      Text("Please enter your first name",
+                                      Text("Please enter your last name",
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontFamily: "Poppins",
@@ -911,7 +911,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ],
                           ),
 
-                          //Show "Please enter your last name"
+                          //Show "Please enter your first name"
                           if (_isLastNameControllerInvalid == true)
                             const Row(
                               children: [
@@ -921,7 +921,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       SizedBox(height: 2),
-                                      Text("Please enter your last name",
+                                      Text("Please enter your first name",
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontFamily: "Poppins",
