@@ -1,15 +1,11 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_storage/firebase_storage.dart' as fStorage;
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 import 'additionalRegistrationPage/personal_details_screen.dart';
 import '../global/global.dart';
-import 'package:image/image.dart' as img;
 import 'auth_screen.dart';
 import 'imageGetters/rider_profile.dart';
 import 'imageUpload/image_upload.dart';
@@ -106,7 +102,15 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   String nbiClearanceType = 'nbiClearance';
   String orType = 'officialReceipt';
   String crType = 'certOfReg';
-  String? vehicleDocType;
+  String vehicleDocType = '';
+
+  String riderProfilePath = '';
+  String frontLicensePath = '';
+  String backLicensePath = '';
+  String nbiClearancePath = '';
+  String orPath = '';
+  String crPath = '';
+  String vehicleDocPath = '';
 
   //Form validation
   Future<void> formValidation() async {
@@ -150,24 +154,45 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   //Authenticate the rider
   void authenticateRiderAndSignUp() async {
     sharedPreferences = await SharedPreferences.getInstance();
-    currentUserUid = sharedPreferences?.getString('currentUserUid');
-    /*String? savedEmail = sharedPreferences!.getString('email');
-    String? savedPassword = sharedPreferences!.getString('password');*/
+    User? currentUser;
+    String? savedEmail = sharedPreferences!.getString('email');
+    String? savedPassword = sharedPreferences!.getString('password');
+
+    //Create or authenticate rider email and password to Firestore
+    await firebaseAuth.createUserWithEmailAndPassword(
+      email: savedEmail!,
+      password: savedPassword!,
+    ).then((auth) {
+      //Once authenticated, assign the authenticated rider to currentUser variable
+      currentUser = auth.user;
+    }).catchError((error) {
+      Navigator.pop(context);
+      showDialog(
+          context: context,
+          builder: (c) {
+            return ErrorDialog(
+              message: error.message.toString(),
+            );
+          });
+    });
 
     //If the rider is authenticated
-    if (currentUserUid != null) {
+    if (currentUser != null) {
       setState(() {
-        vehicleDocType = sharedPreferences!.getString('documentTypeItemDropdown');
+        vehicleDocType = sharedPreferences!.getString('documentTypeItemDropdown')!;
       });
 
-      isButtonPressed = !isButtonPressed;
-      String riderProfilePath = riderProfile!.path;
-      String frontLicensePath = frontLicense!.path;
-      String backLicensePath = backLicense!.path;
-      String nbiClearancePath = nbiImage!.path;
-      String orPath = orImage!.path;
-      String crPath = crImage!.path;
-      String vehicleDocPath = vehicleDoc!.path;
+      riderProfilePath = riderProfile!.path;
+      frontLicensePath = frontLicense!.path;
+      backLicensePath = backLicense!.path;
+      if (nbiImage != null) {
+        nbiClearancePath = nbiImage!.path;
+      }
+      orPath = orImage!.path;
+      crPath = crImage!.path;
+      if (vehicleDoc != null) {
+        vehicleDocPath = vehicleDoc!.path;
+      }
 
       //The Rider profile image will upload to Firestorage
       riderImageUrl = await uploadImage(riderProfilePath, riderImageType);
@@ -175,16 +200,21 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       frontLicenseImageUrl = await uploadImage(frontLicensePath, fLicenseType);
       //The Back License image will upload to Firestorage
       backLicenseImageUrl = await uploadImage(backLicensePath, bLicenseType);
-      //The NBI Clearance image will upload to Firestorage
-      nbiClearanceImageUrl = await uploadImage(nbiClearancePath, nbiClearanceType);
+      if (nbiImage != null) {
+        //The NBI Clearance image will upload to Firestorage
+        nbiClearanceImageUrl = await uploadImage(nbiClearancePath, nbiClearanceType);
+      }
       //The OR image will upload to Firestorage
       orImageUrl = await uploadImage(orPath, orType);
       //The CR image will upload to Firestorage
       crImageUrl = await uploadImage(crPath, crType);
-      //The Vehicle Document Type will upload to Firestorage
-      vehicleDocUrl = await uploadImage(vehicleDocPath, vehicleDocType!);
+      if (vehicleDoc != null) {
+        //The Vehicle Document Type will upload to Firestorage
+        vehicleDocUrl = await uploadImage(vehicleDocPath, vehicleDocType!);
+      }
+
       //save rider's credential to Firestore by calling the function
-      await _saveDataToFirestore().then((value) {
+      await _saveDataToFirestore(currentUser!).then((value) {
         //Stop the loading screen
         Navigator.pop(context);
 
@@ -192,17 +222,23 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
         firebaseAuth.signOut();
 
         //Going back to Login page to login rider's credentials
-        Route newRoute = MaterialPageRoute(builder: (c) => const AuthScreen());
-        Navigator.pushReplacement(context, newRoute);
+        Navigator.pushNamed(context, '/authScreen');
       });
     }
   }
 
   //Saves rider information to Firestore
-  Future<User?> _saveDataToFirestore() async {
+  Future<void> _saveDataToFirestore(User currentUser) async {
     sharedPreferences = await SharedPreferences.getInstance();
+    String? cityAddress = sharedPreferences?.getString('cityAddress');
+    String? serviceType = sharedPreferences?.getString('serviceType');
+    String? lastName = sharedPreferences?.getString('lastName');
+    String? suffix = sharedPreferences?.getString('suffix');
+    String? firstName = sharedPreferences?.getString('firstName');
+    String? middleInit = sharedPreferences?.getString('M.I.');
+    String? contactNumber = sharedPreferences?.getString('contactNumber');
+    String? password = sharedPreferences?.getString('password');
     // Personal Details Screen
-    String? currentUserUid = sharedPreferences?.getString('currentUserUid');
     String? savedSecondaryContactNumber = sharedPreferences!.getString('secondaryContactNumber');
     String? savedNationality = sharedPreferences!.getString('nationality');
     // Driver License Screen
@@ -236,60 +272,83 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     // Vehicle Info Screen
     String? savedPlateNumber = sharedPreferences?.getString('plateNumber') ?? '';
 
-    // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
-    await FirebaseFirestore.instance.collection("riders").doc(currentUserUid).set({
-      // Personal Details Screen
-      "secondaryContactNumber": "+63$savedSecondaryContactNumber",
-      "nationality": savedNationality?.toUpperCase(),
-      "riderAvatarUrl": riderImageUrl,
-      // Driver License Screen
-      "licenseNumber": savedLicenseNumber,
-      "licenseIssueDate": savedIssueDate,
-      "frontLicenseUrl": frontLicenseImageUrl,
-      "backLicenseUrl": backLicenseImageUrl,
-      "age": savedAge,
-      "motherMaidenName": savedMotherMaidenName?.toUpperCase(),
-      "residentialAddress": savedResidentialAddress?.toUpperCase(),
-      "isResidentialPermanentAddress": savedIsResidentialPermanentAddress,
-      // Declaration Screen
-      "declarationsAccepted": savedIsRiderAcceptedDeclaration,
-      // Consent Screen
-      "consentAccepted": savedIsRiderAcceptedConsent,
-      "promotionsSMS": savedPromotionsSMS,
-      "promotionsCall": savedPromotionsCall,
-      "promotionsEmail": savedPromotionsEmail,
-      "promotionsPushNotif": savedPromotionsPushNotif,
-      "opportunitiesSMS": savedOpportunitiesSMS,
-      "opportunitiesCall": savedOpportunitiesCall,
-      "opportunitiesEmail": savedOpportunitiesEmail,
-      "opportunitiesPushNotif": savedOpportunitiesPushNotif,
-      // EatsEasyPay Wallet Screen
-      "eatseasyPayWalletAccepted": savedIsRiderAcceptedEasyPayWallet,
-      // TIN Number
-      "tinNumber": savedTinNumber,
-      // NBI Clearance Image
-      "nbiClearance": nbiClearanceImageUrl,
-      // Emergency Contact Screen
-      "emergencyContactName": savedContactName?.toUpperCase(),
-      "emergencyContactRelationship": savedRelationship?.toUpperCase(),
-      "emergencyNumber": "63$savedEmergencyNumber",
-      "emergencyAddress": savedEmergencyAddress?.toUpperCase(),
-      // Vehicle Info Screen
-      "plateNumber": savedPlateNumber,
-      // OR/CR Screen
-      "OR": orImageUrl,
-      "CR": crImageUrl,
-      // Vehicle Documents Screen
-      "vehicleDocument": vehicleDocUrl,
-    }, SetOptions(merge: true));
+    try {
+      // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
+      await FirebaseFirestore.instance.collection("riders").doc(currentUser.uid).set({
+        "riderUID": currentUser.uid, // Storing user's UID
+        "riderEmail": currentUser.email, // Storing user's email
+        "password": password, // Save password directly
+        "cityAddress": cityAddress?.toUpperCase(), // Storing city address after trimming leading/trailing whitespace
+        "lastName": lastName, // Storing last name after trimming leading/trailing whitespace
+        "firstName": firstName, // Storing first name after trimming leading/trailing whitespace
+        "M.I.": middleInit, // Storing middle initial after trimming leading/trailing whitespace
+        "suffix": suffix, // Storing suffix after trimming leading/trailing whitespace
+        "contactNumber": "+63$contactNumber", // Storing contact number after trimming leading/trailing whitespace
+        "serviceType": serviceType, //Storing the service type of the rider
+        "status": "pending", // Setting the status to 'pending'
+        "earnings": 0.0, // Initializing earnings as 0.0
+        // Personal Details Screen
+        "secondaryContactNumber": "+63$savedSecondaryContactNumber",
+        "nationality": savedNationality?.toUpperCase(),
+        "riderAvatarUrl": riderImageUrl,
+        // Driver License Screen
+        "licenseNumber": savedLicenseNumber,
+        "licenseIssueDate": savedIssueDate,
+        "frontLicenseUrl": frontLicenseImageUrl,
+        "backLicenseUrl": backLicenseImageUrl,
+        "age": savedAge,
+        "motherMaidenName": savedMotherMaidenName?.toUpperCase(),
+        "residentialAddress": savedResidentialAddress?.toUpperCase(),
+        "isResidentialPermanentAddress": savedIsResidentialPermanentAddress,
+        // Declaration Screen
+        "declarationsAccepted": savedIsRiderAcceptedDeclaration,
+        // Consent Screen
+        "consentAccepted": savedIsRiderAcceptedConsent,
+        "promotionsSMS": savedPromotionsSMS,
+        "promotionsCall": savedPromotionsCall,
+        "promotionsEmail": savedPromotionsEmail,
+        "promotionsPushNotif": savedPromotionsPushNotif,
+        "opportunitiesSMS": savedOpportunitiesSMS,
+        "opportunitiesCall": savedOpportunitiesCall,
+        "opportunitiesEmail": savedOpportunitiesEmail,
+        "opportunitiesPushNotif": savedOpportunitiesPushNotif,
+        // EatsEasyPay Wallet Screen
+        "eatsEasyPayWalletAccepted": savedIsRiderAcceptedEasyPayWallet,
+        // TIN Number
+        "tinNumber": savedTinNumber,
+        // NBI Clearance Image
+        "nbiClearance": nbiClearanceImageUrl,
+        // Emergency Contact Screen
+        "emergencyContactName": savedContactName?.toUpperCase(),
+        "emergencyContactRelationship": savedRelationship?.toUpperCase(),
+        "emergencyNumber": "63$savedEmergencyNumber",
+        "emergencyAddress": savedEmergencyAddress?.toUpperCase(),
+        // Vehicle Info Screen
+        "plateNumber": savedPlateNumber,
+        // OR/CR Screen
+        "OR": orImageUrl,
+        "CR": crImageUrl,
+        // Vehicle Documents Screen
+        "vehicleDocument": vehicleDocUrl,
+      });
 
-    /*//Save rider's data locally
-    sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences!.setString("photoUrl", riderImageUrl);*/
+      //Clear all data saved from sharedPreferences
+      await sharedPreferences?.clear();
+      isButtonPressed = !isButtonPressed;
 
-    //Clear all data saved from sharedPreferences
-    await sharedPreferences?.clear();
-    return null;
+      // Save vendor's data locally
+      sharedPreferences = await SharedPreferences.getInstance();
+      await sharedPreferences?.setString("uid", currentUser.uid);
+      await sharedPreferences?.setString("email", currentUser.email.toString());
+      await sharedPreferences?.setString("firstName", firstName!);
+      await sharedPreferences?.setString("riderAvatarUrl", riderImageUrl);
+      await sharedPreferences?.setString("contactNumber", "+63$contactNumber");
+      await sharedPreferences?.setString("residentialAddress", savedResidentialAddress!);
+
+    } catch (e) {
+      print("Error saving data to Firestore: $e");
+      throw e; // Propagate the error
+    }
   }
 
   Future<bool> _onWillPop() async {
@@ -321,6 +380,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
 
           try {
             User? user = FirebaseAuth.instance.currentUser;
+            //Clear all data saved from sharedPreferences
+            await sharedPreferences?.clear();
             await user?.delete();
             print("User account deleted successfully.");
           } catch (error) {

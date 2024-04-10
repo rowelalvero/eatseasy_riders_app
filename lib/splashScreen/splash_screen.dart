@@ -19,11 +19,11 @@ class _MySplashScreenState extends State<MySplashScreen> {
 
       //If the vendor already Logged in send them directly to the Home screen
       if (firebaseAuth.currentUser != null) {
-        //Navigator.pushReplacement(context, MaterialPageRoute(builder: (c) => const HomeScreen()));
+        Navigator.pushReplacementNamed(context, '/homeScreen');
       }
       //If vendor is not logged in send them to Authentication and LogIn screen
       else {
-        Navigator.pushNamed(context, '/authScreen');
+        Navigator.pushReplacementNamed(context, '/authScreen');
       }
     });
   }

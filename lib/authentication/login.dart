@@ -86,10 +86,10 @@ class _LogInScreenState extends State<LogInScreen> {
         .get().then((snapshot) async {
           await sharedPreferences!.setString("uid", currentUser.uid);
           await sharedPreferences!.setString("email", snapshot.data()!["vendorEmail"]);
-          await sharedPreferences!.setString("name", snapshot.data()!["businessName"]);
-          await sharedPreferences!.setString("photoUrl", snapshot.data()!["vendorAvatarUrl"]);
+          await sharedPreferences!.setString("firstName", snapshot.data()!["firstName"]);
+          await sharedPreferences!.setString("photoUrl", snapshot.data()!["riderAvatarUrl"]);
           await sharedPreferences!.setString("contactNumber", snapshot.data()!["contactNumber"]);
-          await sharedPreferences!.setString("address", snapshot.data()!["businessAddress"]);
+          await sharedPreferences!.setString("residentialAddress", snapshot.data()!["savedResidentialAddress"]);
     });
   }
 

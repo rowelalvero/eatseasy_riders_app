@@ -57,6 +57,7 @@ dependencies:
   country_picker: ^2.0.25
   csc_picker: ^0.2.7
   loading_animation_widget:
+  firebase_app_check: ^0.2.2+1
 
 dev_dependencies:
   flutter_test:

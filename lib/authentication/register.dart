@@ -256,7 +256,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool isValidEmail(email) {
     // Regular expression for email validation
     final RegExp emailRegex =
-    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    RegExp(r'^([\w-]+\.)?[\w-]+@([\w-]+\.)+[\w-]{2,4}$');
 
     return emailRegex.hasMatch(email);
   }
@@ -285,8 +285,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     );
                   });
 
-              //Authenticate the rider
-              authenticateVendorAndSignUp();
+              // Save user data to Prefs
+              saveDataToPrefs();
 
             }
             else {
@@ -343,8 +343,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
           });
     }
   }
+  void saveDataToPrefs() async {
+    await sharedPreferences?.setString('cityAddress', cityController!);
+    await sharedPreferences?.setString('serviceType', serviceTypeController!);
+    await sharedPreferences?.setString('lastName', lastNameController.text.trim());
+    await sharedPreferences?.setString('suffix', suffixController!);
+    await sharedPreferences?.setString('firstName', firstNameController.text.trim());
+    await sharedPreferences?.setString('M.I.', middleInitialController.text.trim());
+    await sharedPreferences?.setString('contactNumber', contactNumberController.text.trim());
+    await sharedPreferences?.setString('email', emailController.text.trim());
+    await sharedPreferences?.setString('password', passwordController.text.trim());
 
-  //Authenticate the rider
+    navigateToRegisterScreen2();
+  }
+
+  void navigateToRegisterScreen2() {
+    //Stop the loading screen
+    Navigator.pop(context);
+
+    //Navigate to registerScree2
+    Navigator.pushNamed(context, '/registerScreen2');
+  }
+
+  /*//Authenticate the rider
   void authenticateVendorAndSignUp() async {
     User? currentUser;
     sharedPreferences = await SharedPreferences.getInstance();
@@ -423,7 +444,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     await sharedPreferences?.setString('email', emailController.text.trim());
     await sharedPreferences?.setString('password', passwordController.text.trim());
     await sharedPreferences?.setString('confirmPassword', confirmPasswordController.text.trim());
-  }
+  }*/
 
   Future<bool> _onWillPop() async {
     if (!changesSaved) {
@@ -522,7 +543,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                    Row(
                     children: [
                       Padding(
@@ -530,6 +551,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            const Text("Be part of EatsEasy Riders!",
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  fontFamily: "Poppins",
+                                  color: Color.fromARGB(255, 67, 83, 89),
+                                )),
+                            const SizedBox(height: 10),
                             const Text(
                               "Fill-out the required details and start driving with EatsEasy!",
                               style: TextStyle(

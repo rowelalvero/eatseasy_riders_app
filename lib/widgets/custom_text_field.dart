@@ -11,7 +11,7 @@ class CustomTextField extends StatelessWidget {
   bool noLeftMargin;
   bool noRightMargin;
   final ValueChanged<String>? onChanged;
-  final TextCapitalization textCapitalization; // Add this property
+  final TextCapitalization textCapitalization;
 
   CustomTextField({
     Key? key,
@@ -25,7 +25,7 @@ class CustomTextField extends StatelessWidget {
     required this.noLeftMargin,
     required this.noRightMargin,
     this.onChanged,
-    this.textCapitalization = TextCapitalization.none, // Default text capitalization
+    this.textCapitalization = TextCapitalization.none,
   }) : super(key: key); // Modify constructor
 
   @override
@@ -56,7 +56,7 @@ class CustomTextField extends StatelessWidget {
               obscureText: isObsecure!,
               cursorColor: const Color.fromARGB(255, 242, 198, 65),
               keyboardType: keyboardType,
-              textCapitalization: textCapitalization, // Pass text capitalization
+              textCapitalization: textCapitalization,
               // icon styling
               decoration: InputDecoration(
                 border: InputBorder.none,

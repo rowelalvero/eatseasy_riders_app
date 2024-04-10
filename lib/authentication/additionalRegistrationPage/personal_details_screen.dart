@@ -7,6 +7,7 @@ import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
 import '../../global/global.dart';
 import '../imageGetters/rider_profile.dart';
+import '../imagePicker/image_picker.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
   const PersonalDetailsScreen({Key? key}) : super(key: key);
@@ -37,37 +38,8 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
 
   //Get image and save it to imageXFile
   _getImage() async {
-    bool? isCamera = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text("Camera"),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text("Gallery "),
-            ),
-          ],
-        ),
-      ),
-    );
+    riderProfile = await ImageHelper.getImage(context,);
 
-    if (isCamera == null) return;
-
-    XFile? file = await ImagePicker()
-        .pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
-    riderProfile = XFile(file!.path);
     setState(() {
       _isRiderProfileEmpty = false;
       isButtonPressed = false;
@@ -75,6 +47,7 @@ class _PersonalDetailsScreenState extends State<PersonalDetailsScreen> {
       isCompleted = false;
     });
   }
+
   //Nationality dropdown items
   final List<String> _dropdownItems = [
     'Filipino',

@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../global/global.dart';
 import '../../widgets/error_dialog.dart';
 import '../imageGetters/rider_profile.dart';
+import '../imagePicker/image_picker.dart';
 
 class NBIClearanceScreen extends StatefulWidget {
   const NBIClearanceScreen({Key? key}) : super(key: key);
@@ -25,36 +26,8 @@ class _NBIClearanceScreenState extends State<NBIClearanceScreen> {
 
   //Get image and save it to imageXFile
   _getImage() async {
-    bool? isCamera = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text("Camera"),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text("Gallery "),
-            ),
-          ],
-        ),
-      ),
-    );
+    nbiImage = await ImageHelper.getImage(context,);
 
-    if (isCamera == null) return;
-
-    XFile? file = await ImagePicker().pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
-    nbiImage = XFile(file!.path);
     setState(() {
       _isNbiImageEmpty = false;
       isButtonPressedNBIClearanceScreen = false;

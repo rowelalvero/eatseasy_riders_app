@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../global/global.dart';
 import '../../widgets/error_dialog.dart';
 import '../imageGetters/rider_profile.dart';
+import '../imagePicker/image_picker.dart';
 
 class OrCrScreen extends StatefulWidget {
   const OrCrScreen({Key? key}) : super(key: key);
@@ -27,37 +28,11 @@ class _OrCrScreenState extends State<OrCrScreen> {
   bool _isOrWillDeleted = false;
 
   //Get image and save it to imageXFile
+
   _getImage() async {
-    bool? isCamera = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text("Camera"),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text("Gallery "),
-            ),
-          ],
-        ),
-      ),
-    );
+    XFile? file = await ImageHelper.getImage(context);
+    _isOrSelected ? orImage = file : crImage = file;
 
-    if (isCamera == null) return;
-
-    XFile? file = await ImagePicker().pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
-    _isOrSelected ? orImage = XFile(file!.path): crImage = XFile(file!.path);
     setState(() {
       _isOrHasNoImage = false;
       _isCrHasNoImage = false;
