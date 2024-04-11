@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../global/global.dart';
 import '../../widgets/error_dialog.dart';
 import '../imageGetters/rider_profile.dart';
-import '../imagePicker/image_picker.dart';
+import '../../widgets/image_picker.dart';
 
 class NBIClearanceScreen extends StatefulWidget {
   const NBIClearanceScreen({Key? key}) : super(key: key);
@@ -173,211 +174,234 @@ class _NBIClearanceScreenState extends State<NBIClearanceScreen> {
     super.initState();
     _loadUserDetails();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-        title: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "NBI Clearance",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 67, 83, 89),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        // appBar elevation/shadow
-        elevation: 2,
-        centerTitle: true,
-        leadingWidth: 40.0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-            onPressed: () async {
-              // Call _onWillPop to handle the back button press
-              final bool canPop = await _onWillPop();
-              if (canPop) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
-        ),
-      ),
-      body: WillPopScope(
-        onWillPop: _onWillPop,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-
-                //spacing
-                const SizedBox(height: 10),
-
-                //Header
-                 Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text("Upload Image",
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontFamily: "Poppins",
-                                color: Color.fromARGB(255, 67, 83, 89),
-                              )),
-                          const SizedBox(height: 10),
-                          const Text("Upload your NBI Clearance: ",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                              )),
-                          const Text("Accepted file formats: .jpg, .png, .jpeg",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.black54,
-                                fontFamily: "Poppins",
-                              )),
-                          TextButton(
-                            onPressed: () {
-                              _showLicensePreviewDialog();
-                            },
-                            child: const Text(
-                              "See example",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: "Poppins",
-                                color: Color.fromARGB(255, 242, 198, 65),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Image Picker
-                InkWell(
-                  onTap: () => _getImage(),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                    child: Container(
-                      width: MediaQuery.of(context).size.width * 0.23 * 4,
-                      height: MediaQuery.of(context).size.width * 0.27 * 2,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 230, 229, 229),
-                        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
-                        border: Border.all(
-                          color: _isNbiImageEmpty ? Colors.red : Colors.transparent, // Choose your border color
-                          width: 1, // Choose the border width
+        body: WillPopScope(
+          onWillPop: _onWillPop,
+          child: SizedBox(
+            height: MediaQuery
+                .of(context)
+                .size
+                .height,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                // Change mainAxisSize to MainAxisSize.min
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        image: const DecorationImage(
+                            image: AssetImage('images/background.png'), // Replace with your desired image
+                            fit: BoxFit.cover,
+                            opacity: 0.3
                         ),
-                      ),
-                      child: nbiImage == null
-                          ? Icon(
-                        Icons.add_photo_alternate,
-                        size: MediaQuery.of(context).size.width * 0.20,
-                        color: Colors.grey,
-                      )
-                          : Image.file(File(nbiImage!.path), fit: BoxFit.cover),
-                    ),
-                  ),
-                ),
-
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter, colors: [
+                          Colors.orange.shade900,
+                          Colors.orange.shade800,
+                          Colors.orange.shade400
+                        ])),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        TextButton(
-                          onPressed: () => _getImage(),
-
-                          child: const Text(
-                            "Upload Image",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontFamily: "Poppins",
-                              color: Color.fromARGB(255, 242, 198, 65),
-                            ),
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "NBI Clearance",
+                                    style: TextStyle(color: Colors.white,
+                                        fontSize: 45,
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
                         ),
+                        Container(
+                          decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(60),
+                                  topRight: Radius.circular(60))),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
 
-                        // Remove image button
-                        if (nbiImage != null)
-                          TextButton(
-                            onPressed: () => _removeImage(),
-                            child: const Text(
-                              "Remove",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: "Poppins",
-                                color: Color.fromARGB(255, 67, 83, 89),
-                              ),
+                                //spacing
+                                const SizedBox(height: 10),
+
+                                //Header
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 18),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text("Upload Image",
+                                              style: TextStyle(
+                                                  fontSize: 30,
+                                                  fontFamily: "Poppins",
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.w600
+                                              )),
+                                          const SizedBox(height: 10),
+                                          const Text("Upload your NBI Clearance: ",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                              )),
+                                          const Text("Accepted file formats: .jpg, .png, .jpeg",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black54,
+                                                fontFamily: "Poppins",
+                                              )),
+                                          TextButton(
+                                            onPressed: () {
+                                              _showLicensePreviewDialog();
+                                            },
+                                            child: const Text(
+                                              "See example",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: "Poppins",
+                                                color: Color.fromARGB(255, 242, 198, 65),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                // Image Picker
+                                InkWell(
+                                  onTap: () => _getImage(),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                                    child: Container(
+                                      width: MediaQuery.of(context).size.width * 0.23 * 4,
+                                      height: MediaQuery.of(context).size.width * 0.27 * 2,
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromARGB(255, 230, 229, 229),
+                                        borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 0.05),
+                                        border: Border.all(
+                                          color: _isNbiImageEmpty ? Colors.red : Colors.transparent, // Choose your border color
+                                          width: 1, // Choose the border width
+                                        ),
+                                      ),
+                                      child: nbiImage == null
+                                          ? Icon(
+                                        Icons.add_photo_alternate,
+                                        size: MediaQuery.of(context).size.width * 0.20,
+                                        color: Colors.grey,
+                                      )
+                                          : Image.file(File(nbiImage!.path), fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                ),
+
+                                Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        TextButton(
+                                          onPressed: () => _getImage(),
+
+                                          child: const Text(
+                                            "Upload Image",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontFamily: "Poppins",
+                                              color: Color.fromARGB(255, 242, 198, 65),
+                                            ),
+                                          ),
+                                        ),
+
+                                        // Remove image button
+                                        if (nbiImage != null)
+                                          TextButton(
+                                            onPressed: () => _removeImage(),
+                                            child: const Text(
+                                              "Remove",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: "Poppins",
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+
+                                //Spacing
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                // Submit button
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: isButtonPressedNBIClearanceScreen ? null : () => _saveUserDataToPrefs(),
+                                          // Register button styling
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isButtonPressedNBIClearanceScreen ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                                            padding: const EdgeInsets.symmetric(vertical: 10),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                            ),
+                                            elevation: 4, // Elevation for the shadow
+                                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                                          ),
+                                          child: Text(
+                                            isButtonPressedNBIClearanceScreen ? "Saved" : "Save",
+                                            style: TextStyle(
+                                              color: isButtonPressedNBIClearanceScreen ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                                              fontFamily: "Poppins",
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                        )
                       ],
                     ),
-                  ],
-                ),
-
-                //Spacing
-                const SizedBox(
-                  height: 10,
-                ),
-                // Submit button
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: isButtonPressedNBIClearanceScreen ? null : () => _saveUserDataToPrefs(),
-                          // Register button styling
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isButtonPressedNBIClearanceScreen ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            elevation: 4, // Elevation for the shadow
-                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                          ),
-                          child: Text(
-                            isButtonPressedNBIClearanceScreen ? "Saved" : "Save",
-                            style: TextStyle(
-                              color: isButtonPressedNBIClearanceScreen ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        )
     );
   }
 }

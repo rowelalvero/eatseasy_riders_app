@@ -18,7 +18,6 @@ import 'authentication/additionalRegistrationPage/vehicle_info_screen.dart';
 import 'authentication/additionalRegistrationPage/orcr_screen.dart';
 import 'authentication/additionalRegistrationPage/vehicle_documents_screen.dart';
 
-import 'authentication/auth_screen.dart';
 import 'authentication/login.dart';
 import 'authentication/register.dart';
 import 'global/global.dart';
@@ -55,7 +54,6 @@ class MyApp extends StatelessWidget {
       ),
       home: const MySplashScreen(),
       routes: {
-        '/authScreen': (context) => const AuthScreen(),
         '/logInScreen': (context) => const LogInScreen(),
         '/homeScreen': (context) => const HomeScreen(),
         '/registerScreen': (context) => const RegisterScreen(),

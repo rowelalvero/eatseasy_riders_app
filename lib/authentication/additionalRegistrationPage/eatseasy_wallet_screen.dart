@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -132,134 +133,157 @@ class _EatsEasyPayWalletScreenState extends State<EatsEasyPayWalletScreen> {
   Widget build(BuildContext context) {
     checkboxes["I have already informed EatsEasy about the personal information I have (including my government ID, profile details, and status) in order to: Provide financial products and services; Perform background checks; Link my personal information to the EatsEasy Customer app (if I have access to them); and Provide reasonable compensation based on EatsEasy privacy policy."] = firstBox1;
     checkboxes["I understand that they are linking the EatsEasyPay Wallet to my EatsEasyPay Customer App. If I don't have a EatsEasyPay Wallet, I may need to sign up to get it."] = secondBox1;
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-        title: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "EatsEasyPay Wallet",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 67, 83, 89),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        // appBar elevation/shadow
-        elevation: 2,
-        centerTitle: true,
-        leadingWidth: 40.0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-            onPressed: () async {
-              // Call _onWillPop to handle the back button press
-              final bool canPop = await _onWillPop();
-              if (canPop) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
-        ),
-      ),
 
-      body: WillPopScope(
-        onWillPop: _onWillPop,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                const SizedBox(height: 10),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: checkboxes.keys.map((String text) {
-                      return CheckboxListTile(
-                        controlAffinity: ListTileControlAffinity.leading,
-                        title: Text(text,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.black,
-                            fontFamily: "Poppins", // Change the font family here
+    return Scaffold(
+        body: WillPopScope(
+          onWillPop: _onWillPop,
+          child: SizedBox(
+            height: MediaQuery
+                .of(context)
+                .size
+                .height,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                // Change mainAxisSize to MainAxisSize.min
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        image: const DecorationImage(
+                            image: AssetImage('images/background.png'), // Replace with your desired image
+                            fit: BoxFit.cover,
+                            opacity: 0.3
+                        ),
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter, colors: [
+                          Colors.orange.shade900,
+                          Colors.orange.shade800,
+                          Colors.orange.shade400
+                        ])),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "EatsEasyPay Wallet",
+                                    style: TextStyle(color: Colors.white,
+                                        fontSize: 40,
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
                         ),
-                        value: checkboxes[text],
-                        onChanged: (bool? value) {
-                          setState(() {
-                            switch (text) {
-                              case "I have already informed EatsEasy about the personal information I have (including my government ID, profile details, and status) in order to: Provide financial products and services; Perform background checks; Link my personal information to the EatsEasy Customer app (if I have access to them); and Provide reasonable compensation based on EatsEasy privacy policy.":
-                                firstBox1 = value!;
-                                break;
-                              case "I understand that they are linking the EatsEasyPay Wallet to my EatsEasyPay Customer App. If I don't have a EatsEasyPay Wallet, I may need to sign up to get it.":
-                                secondBox1 = value!;
-                                break;
-                            }
-                            changesSaved = false;
-                            isCompleted = false;
-                            isButtonPressedInEatsEasyPayWallet = false;
-                          });
-                        },
-                        side: BorderSide(color: isCheckboxesCompleted ? Colors.black : Colors.red), // Set border color
-                        fillColor: MaterialStateColor.resolveWith((states) {
-                          // Set fill color
-                          if (states.contains(MaterialState.selected)) {
-                            return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
-                          }
-                          return Colors.transparent; // Default color
-                        }),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: isButtonPressedInEatsEasyPayWallet ? null : () => _saveUserDataToPrefs(),
-                          // Register button styling
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isButtonPressedInEatsEasyPayWallet ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
+                        Container(
+                          decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(60),
+                                  topRight: Radius.circular(60))),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                const SizedBox(height: 10),
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    children: checkboxes.keys.map((String text) {
+                                      return CheckboxListTile(
+                                        controlAffinity: ListTileControlAffinity.leading,
+                                        title: Text(text,
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black,
+                                            fontFamily: "Poppins", // Change the font family here
+                                          ),
+                                        ),
+                                        value: checkboxes[text],
+                                        onChanged: (bool? value) {
+                                          setState(() {
+                                            switch (text) {
+                                              case "I have already informed EatsEasy about the personal information I have (including my government ID, profile details, and status) in order to: Provide financial products and services; Perform background checks; Link my personal information to the EatsEasy Customer app (if I have access to them); and Provide reasonable compensation based on EatsEasy privacy policy.":
+                                                firstBox1 = value!;
+                                                break;
+                                              case "I understand that they are linking the EatsEasyPay Wallet to my EatsEasyPay Customer App. If I don't have a EatsEasyPay Wallet, I may need to sign up to get it.":
+                                                secondBox1 = value!;
+                                                break;
+                                            }
+                                            changesSaved = false;
+                                            isCompleted = false;
+                                            isButtonPressedInEatsEasyPayWallet = false;
+                                          });
+                                        },
+                                        side: BorderSide(color: isCheckboxesCompleted ? Colors.black : Colors.red), // Set border color
+                                        fillColor: MaterialStateColor.resolveWith((states) {
+                                          // Set fill color
+                                          if (states.contains(MaterialState.selected)) {
+                                            return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
+                                          }
+                                          return Colors.transparent; // Default color
+                                        }),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: isButtonPressedInEatsEasyPayWallet ? null : () => _saveUserDataToPrefs(),
+                                          // Register button styling
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isButtonPressedInEatsEasyPayWallet ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                                            padding: const EdgeInsets.symmetric(vertical: 10),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                            ),
+                                            elevation: 4, // Elevation for the shadow
+                                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                                          ),
+                                          child: Text(
+                                            isButtonPressedInEatsEasyPayWallet ? "Saved" : "Save",
+                                            style: TextStyle(
+                                              color: isButtonPressedInEatsEasyPayWallet ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                                              fontFamily: "Poppins",
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                            elevation: 4, // Elevation for the shadow
-                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
                           ),
-                          child: Text(
-                            isButtonPressedInEatsEasyPayWallet ? "Saved" : "Save",
-                            style: TextStyle(
-                              color: isButtonPressedInEatsEasyPayWallet ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        )
     );
   }
 }

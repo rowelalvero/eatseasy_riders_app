@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,7 +7,6 @@ import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 import 'additionalRegistrationPage/personal_details_screen.dart';
 import '../global/global.dart';
-import 'auth_screen.dart';
 import 'imageGetters/rider_profile.dart';
 import 'imageUpload/image_upload.dart';
 
@@ -33,6 +33,7 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   bool isButtonPressed = false;
   bool changesSaved = false;
   String? currentUserUid;
+
   Future<bool> _checkPersonalDetailsCompleted() async {
     sharedPreferences = await SharedPreferences.getInstance();
     return sharedPreferences?.getBool('personalDetailsCompleted') ?? false;
@@ -129,7 +130,6 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
         isEatsEasyPayWalletCompleted &&
         isVehicleInfoCompleted &&
         isORCRCompleted) {
-
       showDialog(
           context: context,
           builder: (c) {
@@ -179,7 +179,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     //If the rider is authenticated
     if (currentUser != null) {
       setState(() {
-        vehicleDocType = sharedPreferences!.getString('documentTypeItemDropdown')!;
+        vehicleDocType =
+        sharedPreferences!.getString('documentTypeItemDropdown')!;
       });
 
       riderProfilePath = riderProfile!.path;
@@ -202,7 +203,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       backLicenseImageUrl = await uploadImage(backLicensePath, bLicenseType);
       if (nbiImage != null) {
         //The NBI Clearance image will upload to Firestorage
-        nbiClearanceImageUrl = await uploadImage(nbiClearancePath, nbiClearanceType);
+        nbiClearanceImageUrl =
+        await uploadImage(nbiClearancePath, nbiClearanceType);
       }
       //The OR image will upload to Firestorage
       orImageUrl = await uploadImage(orPath, orType);
@@ -239,54 +241,87 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     String? contactNumber = sharedPreferences?.getString('contactNumber');
     String? password = sharedPreferences?.getString('password');
     // Personal Details Screen
-    String? savedSecondaryContactNumber = sharedPreferences!.getString('secondaryContactNumber');
+    String? savedSecondaryContactNumber = sharedPreferences!.getString(
+        'secondaryContactNumber');
     String? savedNationality = sharedPreferences!.getString('nationality');
     // Driver License Screen
     String? savedLicenseNumber = sharedPreferences?.getString('licenseNumber');
     String? savedIssueDate = sharedPreferences?.getString('issueDate');
     String? savedAge = sharedPreferences?.getString('age');
-    String? savedMotherMaidenName = sharedPreferences?.getString('motherMaiden');
-    String? savedResidentialAddress = sharedPreferences?.getString('residentialAddress');
-    String? savedIsResidentialPermanentAddress = sharedPreferences?.getString('isResidentialPermanentAddress');
+    String? savedMotherMaidenName = sharedPreferences?.getString(
+        'motherMaiden');
+    String? savedResidentialAddress = sharedPreferences?.getString(
+        'residentialAddress');
+    String? savedIsResidentialPermanentAddress = sharedPreferences?.getString(
+        'isResidentialPermanentAddress');
     // Declaration Screen
-    bool? savedIsRiderAcceptedDeclaration = sharedPreferences?.getBool('isRiderAcceptedDeclaration');
+    bool? savedIsRiderAcceptedDeclaration = sharedPreferences?.getBool(
+        'isRiderAcceptedDeclaration');
     // Consent Screen
-    bool? savedIsRiderAcceptedConsent = sharedPreferences?.getBool('isRiderAcceptedConsent');
-    bool? savedPromotionsSMS = sharedPreferences?.getBool('offersConsentBox1') ?? false;
-    bool? savedPromotionsCall = sharedPreferences?.getBool('offersConsentBox2') ?? false;
-    bool? savedPromotionsEmail = sharedPreferences?.getBool('offersConsentBox3') ?? false;
-    bool? savedPromotionsPushNotif = sharedPreferences?.getBool('offersConsentBox4') ?? false;
-    bool? savedOpportunitiesSMS = sharedPreferences?.getBool('additionalConsentBox1') ?? false;
-    bool? savedOpportunitiesCall = sharedPreferences?.getBool('additionalConsentBox2') ?? false;
-    bool? savedOpportunitiesEmail = sharedPreferences?.getBool('additionalConsentBox3') ?? false;
-    bool? savedOpportunitiesPushNotif = sharedPreferences?.getBool('additionalConsentBox4') ?? false;
+    bool? savedIsRiderAcceptedConsent = sharedPreferences?.getBool(
+        'isRiderAcceptedConsent');
+    bool? savedPromotionsSMS = sharedPreferences?.getBool(
+        'offersConsentBox1') ?? false;
+    bool? savedPromotionsCall = sharedPreferences?.getBool(
+        'offersConsentBox2') ?? false;
+    bool? savedPromotionsEmail = sharedPreferences?.getBool(
+        'offersConsentBox3') ?? false;
+    bool? savedPromotionsPushNotif = sharedPreferences?.getBool(
+        'offersConsentBox4') ?? false;
+    bool? savedOpportunitiesSMS = sharedPreferences?.getBool(
+        'additionalConsentBox1') ?? false;
+    bool? savedOpportunitiesCall = sharedPreferences?.getBool(
+        'additionalConsentBox2') ?? false;
+    bool? savedOpportunitiesEmail = sharedPreferences?.getBool(
+        'additionalConsentBox3') ?? false;
+    bool? savedOpportunitiesPushNotif = sharedPreferences?.getBool(
+        'additionalConsentBox4') ?? false;
     // EatsEasyPay Wallet Screen
-    bool? savedIsRiderAcceptedEasyPayWallet = sharedPreferences?.getBool('isRiderAcceptedDeclaration');
+    bool? savedIsRiderAcceptedEasyPayWallet = sharedPreferences?.getBool(
+        'isRiderAcceptedDeclaration');
     // TIN Number
     String? savedTinNumber = sharedPreferences?.getString('TINNumber');
     // Emergency Contact Screen
-    String? savedContactName = sharedPreferences?.getString('emergencyContactName');
+    String? savedContactName = sharedPreferences?.getString(
+        'emergencyContactName');
     String? savedRelationship = sharedPreferences?.getString('relationship');
-    String? savedEmergencyNumber = sharedPreferences?.getString('emergencyNumber');
-    String? savedEmergencyAddress = sharedPreferences?.getString('emergencyAddress');
+    String? savedEmergencyNumber = sharedPreferences?.getString(
+        'emergencyNumber');
+    String? savedEmergencyAddress = sharedPreferences?.getString(
+        'emergencyAddress');
     // Vehicle Info Screen
-    String? savedPlateNumber = sharedPreferences?.getString('plateNumber') ?? '';
+    String? savedPlateNumber = sharedPreferences?.getString('plateNumber') ??
+        '';
 
     try {
       // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
-      await FirebaseFirestore.instance.collection("riders").doc(currentUser.uid).set({
-        "riderUID": currentUser.uid, // Storing user's UID
-        "riderEmail": currentUser.email, // Storing user's email
-        "password": password, // Save password directly
-        "cityAddress": cityAddress?.toUpperCase(), // Storing city address after trimming leading/trailing whitespace
-        "lastName": lastName, // Storing last name after trimming leading/trailing whitespace
-        "firstName": firstName, // Storing first name after trimming leading/trailing whitespace
-        "M.I.": middleInit, // Storing middle initial after trimming leading/trailing whitespace
-        "suffix": suffix, // Storing suffix after trimming leading/trailing whitespace
-        "contactNumber": "+63$contactNumber", // Storing contact number after trimming leading/trailing whitespace
-        "serviceType": serviceType, //Storing the service type of the rider
-        "status": "pending", // Setting the status to 'pending'
-        "earnings": 0.0, // Initializing earnings as 0.0
+      await FirebaseFirestore.instance.collection("riders")
+          .doc(currentUser.uid)
+          .set({
+        "riderUID": currentUser.uid,
+        // Storing user's UID
+        "riderEmail": currentUser.email,
+        // Storing user's email
+        "password": password,
+        // Save password directly
+        "cityAddress": cityAddress?.toUpperCase(),
+        // Storing city address after trimming leading/trailing whitespace
+        "lastName": lastName,
+        // Storing last name after trimming leading/trailing whitespace
+        "firstName": firstName,
+        // Storing first name after trimming leading/trailing whitespace
+        "M.I.": middleInit,
+        // Storing middle initial after trimming leading/trailing whitespace
+        "suffix": suffix,
+        // Storing suffix after trimming leading/trailing whitespace
+        "contactNumber": "+63$contactNumber",
+        // Storing contact number after trimming leading/trailing whitespace
+        "serviceType": serviceType,
+        //Storing the service type of the rider
+        "status": "pending",
+        // Setting the status to 'pending'
+        "earnings": 0.0,
+        // Initializing earnings as 0.0
         // Personal Details Screen
         "secondaryContactNumber": "+63$savedSecondaryContactNumber",
         "nationality": savedNationality?.toUpperCase(),
@@ -343,8 +378,8 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
       await sharedPreferences?.setString("firstName", firstName!);
       await sharedPreferences?.setString("riderAvatarUrl", riderImageUrl);
       await sharedPreferences?.setString("contactNumber", "+63$contactNumber");
-      await sharedPreferences?.setString("residentialAddress", savedResidentialAddress!);
-
+      await sharedPreferences?.setString(
+          "residentialAddress", savedResidentialAddress!);
     } catch (e) {
       print("Error saving data to Firestore: $e");
       throw e; // Propagate the error
@@ -355,29 +390,29 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     if (!changesSaved) {
       final result = await showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Discard Changes?'),
-          content: const Text('Are you sure you want to discard changes?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context, true);
-              },
-              child: const Text('Discard'),
+        builder: (context) =>
+            AlertDialog(
+              title: const Text('Discard Changes?'),
+              content: const Text('Are you sure you want to discard changes?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  child: const Text('Discard'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+              ],
             ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-          ],
-        ),
       );
 
       if (result == true) {
         sharedPreferences = await SharedPreferences.getInstance();
 
         if (sharedPreferences!.containsKey('currentUserUid')) {
-
           try {
             User? user = FirebaseAuth.instance.currentUser;
             //Clear all data saved from sharedPreferences
@@ -419,234 +454,371 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-        title: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
+        body: WillPopScope(
+          onWillPop: _onWillPop,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              // Change mainAxisSize to MainAxisSize.min
               children: [
-                Text(
-                  "EatsEasy",
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w800,
-                    color: Color.fromARGB(255, 67, 83, 89),
-                  ),
-                ),
-                Text(
-                  " register",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontFamily: "Poppins",
-                    fontStyle: FontStyle.italic,
-                    color: Color.fromARGB(255, 67, 83, 89),
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      image: const DecorationImage(
+                          image: AssetImage('images/background.png'), // Replace with your desired image
+                          fit: BoxFit.cover,
+                          opacity: 0.3
+                      ),
+                      gradient: LinearGradient(
+                          begin: Alignment.topCenter, colors: [
+                        Colors.orange.shade900,
+                        Colors.orange.shade800,
+                        Colors.orange.shade400
+                      ])),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                /*IconButton(
+                                  icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
+                                  onPressed: () async {
+                                    // Call _onWillPop to handle the back button press
+                                    final bool canPop = await _onWillPop();
+                                    if (canPop) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                ),*/
+                                Text(
+                                  "EatsEasy",
+                                  style: TextStyle(color: Colors.white,
+                                      fontSize: 45,
+                                      fontFamily: "Poppins",
+                                      fontWeight: FontWeight.w700),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  "register",
+                                  style: TextStyle(color: Colors.white,
+                                      fontSize: 23,
+                                      fontFamily: "Poppins",
+                                      fontStyle: FontStyle.italic),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      FadeInUp(
+                          duration: const Duration(milliseconds: 300),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(60),
+                                    topRight: Radius.circular(60))),
+                            child: Padding(
+                              padding: const EdgeInsets.all(15),
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 20),
+                                  const Row(
+                                    children: [
+                                      Padding(
+                                        padding: EdgeInsets.only(left: 20),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment
+                                              .start,
+                                          children: [
+                                            Text(
+                                              "Complete your application and start driving with EatsEasy!",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                              ),
+                                            ),
+                                            Text(
+                                              "Provide the following information.",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 20, bottom: 10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Personal",
+                                              style: TextStyle(color: Colors.black,
+                                                  fontSize: 30,
+                                                  fontFamily: "Poppins",
+                                                  fontWeight: FontWeight.w700),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+
+                                  LinkTile(
+                                    title: 'Personal Details',
+                                    destination: '/personalDetails',
+                                    isOptionalBasedOnCompletion: false,
+                                    isRequiredBasedOnCompletion: true,
+                                    isCompleted: _isPersonalDetailsCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isPersonalDetailsCompleted =
+                                            _checkPersonalDetailsCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'Driver License',
+                                    destination: '/driversLicense',
+                                    isOptionalBasedOnCompletion: false,
+                                    isRequiredBasedOnCompletion: true,
+                                    isCompleted: _isDriverLicenseCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isDriverLicenseCompleted =
+                                            _checkDriverLicenseCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'Declarations',
+                                    destination: '/declarations',
+                                    isOptionalBasedOnCompletion: false,
+                                    isRequiredBasedOnCompletion: true,
+                                    isCompleted: _isDeclarationsCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isDeclarationsCompleted =
+                                            _checkDeclarationsCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'Consents',
+                                    destination: '/consents',
+                                    isOptionalBasedOnCompletion: false,
+                                    isRequiredBasedOnCompletion: true,
+                                    isCompleted: _isConsentsCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isConsentsCompleted =
+                                            _checkConsentsCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'EatsEasyPay Wallet',
+                                    destination: '/eatsEasyPayWallet',
+                                    isOptionalBasedOnCompletion: false,
+                                    isRequiredBasedOnCompletion: true,
+                                    isCompleted: _isEatsEasyPayWalletCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isEatsEasyPayWalletCompleted =
+                                            _checkEatsEasyPayWalletCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'TIN Number',
+                                    destination: '/tinNumber',
+                                    isOptionalBasedOnCompletion: true,
+                                    isRequiredBasedOnCompletion: false,
+                                    isCompleted: _isTINNumberCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isTINNumberCompleted =
+                                            _checkTINNumberCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'NBI Clearance',
+                                    destination: '/nbiClearance',
+                                    isOptionalBasedOnCompletion: true,
+                                    isRequiredBasedOnCompletion: false,
+                                    isCompleted: _isNBIClearanceCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isNBIClearanceCompleted =
+                                            _checkNBIClearanceCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'Emergency Contact',
+                                    destination: '/emergencyContact',
+                                    isOptionalBasedOnCompletion: true,
+                                    isRequiredBasedOnCompletion: false,
+                                    isCompleted: _isEmergencyContactCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isEmergencyContactCompleted =
+                                            _checkEmergencyContactCompleted();
+                                      });
+                                    },),
+                                  const SizedBox(height: 10),
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 20, bottom: 10),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Transport",
+                                              style: TextStyle(color: Colors.black,
+                                                  fontSize: 30,
+                                                  fontFamily: "Poppins",
+                                                  fontWeight: FontWeight.w700),
+                                            ),
+                                          ],
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  LinkTile(
+                                    title: 'Vehicle Info',
+                                    destination: '/vehicleInfo',
+                                    isOptionalBasedOnCompletion: false,
+                                    isRequiredBasedOnCompletion: true,
+                                    isCompleted: _isVehicleInfoCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isVehicleInfoCompleted =
+                                            _checkVehicleInfoCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'OR/CR',
+                                    destination: '/orCr',
+                                    isOptionalBasedOnCompletion: false,
+                                    isRequiredBasedOnCompletion: true,
+                                    isCompleted: _isORCRCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isORCRCompleted =
+                                            _checkORCRCompleted();
+                                      });
+                                    },),
+                                  LinkTile(
+                                    title: 'Vehicle Documents',
+                                    destination: '/vehicleDocs',
+                                    isOptionalBasedOnCompletion: true,
+                                    isRequiredBasedOnCompletion: false,
+                                    isCompleted: _isVehicleDocumentsCompleted,
+                                    updateCompletionStatus: () {
+                                      setState(() {
+                                        _isVehicleDocumentsCompleted =
+                                            _checkVehicleDocumentsCompleted();
+                                      });
+                                    },),
+
+                                  //spacing
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+
+                                  //submit button
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 20.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: ElevatedButton(
+                                            onPressed: isButtonPressed
+                                                ? null
+                                                : () => formValidation(),
+                                            // Register button styling
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: isButtonPressed
+                                                  ? Colors.grey
+                                                  : const Color.fromARGB(255, 242, 198, 65),
+                                              padding: const EdgeInsets.symmetric(vertical: 10),
+                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0),
+                                              ),
+                                              elevation: 4,
+                                              // Elevation for the shadow
+                                              shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                                            ),
+                                            child: Text(
+                                              isButtonPressed
+                                                  ? "Submitted"
+                                                  : "Submit",
+                                              style: TextStyle(
+                                                color: isButtonPressed
+                                                    ? Colors.black54
+                                                    : const Color.fromARGB(
+                                                    255, 67, 83, 89),
+                                                fontFamily: "Poppins",
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment
+                                        .center,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            sharedPreferences?.clear(),
+                                        child: const Text(
+                                          "RegistrationScreen2() Reset",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontFamily: "Poppins",
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  //spacing
+                                  const SizedBox(
+                                    height: 20,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          ],
-        ),
-        //appBar elevation/shadow
-        elevation: 2,
-        centerTitle: true,
-        leadingWidth: 40.0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-            onPressed: () async {
-              // Call _onWillPop to handle the back button press
-              final bool canPop = await _onWillPop();
-              if (canPop) {
-                Navigator.of(context).pop();
-              }
-            },
           ),
-        ),
-      ),
-      body: WillPopScope(
-        onWillPop: _onWillPop,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: ListView(
-            children: [
-              const SizedBox(height: 20),
-              const Row(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Complete your application and start driving with EatsEasy!",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color.fromARGB(255, 67, 83, 89),
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                        Text(
-                          "Provide the following information.",
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color.fromARGB(255, 67, 83, 89),
-                            fontFamily: "Poppins",
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: const Text(
-                  'Personal',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: "Poppins",
-                    color: Colors.black54,
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-
-              LinkTile(title: 'Personal Details', destination: '/personalDetails', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion : true, isCompleted: _isPersonalDetailsCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isPersonalDetailsCompleted = _checkPersonalDetailsCompleted();
-                });
-              },),
-              LinkTile(title: 'Driver License', destination: '/driversLicense', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isDriverLicenseCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isDriverLicenseCompleted = _checkDriverLicenseCompleted();
-                });
-              },),
-              LinkTile(title: 'Declarations', destination: '/declarations', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isDeclarationsCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isDeclarationsCompleted = _checkDeclarationsCompleted();
-                });
-              },),
-              LinkTile(title: 'Consents', destination: '/consents', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isConsentsCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isConsentsCompleted = _checkConsentsCompleted();
-                });
-              },),
-              LinkTile(title: 'EatsEasyPay Wallet', destination: '/eatsEasyPayWallet', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isEatsEasyPayWalletCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isEatsEasyPayWalletCompleted = _checkEatsEasyPayWalletCompleted();
-                });
-              },),
-              LinkTile(title: 'TIN Number', destination: '/tinNumber', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isTINNumberCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isTINNumberCompleted = _checkTINNumberCompleted();
-                });
-              },),
-              LinkTile(title: 'NBI Clearance', destination: '/nbiClearance', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isNBIClearanceCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isNBIClearanceCompleted = _checkNBIClearanceCompleted();
-                });
-              },),
-              LinkTile(title: 'Emergency Contact', destination: '/emergencyContact', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isEmergencyContactCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isEmergencyContactCompleted = _checkEmergencyContactCompleted();
-                });
-              },),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: const Text(
-                  'Transport',
-                  style: TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: "Poppins",
-                    color: Colors.black54,
-                  ),
-                  textAlign: TextAlign.left,
-                ),
-              ),
-              LinkTile(title: 'Vehicle Info', destination: '/vehicleInfo', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isVehicleInfoCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isVehicleInfoCompleted = _checkVehicleInfoCompleted();
-                });
-              },),
-              LinkTile(title: 'OR/CR', destination: '/orCr', isOptionalBasedOnCompletion: false, isRequiredBasedOnCompletion: true, isCompleted: _isORCRCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isORCRCompleted = _checkORCRCompleted();
-                });
-              },),
-              LinkTile(title: 'Vehicle Documents', destination: '/vehicleDocs', isOptionalBasedOnCompletion: true, isRequiredBasedOnCompletion: false, isCompleted: _isVehicleDocumentsCompleted, updateCompletionStatus: () {
-                setState(() {
-                  _isVehicleDocumentsCompleted = _checkVehicleDocumentsCompleted();
-                });
-              },),
-
-              //spacing
-              const SizedBox(
-                height: 20,
-              ),
-
-              //submit button
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: isButtonPressed ? null : () => formValidation(),
-                        // Register button styling
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          elevation: 4, // Elevation for the shadow
-                          shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                        ),
-                        child: Text(
-                          isButtonPressed ? "Submitted" : "Submit",
-                          style: TextStyle(
-                            color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.w700,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TextButton(
-                    onPressed: () => sharedPreferences?.clear(),
-                    child: const Text(
-                      "RegistrationScreen2() Reset",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontFamily: "Poppins",
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              //spacing
-              const SizedBox(
-                height: 20,
-              ),
-            ],
-          ),
-        ),
-      )
+        )
     );
   }
 }
@@ -680,9 +852,12 @@ class LinkTile extends StatelessWidget {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 18.0),
           child: Card(
-            elevation: 1,
+            color: Colors.white,
+            elevation: 3,
+            // Elevation for the shadow
+            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(10.0),
             ),
             child: InkWell(
               onTap: () {
@@ -700,7 +875,7 @@ class LinkTile extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 18.0,
                           fontFamily: "Poppins",
-                          color: Colors.black54,
+                          color: Colors.black,
                         ),
                       ),
                     ),

@@ -217,304 +217,327 @@ class _ConsentsScreenState extends State<ConsentsScreen> {
     additionalCheckboxes["Email"] = additionalConsentBox3;
     additionalCheckboxes["Push Notifications"] = additionalConsentBox4;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-        title: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "Consents",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 67, 83, 89),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        // appBar elevation/shadow
-        elevation: 2,
-        centerTitle: true,
-        leadingWidth: 40.0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-            onPressed: () async {
-              // Call _onWillPop to handle the back button press
-              final bool canPop = await _onWillPop();
-              if (canPop) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
-        ),
-      ),
-      body: WillPopScope(
-        onWillPop: _onWillPop,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                const SizedBox(height: 10),
-                Column(
-                  children: mainCheckboxes.keys.map((String text) {
-                    return CheckboxListTile(
-                      controlAffinity: ListTileControlAffinity.leading,
-                      title: Text(text,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontFamily: "Poppins", // Change the font family here
+        body: WillPopScope(
+          onWillPop: _onWillPop,
+          child: SizedBox(
+            height: MediaQuery
+                .of(context)
+                .size
+                .height,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                // Change mainAxisSize to MainAxisSize.min
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        image: const DecorationImage(
+                            image: AssetImage('images/background.png'), // Replace with your desired image
+                            fit: BoxFit.cover,
+                            opacity: 0.3
                         ),
-                      ),
-                      value: mainCheckboxes[text],
-                      onChanged: (bool? value) {
-                        setState(() {
-                          switch (text) {
-                            case "I agree to let EatsEasy collect, use, process, and share my personal data only for Relevant Purposes.":
-                              mainConsentBox1 = value!;
-                              break;
-                            case "I have read, understand, and agree to EatsEasy's Privacy Policy.":
-                              mainConsentBox2 = value!;
-                              break;
-                            case "I have read, understand, and agree to EatsEasy's Code of Conduct.":
-                              mainConsentBox3 = value!;
-                              break;
-                            case "I have read, understand, and agree to EatsEasy's Terms of Service.":
-                              mainConsentBox4 = value!;
-                              break;
-                          }
-                          changesSaved = false;
-                          isCompleted = false;
-                          isButtonPressedInConsents = false;
-                        });
-                      },
-                      side: BorderSide(color: isCheckboxesCompleted ? Colors.black : Colors.red), // Set border color
-                      fillColor: MaterialStateColor.resolveWith((states) {
-                        // Set fill color
-                        if (states.contains(MaterialState.selected)) {
-                          return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
-                        }
-                        return Colors.transparent; // Default color
-                      }),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 10),
-
-                Container(
-                  padding: const EdgeInsets.only(left: 18.0),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Offers from EatsEasy",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )),
-                          Text(" (Optional)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black45,
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-
-                      Text(
-                        "I would like to be contacted for promotions, events and other marketing purposes via:",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 67, 83, 89),
-                          fontFamily: "Poppins",
-                        ),// Text fading effect when it overflows
-                      ),
-                    ],
-                  ),
-                ),
-
-                Column(
-                  children: offersCheckboxes.keys.map((String text) {
-                    return CheckboxListTile(
-                      controlAffinity: ListTileControlAffinity.leading,
-                      title: Text(text,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontFamily: "Poppins", // Change the font family here
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter, colors: [
+                          Colors.orange.shade900,
+                          Colors.orange.shade800,
+                          Colors.orange.shade400
+                        ])),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 30,
                         ),
-                      ),
-                      value: offersCheckboxes[text],
-                      onChanged: (bool? value) {
-                        setState(() {
-                          switch (text) {
-                            case "SMS":
-                              offersConsentBox1 = value!;
-                              break;
-                            case "Call":
-                              offersConsentBox2 = value!;
-                              break;
-                            case "Email":
-                              offersConsentBox3 = value!;
-                              break;
-                            case "Push Notifications":
-                              offersConsentBox4 = value!;
-                              break;
-                          }
-                          changesSaved = false;
-                          isCompleted = false;
-                          isButtonPressedInConsents = false;
-                        });
-                      },
-                      side: const BorderSide(color: Colors.black), // Set border color
-                      fillColor: MaterialStateColor.resolveWith((states) {
-                        // Set fill color
-                        if (states.contains(MaterialState.selected)) {
-                          return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
-                        }
-                        return Colors.transparent; // Default color
-                      }),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.only(left: 18.0),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Additional Income Opportunities",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )),
-                          Text(" (Optional)",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.black45,
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w500,
-                              )),
-                        ],
-                      ),
-
-                      SizedBox(height: 10),
-
-                      Text(
-                        "I would like to be contacted for additional income opportunities via: ",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color.fromARGB(255, 67, 83, 89),
-                          fontFamily: "Poppins",
-                        ),// Text fading effect when it overflows
-                      ),
-                    ],
-                  ),
-                ),
-
-                Column(
-                  children: additionalCheckboxes.keys.map((String text) {
-                    return CheckboxListTile(
-                      controlAffinity: ListTileControlAffinity.leading,
-                      title: Text(text,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.black,
-                          fontFamily: "Poppins", // Change the font family here
-                        ),
-                      ),
-                      value: additionalCheckboxes[text],
-                      onChanged: (bool? value) {
-                        setState(() {
-                          switch (text) {
-                            case "SMS":
-                              additionalConsentBox1 = value!;
-                              break;
-                            case "Call":
-                              additionalConsentBox2 = value!;
-                              break;
-                            case "Email":
-                              additionalConsentBox3 = value!;
-                              break;
-                            case "Push Notifications":
-                              additionalConsentBox4 = value!;
-                              break;
-                          }
-                          changesSaved = false;
-                          isCompleted = false;
-                          isButtonPressedInConsents = false;
-                        });
-                      },
-                      side: const BorderSide(color: Colors.black), // Set border color
-                      fillColor: MaterialStateColor.resolveWith((states) {
-                        // Set fill color
-                        if (states.contains(MaterialState.selected)) {
-                          return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
-                        }
-                        return Colors.transparent; // Default color
-                      }),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: isButtonPressedInConsents ? null : () => _saveUserDataToPrefs(),
-                          // Register button styling
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isButtonPressedInConsents ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            elevation: 4, // Elevation for the shadow
-                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                          ),
-                          child: Text(
-                            isButtonPressedInConsents ? "Saved" : "Save",
-                            style: TextStyle(
-                              color: isButtonPressedInConsents ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20,
-                            ),
+                        const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Consents",
+                                    style: TextStyle(color: Colors.white,
+                                        fontSize: 45,
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        Container(
+                          decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(60),
+                                  topRight: Radius.circular(60))),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              children: [
+                                const SizedBox(height: 10),
+                                Column(
+                                  children: mainCheckboxes.keys.map((String text) {
+                                    return CheckboxListTile(
+                                      controlAffinity: ListTileControlAffinity.leading,
+                                      title: Text(text,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontFamily: "Poppins", // Change the font family here
+                                        ),
+                                      ),
+                                      value: mainCheckboxes[text],
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          switch (text) {
+                                            case "I agree to let EatsEasy collect, use, process, and share my personal data only for Relevant Purposes.":
+                                              mainConsentBox1 = value!;
+                                              break;
+                                            case "I have read, understand, and agree to EatsEasy's Privacy Policy.":
+                                              mainConsentBox2 = value!;
+                                              break;
+                                            case "I have read, understand, and agree to EatsEasy's Code of Conduct.":
+                                              mainConsentBox3 = value!;
+                                              break;
+                                            case "I have read, understand, and agree to EatsEasy's Terms of Service.":
+                                              mainConsentBox4 = value!;
+                                              break;
+                                          }
+                                          changesSaved = false;
+                                          isCompleted = false;
+                                          isButtonPressedInConsents = false;
+                                        });
+                                      },
+                                      side: BorderSide(color: isCheckboxesCompleted ? Colors.black : Colors.red), // Set border color
+                                      fillColor: MaterialStateColor.resolveWith((states) {
+                                        // Set fill color
+                                        if (states.contains(MaterialState.selected)) {
+                                          return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
+                                        }
+                                        return Colors.transparent; // Default color
+                                      }),
+                                    );
+                                  }).toList(),
+                                ),
+                                const SizedBox(height: 10),
+
+                                Container(
+                                  padding: const EdgeInsets.only(left: 18.0),
+                                  child: const Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text("Offers from EatsEasy",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                                fontWeight: FontWeight.w500,
+                                              )),
+                                          Text(" (Optional)",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black45,
+                                                fontFamily: "Poppins",
+                                                fontWeight: FontWeight.w500,
+                                              )),
+                                        ],
+                                      ),
+                                      SizedBox(height: 10),
+
+                                      Text(
+                                        "I would like to be contacted for promotions, events and other marketing purposes via:",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontFamily: "Poppins",
+                                        ),// Text fading effect when it overflows
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Column(
+                                  children: offersCheckboxes.keys.map((String text) {
+                                    return CheckboxListTile(
+                                      controlAffinity: ListTileControlAffinity.leading,
+                                      title: Text(text,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontFamily: "Poppins", // Change the font family here
+                                        ),
+                                      ),
+                                      value: offersCheckboxes[text],
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          switch (text) {
+                                            case "SMS":
+                                              offersConsentBox1 = value!;
+                                              break;
+                                            case "Call":
+                                              offersConsentBox2 = value!;
+                                              break;
+                                            case "Email":
+                                              offersConsentBox3 = value!;
+                                              break;
+                                            case "Push Notifications":
+                                              offersConsentBox4 = value!;
+                                              break;
+                                          }
+                                          changesSaved = false;
+                                          isCompleted = false;
+                                          isButtonPressedInConsents = false;
+                                        });
+                                      },
+                                      side: const BorderSide(color: Colors.black), // Set border color
+                                      fillColor: MaterialStateColor.resolveWith((states) {
+                                        // Set fill color
+                                        if (states.contains(MaterialState.selected)) {
+                                          return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
+                                        }
+                                        return Colors.transparent; // Default color
+                                      }),
+                                    );
+                                  }).toList(),
+                                ),
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.only(left: 18.0),
+                                  child: const Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text("Additional Income Opportunities",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                                fontWeight: FontWeight.w500,
+                                              )),
+                                          Text(" (Optional)",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black45,
+                                                fontFamily: "Poppins",
+                                                fontWeight: FontWeight.w500,
+                                              )),
+                                        ],
+                                      ),
+
+                                      SizedBox(height: 10),
+
+                                      Text(
+                                        "I would like to be contacted for additional income opportunities via: ",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontFamily: "Poppins",
+                                        ),// Text fading effect when it overflows
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Column(
+                                  children: additionalCheckboxes.keys.map((String text) {
+                                    return CheckboxListTile(
+                                      controlAffinity: ListTileControlAffinity.leading,
+                                      title: Text(text,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black,
+                                          fontFamily: "Poppins", // Change the font family here
+                                        ),
+                                      ),
+                                      value: additionalCheckboxes[text],
+                                      onChanged: (bool? value) {
+                                        setState(() {
+                                          switch (text) {
+                                            case "SMS":
+                                              additionalConsentBox1 = value!;
+                                              break;
+                                            case "Call":
+                                              additionalConsentBox2 = value!;
+                                              break;
+                                            case "Email":
+                                              additionalConsentBox3 = value!;
+                                              break;
+                                            case "Push Notifications":
+                                              additionalConsentBox4 = value!;
+                                              break;
+                                          }
+                                          changesSaved = false;
+                                          isCompleted = false;
+                                          isButtonPressedInConsents = false;
+                                        });
+                                      },
+                                      side: const BorderSide(color: Colors.black), // Set border color
+                                      fillColor: MaterialStateColor.resolveWith((states) {
+                                        // Set fill color
+                                        if (states.contains(MaterialState.selected)) {
+                                          return const Color.fromARGB(255, 242, 198, 65); // Color when checkbox is selected
+                                        }
+                                        return Colors.transparent; // Default color
+                                      }),
+                                    );
+                                  }).toList(),
+                                ),
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: isButtonPressedInConsents ? null : () => _saveUserDataToPrefs(),
+                                          // Register button styling
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isButtonPressedInConsents ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                                            padding: const EdgeInsets.symmetric(vertical: 10),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                            ),
+                                            elevation: 4, // Elevation for the shadow
+                                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                                          ),
+                                          child: Text(
+                                            isButtonPressedInConsents ? "Saved" : "Save",
+                                            style: TextStyle(
+                                              color: isButtonPressedInConsents ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                                              fontFamily: "Poppins",
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 20),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        )
     );
   }
 }

@@ -76,7 +76,7 @@ class _CameraWidgetState extends State<CameraWidget> {
                     fontSize: 25,
                     fontFamily: "Poppins",
                     fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 67, 83, 89),
+                    color: Colors.black,
                   ),
                 ),
               ],

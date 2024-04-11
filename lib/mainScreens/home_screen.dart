@@ -1,9 +1,5 @@
-
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
-import '../authentication/auth_screen.dart';
 import '../global/global.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -38,8 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           onPressed: () {
             firebaseAuth.signOut();
-            Route newRoute = MaterialPageRoute(builder: (c) => const AuthScreen());
-            Navigator.pushReplacement(context, newRoute);
+            Navigator.pushReplacementNamed(context, '/logInScreen');
           },
         ),
       ),

@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:eatseasy_riders_app/authentication/auth_screen.dart';
 import 'package:eatseasy_riders_app/global/global.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +11,6 @@ class MySplashScreen extends StatefulWidget {
 
 class _MySplashScreenState extends State<MySplashScreen> {
   startTimer() {
-
     //Splash Screen wait 4 seconds
     Timer(const Duration(seconds: 4), () async {
 
@@ -23,7 +20,7 @@ class _MySplashScreenState extends State<MySplashScreen> {
       }
       //If vendor is not logged in send them to Authentication and LogIn screen
       else {
-        Navigator.pushReplacementNamed(context, '/authScreen');
+        Navigator.pushReplacementNamed(context, '/logInScreen');
       }
     });
   }

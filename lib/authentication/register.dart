@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatseasy_riders_app/authentication/register2.dart';
 import 'package:flutter/material.dart';
@@ -491,920 +492,952 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-            title: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+      body: WillPopScope(
+        onWillPop: _onWillPop,
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.max, // Change mainAxisSize to MainAxisSize.min
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Text("EatsEasy",
-                        style: TextStyle(
-                            fontSize: 30,
-                            fontFamily: "Poppins",
-                            fontWeight: FontWeight.w800,
-                            color: Color.fromARGB(255, 67, 83, 89))),
-                    Text(" register",
-                        style: TextStyle(
-                            fontSize: 25,
-                            fontFamily: "Poppins",
-                            fontStyle: FontStyle.italic,
-                            color: Color.fromARGB(255, 67, 83, 89))),
-                  ],
-                ),
-              ],
-            ),
-          //appBar elevation/shadow
-          elevation: 2,
-          centerTitle: true,
-          leadingWidth: 40.0,
-          leading: Padding(
-            padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
-            child: IconButton(
-              icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-              onPressed: () async {
-                // Call _onWillPop to handle the back button press
-                final bool canPop = await _onWillPop();
-                if (canPop) {
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ),
-        ),
-
-        //Register body
-        body: WillPopScope(
-          onWillPop: _onWillPop,
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  const SizedBox(height: 10),
-                   Row(
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                      image: const DecorationImage(
+                        image: AssetImage('images/background.png'), // Replace with your desired image
+                        fit: BoxFit.cover,
+                        opacity: 0.3
+                      ),
+                      gradient: LinearGradient(begin: Alignment.topCenter, colors: [
+                        Colors.orange.shade900,
+                        Colors.orange.shade800,
+                        Colors.orange.shade400
+                      ])),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 20),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Be part of EatsEasy Riders!",
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontFamily: "Poppins",
-                                  color: Color.fromARGB(255, 67, 83, 89),
-                                )),
-                            const SizedBox(height: 10),
-                            const Text(
-                              "Fill-out the required details and start driving with EatsEasy!",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                              ),
-                            ),
-                            const Text(
-                              "Please provide the following information.",
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                              ),
-                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                const Text(
-                                  "View the requirements",
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontFamily: "Poppins",
-                                    color: Colors.black54,
-                                  ),
+                                /*IconButton(
+                                  icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
+                                  onPressed: () async {
+                                    // Call _onWillPop to handle the back button press
+                                    final bool canPop = await _onWillPop();
+                                    if (canPop) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                ),*/
+                                Text(
+                                  "EatsEasy",
+                                  style: TextStyle(color: Colors.white, fontSize: 45, fontFamily: "Poppins", fontWeight: FontWeight.w700),
                                 ),
-
-                                TextButton(
-                                  onPressed: () => _showPreviewDialog(),
-                                  child: const Text(
-                                    "here!",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: "Poppins",
-                                      color: Color.fromARGB(255, 242, 198, 65),
-                                    ),
-                                  ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  "register",
+                                  style: TextStyle(color: Colors.white, fontSize: 23, fontFamily: "Poppins", fontStyle: FontStyle.italic),
                                 ),
                               ],
                             )
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                  //Text Fields
-                  Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-                          //City text field
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0E3E7),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _isCityControllerInvalid ? Colors.red : Colors.transparent,
-                              ),
-                            ),
-                            child: DropdownButtonFormField2<String>(
-                              isExpanded: true,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                              ),
-                              hint: const Text(
-                                'Select your City',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              items: _cities.map((item) => DropdownMenuItem<String>(
-                                value: item,
-                                child: Text(
-                                  item,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ))
-                                  .toList(),
-                              validator: (value) {
-                                if (value == null) {
-                                  return 'Select your city';
-                                }
-                                return null;
-                              },
-                              onChanged: (value) {
-                                setState(() {
-                                  changesSaved = false;
-                                  cityController = value.toString();
-                                  _isCityControllerInvalid = false;
-                                });
-                              },
-                              buttonStyleData: const ButtonStyleData(
-                                padding: EdgeInsets.only(right: 8),
-                              ),
-                              iconStyleData: const IconStyleData(
-                                icon: Icon(
-                                  Icons.arrow_drop_down,
-                                  color: Colors.black45,
-                                ),
-                                iconSize: 24,
-                              ),
-                              dropdownStyleData: DropdownStyleData(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              menuItemStyleData: const MenuItemStyleData(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                              ),
-                            ),
-                          ),
-
-                          //Show "Please enter your city"
-                          if (_isCityControllerInvalid == true)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                      FadeInUp(
+                          duration: const Duration(milliseconds: 300),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(60),
+                                    topRight: Radius.circular(60))),
+                            child: Padding(
+                              padding: const EdgeInsets.all(15),
+                              child:  Column(
+                                mainAxisSize: MainAxisSize.max,
+                                children: [
+                                  const SizedBox(height: 15),
+                                  Row(
                                     children: [
-                                      SizedBox(height: 2),
-                                      Text("Please enter your city",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 20),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text("Be part of EatsEasy Riders!",
+                                                style: TextStyle(
+                                                    fontSize: 30,
+                                                    fontFamily: "Poppins",
+                                                    color: Colors.black,
+                                                    fontWeight: FontWeight.w600
+                                                )),
+                                            const SizedBox(height: 10),
+                                            const Text(
+                                              "Fill-out the required details and start driving with EatsEasy!",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                              ),
+                                            ),
+                                            const Text(
+                                              "Please provide the following information.",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: Colors.black,
+                                                fontFamily: "Poppins",
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  "View the requirements",
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontFamily: "Poppins",
+                                                    color: Colors.black54,
+                                                  ),
+                                                ),
 
-                          //Service type dropdown
-                          Container(
-                            padding: const EdgeInsets.all(4),
-                            margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0E3E7),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _isServiceTypeEmpty ? Colors.red : Colors.transparent,
-                              ),
-                            ),
-                            child: DropdownButtonFormField2<Map<String, dynamic>>(
-                              isExpanded: true,
-                              decoration: const InputDecoration(
-                                border: InputBorder.none,
-                              ),
-                              hint: const Text(
-                                'Select your service type*',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              items: _serviceTypeDropdownItemsWithIcons.map((item) {
-                                return DropdownMenuItem<Map<String, dynamic>>(
-                                  value: item,
-                                  child: Row(
-                                    children: [
-                                      Icon(item['icon']), // Icon
-                                      const SizedBox(width: 10),
-                                      Text(item['text'], style: const TextStyle(fontSize: 16)),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                              validator: (value) {
-                                if (value == null) {
-                                  return 'Select your service type*';
-                                }
-                                return null;
-                              },
-                              onChanged: (value) {
-                                setState(() {
-                                  changesSaved = false;
-                                  _isServiceTypeEmpty = false;
-                                  serviceTypeController = value?['text']; // Extracting text from the selected item
-                                });
-                              },
-                              buttonStyleData: const ButtonStyleData(
-                                padding: EdgeInsets.only(right: 8),
-                              ),
-                              iconStyleData: const IconStyleData(
-                                icon: Icon(
-                                  Icons.arrow_drop_down,
-                                  color: Colors.black45,
-                                ),
-                                iconSize: 24,
-                              ),
-                              dropdownStyleData: DropdownStyleData(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                              ),
-                              menuItemStyleData: const MenuItemStyleData(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                              ),
-                            ),
-                          ),
-
-                          //Show "Please select your service type"
-                          if (_isServiceTypeEmpty == true)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 2),
-                                      Text("Please select your service type",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                //Last name text field
-                                child: CustomTextField(
-                                    data: Icons.person_2_rounded,
-                                    controller: lastNameController,
-                                    hintText: "Last Name*",
-                                    isObsecure: false,
-                                    keyboardType: TextInputType.text,
-                                    textCapitalization: TextCapitalization.sentences,
-                                    redBorder: _isLastNameControllerInvalid,
-                                    noLeftMargin: false,
-                                    noRightMargin: true,
-                                    onChanged:(value) {
-                                      setState(() {
-                                        changesSaved = false;
-                                        _isLastNameControllerInvalid = false;
-                                      });
-                                    }
-                                ),
-                              ),
-
-                              //Suffix text field
-                              Expanded(
-                                flex: 1,
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE0E3E7),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: DropdownButtonFormField2<String>(
-                                    isExpanded: true,
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                    ),
-                                    hint: const Text('Suffix',
-                                      style: TextStyle(fontSize: 16),
-                                    ),
-                                    items: _suffixDropdownItems.map((item) => DropdownMenuItem<String>(
-                                      value: item,
-                                      child: Text(item,
-                                        style: const TextStyle(
-                                          fontSize: 16,
+                                                TextButton(
+                                                  onPressed: () => _showPreviewDialog(),
+                                                  child: const Text(
+                                                    "here!",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontFamily: "Poppins",
+                                                      color: Color.fromARGB(255, 242, 198, 65),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          ],
                                         ),
                                       ),
-                                    ))
-                                        .toList(),
-                                    validator: (value) {
-                                      if (value == null) {
-                                        return 'Suffix';
-                                      }
-                                      return null;
-                                    },
-                                    onChanged: (value) {
-                                      setState(() {
-                                        changesSaved = false;
-                                        suffixController = value.toString();
-                                      });
-                                    },
-                                    buttonStyleData: const ButtonStyleData(
-                                      padding: EdgeInsets.only(right: 8),
-                                    ),
-                                    iconStyleData: const IconStyleData(
-                                      icon: Icon(Icons.arrow_drop_down,
-                                        color: Colors.black45,
-                                      ),
-                                      iconSize: 24,
-                                    ),
-                                    dropdownStyleData: DropdownStyleData(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                    ),
-                                    menuItemStyleData: const MenuItemStyleData(
-                                      padding: EdgeInsets.symmetric(horizontal: 16),
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-
-                          //Show "Please enter your last name"
-                          if (_isLastNameControllerInvalid == true)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 2),
-                                      Text("Please enter your last name",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
-                                      ),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
-
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                //Firstname text field
-                                child: CustomTextField(
-                                    data: Icons.person_2_rounded,
-                                    controller: firstNameController,
-                                    hintText: "First Name*",
-                                    isObsecure: false,
-                                    keyboardType: TextInputType.text,
-                                    textCapitalization: TextCapitalization.sentences,
-                                    redBorder: _isFirstNameControllerInvalid,
-                                    noLeftMargin: false,
-                                    noRightMargin: true,
-                                    onChanged:(value) {
-                                      setState(() {
-                                        changesSaved = false;
-                                        _isFirstNameControllerInvalid = false;
-                                      });
-                                    }
-                                ),
-                              ),
-
-                              //Middle Initial text field
-                              Expanded(
-                                flex: 1,
-                                child: CustomTextField(
-                                  data: null,
-                                  controller: middleInitialController,
-                                  hintText: "Middle In.",
-                                  isObsecure: false,
-                                  keyboardType: TextInputType.text,
-                                  textCapitalization: TextCapitalization.sentences,
-                                  noLeftMargin: true,
-                                  noRightMargin: false,
-                                  redBorder: false,
-                                  onChanged: (value) {
-                                    changesSaved = false;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          //Show "Please enter your first name"
-                          if (_isLastNameControllerInvalid == true)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 2),
-                                      Text("Please enter your first name",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                          //Contact number text field,
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 2,
-                                child: CustomTextField(
-                                  data: Icons.phone,
-                                  hintText: "+63",
-                                  isObsecure: false,
-                                  keyboardType: TextInputType.none,
-                                  noLeftMargin: false,
-                                  noRightMargin: true,
-                                  redBorder: false,
-                                  enabled: false,
-                                ),
-                              ),
-
-                              Expanded(
-                                flex: 5,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE0E3E7),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: _isContactNumberControllerInvalid
-                                          ? Colors.red
-                                          : _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.all(4),
-                                  margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
-                                  child: LayoutBuilder(
-                                    builder: (BuildContext context, BoxConstraints constraints) {
-                                      double maxWidth = MediaQuery.of(context).size.width * 0.9;
-                                      return ConstrainedBox(
-                                        constraints: BoxConstraints(maxWidth: maxWidth),
-                                        child: TextFormField(
-                                          enabled: true,
-                                          controller: contactNumberController,
-                                          obscureText: false,
-                                          cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                                          keyboardType: TextInputType.phone,
-                                          decoration: InputDecoration(
-                                            border: InputBorder.none,
-                                            focusColor: Theme.of(context).primaryColor,
-                                            hintText: "Contact Number*",
-                                          ),
-                                          onChanged: (value) {
-                                            setState(() {
-                                              changesSaved = false;
-                                              _isUserTypingContactNumber = true;
-                                              _isContactNumberControllerInvalid = false;
-                                            });
-                                            if (value.length == 10) {
-                                              setState(() {
-                                                isContactNumberCompleted = true;
-                                              });
-                                            }
-                                            else {
-                                              if (contactNumberController.text.isEmpty) {
-                                                setState(() {
-                                                  _isUserTypingContactNumber = false;
-                                                });
-                                              }
-                                              else {
-                                                setState(() {
-                                                  isContactNumberCompleted = false;
-                                                });
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-
-                          //Show "Invalid Contact number"
-                          if ((_isUserTypingContactNumber &&
-                              isContactNumberCompleted == false) || _isContactNumberControllerInvalid)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 2),
-                                      Text("Enter a valid contact number",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                          //Email text field
-                          CustomTextField(
-                              data: Icons.email_rounded,
-                              controller: emailController,
-                              hintText: "Email*",
-                              isObsecure: false,
-                              keyboardType: TextInputType.emailAddress,
-                              redBorder: _isEmailControllerInvalid,
-                              noLeftMargin: false,
-                              noRightMargin: false,
-                              onChanged:(value) {
-                                setState(() {
-
-                                  changesSaved = false;
-                                  _isEmailControllerInvalid = false;
-                                });
-                              }
-                          ),
-
-                          //Show "Please enter your valid email format"
-                          if (_isEmailControllerInvalid == true)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 2),
-                                      Text("Please enter your valid email format",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                          //Password text field
-                          Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0E3E7),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _isPasswordControllerInvalid
-                                    ? Colors.red
-                                    : _isUserTypingPassword ? (_isPasswordValidated() ? Colors.green : Colors.red) : Colors.transparent,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(4),
-                            margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                            child: LayoutBuilder(
-                              builder: (BuildContext context, BoxConstraints constraints) {
-                                double maxWidth = MediaQuery.of(context).size.width * 0.9;
-                                return ConstrainedBox(
-                                  constraints: BoxConstraints(maxWidth: maxWidth),
-                                  child: TextFormField(
-                                      enabled: true,
-                                      controller: passwordController,
-                                      obscureText: _obscureText,
-                                      cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                                      keyboardType: TextInputType.text,
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        prefixIcon: const Icon(Icons.password_rounded, color: Color.fromARGB(255, 67, 83, 89)),
-                                        suffixIcon: IconButton(
-                                          icon: Icon(passwordController.text.isNotEmpty
-                                              ? (_obscureText ? Icons.visibility : Icons.visibility_off)
-                                              : null,
-                                          ),
-                                          onPressed: () {
-                                            setState(() {
-                                              _obscureText = !_obscureText;
-                                            });
-                                          },
-                                        ),
-                                        focusColor: Theme.of(context).primaryColor,
-                                        hintText: "Password*",
-                                      ),
-                                      onChanged: (value) {
-                                        changesSaved = false;
-                                        _isPasswordControllerInvalid = false;
-                                        _validatePassword(value);
-                                      }
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-
-                          //Validation notifier
-                          if (_isUserTypingPassword)
-                            Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const SizedBox(height: 10),
-                                      const Text(
-                                        "Password must contain: ",
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontFamily: "Poppins",
-                                          color: Color.fromARGB(255, 67, 83, 89),
-                                        ),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                  //Text Fields
+                                  Form(
+                                      key: _formKey,
+                                      child: Column(
                                         children: [
-                                          _buildValidationRow(
-                                            'At least one uppercase letter',
-                                            _hasUpperCase,
+                                          //City text field
+                                          Container(
+                                            padding: const EdgeInsets.all(4),
+                                            margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFE0E3E7),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: _isCityControllerInvalid ? Colors.red : Colors.transparent,
+                                              ),
+                                            ),
+                                            child: DropdownButtonFormField2<String>(
+                                              isExpanded: true,
+                                              decoration: const InputDecoration(
+                                                border: InputBorder.none,
+                                              ),
+                                              hint: const Text(
+                                                'Select your City',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              items: _cities.map((item) => DropdownMenuItem<String>(
+                                                value: item,
+                                                child: Text(
+                                                  item,
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ))
+                                                  .toList(),
+                                              validator: (value) {
+                                                if (value == null) {
+                                                  return 'Select your city';
+                                                }
+                                                return null;
+                                              },
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  changesSaved = false;
+                                                  cityController = value.toString();
+                                                  _isCityControllerInvalid = false;
+                                                });
+                                              },
+                                              buttonStyleData: const ButtonStyleData(
+                                                padding: EdgeInsets.only(right: 8),
+                                              ),
+                                              iconStyleData: const IconStyleData(
+                                                icon: Icon(
+                                                  Icons.arrow_drop_down,
+                                                  color: Colors.black45,
+                                                ),
+                                                iconSize: 24,
+                                              ),
+                                              dropdownStyleData: DropdownStyleData(
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(15),
+                                                ),
+                                              ),
+                                              menuItemStyleData: const MenuItemStyleData(
+                                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                              ),
+                                            ),
                                           ),
-                                          _buildValidationRow(
-                                            'At least one lowercase letter',
-                                            _hasLowerCase,
+
+                                          //Show "Please enter your city"
+                                          if (_isCityControllerInvalid == true)
+                                            const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(height: 2),
+                                                      Text("Please enter your city",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontFamily: "Poppins",
+                                                            color: Colors.red,
+                                                          )
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          //Service type dropdown
+                                          Container(
+                                            padding: const EdgeInsets.all(4),
+                                            margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFE0E3E7),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: _isServiceTypeEmpty ? Colors.red : Colors.transparent,
+                                              ),
+                                            ),
+                                            child: DropdownButtonFormField2<Map<String, dynamic>>(
+                                              isExpanded: true,
+                                              decoration: const InputDecoration(
+                                                border: InputBorder.none,
+                                              ),
+                                              hint: const Text(
+                                                'Select your service type*',
+                                                style: TextStyle(fontSize: 16),
+                                              ),
+                                              items: _serviceTypeDropdownItemsWithIcons.map((item) {
+                                                return DropdownMenuItem<Map<String, dynamic>>(
+                                                  value: item,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(item['icon']), // Icon
+                                                      const SizedBox(width: 10),
+                                                      Text(item['text'], style: const TextStyle(fontSize: 16)),
+                                                    ],
+                                                  ),
+                                                );
+                                              }).toList(),
+                                              validator: (value) {
+                                                if (value == null) {
+                                                  return 'Select your service type*';
+                                                }
+                                                return null;
+                                              },
+                                              onChanged: (value) {
+                                                setState(() {
+                                                  changesSaved = false;
+                                                  _isServiceTypeEmpty = false;
+                                                  serviceTypeController = value?['text']; // Extracting text from the selected item
+                                                });
+                                              },
+                                              buttonStyleData: const ButtonStyleData(
+                                                padding: EdgeInsets.only(right: 8),
+                                              ),
+                                              iconStyleData: const IconStyleData(
+                                                icon: Icon(
+                                                  Icons.arrow_drop_down,
+                                                  color: Colors.black45,
+                                                ),
+                                                iconSize: 24,
+                                              ),
+                                              dropdownStyleData: DropdownStyleData(
+                                                decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(15),
+                                                ),
+                                              ),
+                                              menuItemStyleData: const MenuItemStyleData(
+                                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                              ),
+                                            ),
                                           ),
-                                          _buildValidationRow(
-                                            'At least one number',
-                                            _hasNumber,
+
+                                          //Show "Please select your service type"
+                                          if (_isServiceTypeEmpty == true)
+                                            const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(height: 2),
+                                                      Text("Please select your service type",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontFamily: "Poppins",
+                                                            color: Colors.red,
+                                                          )
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 6,
+                                                //Last name text field
+                                                child: CustomTextField(
+                                                    data: Icons.person_2_rounded,
+                                                    controller: lastNameController,
+                                                    hintText: "Last Name*",
+                                                    isObsecure: false,
+                                                    keyboardType: TextInputType.text,
+                                                    textCapitalization: TextCapitalization.sentences,
+                                                    redBorder: _isLastNameControllerInvalid,
+                                                    noLeftMargin: false,
+                                                    noRightMargin: true,
+                                                    onChanged:(value) {
+                                                      setState(() {
+                                                        changesSaved = false;
+                                                        _isLastNameControllerInvalid = false;
+                                                      });
+                                                    }
+                                                ),
+                                              ),
+
+                                              //Suffix text field
+                                              Expanded(
+                                                flex: 4,
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(4),
+                                                  margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(0xFFE0E3E7),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                  ),
+                                                  child: DropdownButtonFormField2<String>(
+                                                    isExpanded: true,
+                                                    decoration: const InputDecoration(
+                                                      border: InputBorder.none,
+                                                    ),
+                                                    hint: const Text('Suffix',
+                                                      style: TextStyle(fontSize: 16),
+                                                    ),
+                                                    items: _suffixDropdownItems.map((item) => DropdownMenuItem<String>(
+                                                      value: item,
+                                                      child: Text(item,
+                                                        style: const TextStyle(
+                                                          fontSize: 16,
+                                                        ),
+                                                      ),
+                                                    ))
+                                                        .toList(),
+                                                    validator: (value) {
+                                                      if (value == null) {
+                                                        return 'Suffix';
+                                                      }
+                                                      return null;
+                                                    },
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        changesSaved = false;
+                                                        suffixController = value.toString();
+                                                      });
+                                                    },
+                                                    buttonStyleData: const ButtonStyleData(
+                                                      padding: EdgeInsets.only(right: 8),
+                                                    ),
+                                                    iconStyleData: const IconStyleData(
+                                                      icon: Icon(Icons.arrow_drop_down,
+                                                        color: Colors.black45,
+                                                      ),
+                                                      iconSize: 24,
+                                                    ),
+                                                    dropdownStyleData: DropdownStyleData(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(15),
+                                                      ),
+                                                    ),
+                                                    menuItemStyleData: const MenuItemStyleData(
+                                                      padding: EdgeInsets.symmetric(horizontal: 16),
+                                                    ),
+                                                  ),
+                                                ),
+                                              )
+                                            ],
                                           ),
-                                          _buildValidationRow(
-                                            'Minimum of 8 characters',
-                                            _hasEightChar,
+
+                                          //Show "Please enter your last name"
+                                          if (_isLastNameControllerInvalid == true)
+                                            const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(height: 2),
+                                                      Text("Please enter your last name",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontFamily: "Poppins",
+                                                            color: Colors.red,
+                                                          )
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 3,
+                                                //Firstname text field
+                                                child: CustomTextField(
+                                                    data: Icons.person_2_rounded,
+                                                    controller: firstNameController,
+                                                    hintText: "First Name*",
+                                                    isObsecure: false,
+                                                    keyboardType: TextInputType.text,
+                                                    textCapitalization: TextCapitalization.sentences,
+                                                    redBorder: _isFirstNameControllerInvalid,
+                                                    noLeftMargin: false,
+                                                    noRightMargin: true,
+                                                    onChanged:(value) {
+                                                      setState(() {
+                                                        changesSaved = false;
+                                                        _isFirstNameControllerInvalid = false;
+                                                      });
+                                                    }
+                                                ),
+                                              ),
+
+                                              //Middle Initial text field
+                                              Expanded(
+                                                flex: 1,
+                                                child: CustomTextField(
+                                                  data: null,
+                                                  controller: middleInitialController,
+                                                  hintText: "Middle In.",
+                                                  isObsecure: false,
+                                                  keyboardType: TextInputType.text,
+                                                  textCapitalization: TextCapitalization.sentences,
+                                                  noLeftMargin: true,
+                                                  noRightMargin: false,
+                                                  redBorder: false,
+                                                  onChanged: (value) {
+                                                    changesSaved = false;
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                          //Show "Please enter your first name"
+                                          if (_isLastNameControllerInvalid == true)
+                                            const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(height: 2),
+                                                      Text("Please enter your first name",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontFamily: "Poppins",
+                                                            color: Colors.red,
+                                                          )
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          //Contact number text field,
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 2,
+                                                child: CustomTextField(
+                                                  data: Icons.phone,
+                                                  hintText: "+63",
+                                                  isObsecure: false,
+                                                  keyboardType: TextInputType.none,
+                                                  noLeftMargin: false,
+                                                  noRightMargin: true,
+                                                  redBorder: false,
+                                                  enabled: false,
+                                                ),
+                                              ),
+
+                                              Expanded(
+                                                flex: 5,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(0xFFE0E3E7),
+                                                    borderRadius: BorderRadius.circular(12),
+                                                    border: Border.all(
+                                                      color: _isContactNumberControllerInvalid
+                                                          ? Colors.red
+                                                          : _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
+                                                    ),
+                                                  ),
+                                                  padding: const EdgeInsets.all(4),
+                                                  margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                                                  child: LayoutBuilder(
+                                                    builder: (BuildContext context, BoxConstraints constraints) {
+                                                      double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                                                      return ConstrainedBox(
+                                                        constraints: BoxConstraints(maxWidth: maxWidth),
+                                                        child: TextFormField(
+                                                          enabled: true,
+                                                          controller: contactNumberController,
+                                                          obscureText: false,
+                                                          cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                                          keyboardType: TextInputType.phone,
+                                                          decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            focusColor: Theme.of(context).primaryColor,
+                                                            hintText: "Contact Number*",
+                                                          ),
+                                                          onChanged: (value) {
+                                                            setState(() {
+                                                              changesSaved = false;
+                                                              _isUserTypingContactNumber = true;
+                                                              _isContactNumberControllerInvalid = false;
+                                                            });
+                                                            if (value.length == 10) {
+                                                              setState(() {
+                                                                isContactNumberCompleted = true;
+                                                              });
+                                                            }
+                                                            else {
+                                                              if (contactNumberController.text.isEmpty) {
+                                                                setState(() {
+                                                                  _isUserTypingContactNumber = false;
+                                                                });
+                                                              }
+                                                              else {
+                                                                setState(() {
+                                                                  isContactNumberCompleted = false;
+                                                                });
+                                                              }
+                                                            }
+                                                          },
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                          //Show "Invalid Contact number"
+                                          if ((_isUserTypingContactNumber &&
+                                              isContactNumberCompleted == false) || _isContactNumberControllerInvalid)
+                                            const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(height: 2),
+                                                      Text("Enter a valid contact number",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontFamily: "Poppins",
+                                                            color: Colors.red,
+                                                          )
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          //Email text field
+                                          CustomTextField(
+                                              data: Icons.email_rounded,
+                                              controller: emailController,
+                                              hintText: "Email*",
+                                              isObsecure: false,
+                                              keyboardType: TextInputType.emailAddress,
+                                              redBorder: _isEmailControllerInvalid,
+                                              noLeftMargin: false,
+                                              noRightMargin: false,
+                                              onChanged:(value) {
+                                                setState(() {
+
+                                                  changesSaved = false;
+                                                  _isEmailControllerInvalid = false;
+                                                });
+                                              }
+                                          ),
+
+                                          //Show "Please enter your valid email format"
+                                          if (_isEmailControllerInvalid == true)
+                                            const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(height: 2),
+                                                      Text("Please enter your valid email format",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontFamily: "Poppins",
+                                                            color: Colors.red,
+                                                          )
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          //Password text field
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFE0E3E7),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: _isPasswordControllerInvalid
+                                                    ? Colors.red
+                                                    : _isUserTypingPassword ? (_isPasswordValidated() ? Colors.green : Colors.red) : Colors.transparent,
+                                              ),
+                                            ),
+                                            padding: const EdgeInsets.all(4),
+                                            margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                                            child: LayoutBuilder(
+                                              builder: (BuildContext context, BoxConstraints constraints) {
+                                                double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                                                return ConstrainedBox(
+                                                  constraints: BoxConstraints(maxWidth: maxWidth),
+                                                  child: TextFormField(
+                                                      enabled: true,
+                                                      controller: passwordController,
+                                                      obscureText: _obscureText,
+                                                      cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                                      keyboardType: TextInputType.text,
+                                                      decoration: InputDecoration(
+                                                        border: InputBorder.none,
+                                                        prefixIcon: const Icon(Icons.password_rounded, color: Color.fromARGB(255, 67, 83, 89)),
+                                                        suffixIcon: IconButton(
+                                                          icon: Icon(passwordController.text.isNotEmpty
+                                                              ? (_obscureText ? Icons.visibility : Icons.visibility_off)
+                                                              : null,
+                                                          ),
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              _obscureText = !_obscureText;
+                                                            });
+                                                          },
+                                                        ),
+                                                        focusColor: Theme.of(context).primaryColor,
+                                                        hintText: "Password*",
+                                                      ),
+                                                      onChanged: (value) {
+                                                        changesSaved = false;
+                                                        _isPasswordControllerInvalid = false;
+                                                        _validatePassword(value);
+                                                      }
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+
+                                          //Validation notifier
+                                          if (_isUserTypingPassword)
+                                            Row(
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      const SizedBox(height: 10),
+                                                      const Text(
+                                                        "Password must contain: ",
+                                                        style: TextStyle(
+                                                          fontSize: 15,
+                                                          fontFamily: "Poppins",
+                                                          color: Colors.black,
+                                                        ),
+                                                      ),
+                                                      Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          _buildValidationRow(
+                                                            'At least one uppercase letter',
+                                                            _hasUpperCase,
+                                                          ),
+                                                          _buildValidationRow(
+                                                            'At least one lowercase letter',
+                                                            _hasLowerCase,
+                                                          ),
+                                                          _buildValidationRow(
+                                                            'At least one number',
+                                                            _hasNumber,
+                                                          ),
+                                                          _buildValidationRow(
+                                                            'Minimum of 8 characters',
+                                                            _hasEightChar,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          //Show "Please provide a strong password"
+                                          if (_isPasswordControllerInvalid == true)
+                                            const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(height: 2),
+                                                      Text("Please provide a strong password",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontFamily: "Poppins",
+                                                            color: Colors.red,
+                                                          )
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          //Confirm password text field
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFE0E3E7),
+                                              borderRadius: BorderRadius.circular(12),
+                                              border: Border.all(
+                                                color: _isConfirmPasswordControllerInvalid
+                                                    ? Colors.red
+                                                    : _isUserTypingConfirmPassword ? (_isPasswordMatched ? Colors.green : Colors.red) : Colors.transparent,
+                                              ),
+                                            ),
+                                            padding: const EdgeInsets.all(4),
+                                            margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
+                                            child: LayoutBuilder(
+                                              builder: (BuildContext context, BoxConstraints constraints) {
+                                                double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                                                return ConstrainedBox(
+                                                  constraints: BoxConstraints(maxWidth: maxWidth),
+                                                  child: TextFormField(
+                                                      enabled: true,
+                                                      controller: confirmPasswordController,
+                                                      obscureText: _obscureText,
+                                                      cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                                      keyboardType: TextInputType.text,
+                                                      decoration: InputDecoration(
+                                                        border: InputBorder.none,
+                                                        prefixIcon: const Icon(Icons.password_rounded, color: Color.fromARGB(255, 67, 83, 89)),
+                                                        suffixIcon: IconButton(
+                                                          icon: Icon(confirmPasswordController.text.isNotEmpty
+                                                              ? (_obscureText ? Icons.visibility : Icons.visibility_off)
+                                                              : null,
+                                                          ),
+                                                          onPressed: () {
+                                                            setState(() {
+                                                              _obscureText = !_obscureText;
+                                                            });
+                                                          },
+                                                        ),
+                                                        focusColor: Theme.of(context).primaryColor,
+                                                        hintText: 'Confirm Password*',
+                                                      ),
+                                                      onChanged: (value) {
+                                                        setState(() {
+                                                          changesSaved = false;
+                                                          _isUserTypingConfirmPassword = true;
+                                                          _isConfirmPasswordControllerInvalid = false;
+                                                        });
+
+                                                        _matchPassword();
+                                                      }
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+
+                                          //Show "Passwords don't match"
+                                          if (_isUserTypingConfirmPassword && _isPasswordMatched == false)
+                                            const Row(
+                                              children: [
+                                                Padding(
+                                                  padding: EdgeInsets.only(left: 35),
+                                                  child: Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(height: 10),
+                                                      Text("Passwords don't match",
+                                                          style: TextStyle(
+                                                            fontSize: 14,
+                                                            fontFamily: "Poppins",
+                                                            color: Colors.red,
+                                                          )
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                        ],
+                                      )),
+
+                                  //spacing
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+
+                                  //Submit button
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: ElevatedButton(
+                                            onPressed: isButtonPressed
+                                                ? null
+                                                : changesSaved
+                                                ? _navigateToRegisterScreen2()
+                                                : () => _formValidation(),
+                                            // Register button styling
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                                              padding: const EdgeInsets.symmetric(vertical: 10),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(12.0),
+                                              ),
+                                              elevation: 4, // Elevation for the shadow
+                                              shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                                            ),
+                                            child: Text(
+                                              isButtonPressed ? "Sign Up" : "Sign Up",
+                                              style: TextStyle(
+                                                color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                                                fontFamily: "Poppins",
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+
+                                  //Register Button
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          const Text(
+                                            "Have an account?",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontFamily: "Poppins",
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+
+                                          TextButton(
+                                            onPressed: () => Navigator.of(context).pop(),
+                                            child: const Text(
+                                              "Login here",
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontFamily: "Poppins",
+                                                color: Color.fromARGB(255, 242, 198, 65),
+                                              ),
+                                            ),
                                           ),
                                         ],
-                                      ),
+                                      )
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
-
-                          //Show "Please provide a strong password"
-                          if (_isPasswordControllerInvalid == true)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                  //Register Button
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      SizedBox(height: 2),
-                                      Text("Please provide a strong password",
+                                      TextButton(
+                                        onPressed: () => Navigator.pushNamed(context, '/registerScreen2'),
+                                        child: const Text(
+                                          "Navigate to RegistrationScreen2();",
                                           style: TextStyle(
                                             fontSize: 14,
                                             fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-
-                          //Confirm password text field
-                          Container(
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE0E3E7),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _isConfirmPasswordControllerInvalid
-                                    ? Colors.red
-                                    : _isUserTypingConfirmPassword ? (_isPasswordMatched ? Colors.green : Colors.red) : Colors.transparent,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(4),
-                            margin: const EdgeInsets.only(left: 18.0, right: 18.0, top: 8.0),
-                            child: LayoutBuilder(
-                              builder: (BuildContext context, BoxConstraints constraints) {
-                                double maxWidth = MediaQuery.of(context).size.width * 0.9;
-                                return ConstrainedBox(
-                                  constraints: BoxConstraints(maxWidth: maxWidth),
-                                  child: TextFormField(
-                                      enabled: true,
-                                      controller: confirmPasswordController,
-                                      obscureText: _obscureText,
-                                      cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                                      keyboardType: TextInputType.text,
-                                      decoration: InputDecoration(
-                                        border: InputBorder.none,
-                                        prefixIcon: const Icon(Icons.password_rounded, color: Color.fromARGB(255, 67, 83, 89)),
-                                        suffixIcon: IconButton(
-                                          icon: Icon(confirmPasswordController.text.isNotEmpty
-                                              ? (_obscureText ? Icons.visibility : Icons.visibility_off)
-                                              : null,
                                           ),
-                                          onPressed: () {
-                                            setState(() {
-                                              _obscureText = !_obscureText;
-                                            });
-                                          },
                                         ),
-                                        focusColor: Theme.of(context).primaryColor,
-                                        hintText: 'Confirm Password*',
-                                      ),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          changesSaved = false;
-                                          _isUserTypingConfirmPassword = true;
-                                          _isConfirmPasswordControllerInvalid = false;
-                                        });
-
-                                        _matchPassword();
-                                      }
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-
-                          //Show "Passwords don't match"
-                          if (_isUserTypingConfirmPassword && _isPasswordMatched == false)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 10),
-                                      Text("Passwords don't match",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
                                       ),
                                     ],
                                   ),
-                                ),
-                              ],
-                            ),
-                        ],
-                      )),
-
-                  //spacing
-                  const SizedBox(
-                    height: 10,
-                  ),
-
-                  //Submit button
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: isButtonPressed
-                                ? null
-                                : changesSaved
-                                  ? _navigateToRegisterScreen2()
-                                  : () => _formValidation(),
-                            // Register button styling
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isButtonPressed ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                              padding: const EdgeInsets.symmetric(vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12.0),
-                              ),
-                              elevation: 4, // Elevation for the shadow
-                              shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                            ),
-                            child: Text(
-                              isButtonPressed ? "Sign Up" : "Sign Up",
-                              style: TextStyle(
-                                color: isButtonPressed ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.w700,
-                                fontSize: 20,
+                                ],
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  //Register Button
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            "Have an account?",
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontFamily: "Poppins",
-                              color: Colors.black54,
-                            ),
-                          ),
-
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text(
-                              "Login here",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: "Poppins",
-                                color: Color.fromARGB(255, 242, 198, 65),
-                              ),
-                            ),
-                          ),
-                        ],
-                      )
-                    ],
-                  ),
-                  //Register Button
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.pushNamed(context, '/registerScreen2'),
-                        child: const Text(
-                          "Navigate to RegistrationScreen2();",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontFamily: "Poppins",
-                          ),
-                        ),
+                          )
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
+      )
     );
   }
+
 
   //Logic for password validation notifier
   Widget _buildValidationRow(String message, bool isValid) {
@@ -1493,7 +1526,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
-
 }
 
 

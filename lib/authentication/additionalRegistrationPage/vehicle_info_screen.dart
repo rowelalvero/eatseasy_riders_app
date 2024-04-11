@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -111,193 +112,215 @@ class _VehicleInfoScreenState extends State<VehicleInfoScreen> {
     }
     return true; // Allow pop if changes are saved or no changes were made
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-        title: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  "Vehicle Info",
-                  style: TextStyle(
-                    fontSize: 25,
-                    fontFamily: "Poppins",
-                    fontWeight: FontWeight.w500,
-                    color: Color.fromARGB(255, 67, 83, 89),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-        // appBar elevation/shadow
-        elevation: 2,
-        centerTitle: true,
-        leadingWidth: 40.0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 8.0), // Adjust the left margin here
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_rounded), // Change this icon to your desired icon
-            onPressed: () async {
-              // Call _onWillPop to handle the back button press
-              final bool canPop = await _onWillPop();
-              if (canPop) {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
-        ),
-      ),
-      body: WillPopScope(
-        onWillPop: _onWillPop,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                const SizedBox(height: 10,),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    children: [
-
-                      const SizedBox(height: 10),
-
-                      // Emergency Contact Name
-                      const Padding(
-                        padding: EdgeInsets.only(left: 18),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Plate Number",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Color.fromARGB(255, 67, 83, 89),
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w500,
-                                )),
-                            Text(" (Required)",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.orangeAccent,
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.w500,
-                                )),
-                          ],
+        body: WillPopScope(
+          onWillPop: _onWillPop,
+          child: SizedBox(
+            height: MediaQuery
+                .of(context)
+                .size
+                .height,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                // Change mainAxisSize to MainAxisSize.min
+                children: [
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        image: const DecorationImage(
+                            image: AssetImage('images/background.png'), // Replace with your desired image
+                            fit: BoxFit.cover,
+                            opacity: 0.3
                         ),
-                      ),
-
-                      CustomTextField(
-                          data: Icons.numbers_rounded,
-                          controller: plateNumberController,
-                          hintText: "",
-                          isObsecure: false,
-                          keyboardType: TextInputType.text,
-                          textCapitalization: TextCapitalization.sentences,
-                          redBorder: _isPlateNumberInvalid,
-                          noLeftMargin: false,
-                          noRightMargin: false,
-                          onChanged:(value) {
-                            setState(() {
-                              changesSaved = false;
-                              isCompleted = false;
-                              isButtonPressedInVehicleInfo = false;
-                              _isPlateNumberInvalid = false;
-                            });
-                          }
-                      ),
-                      const Row(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: 18),
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter, colors: [
+                          Colors.orange.shade900,
+                          Colors.orange.shade800,
+                          Colors.orange.shade400
+                        ])),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 30,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Vehicle Info",
+                                    style: TextStyle(color: Colors.white,
+                                        fontSize: 45,
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w700),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                        Container(
+                          decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(60),
+                                  topRight: Radius.circular(60))),
+                          child: Padding(
+                            padding: const EdgeInsets.all(15),
                             child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.max,
                               children: [
-                                SizedBox(height: 2),
-                                Text("MV Numbers are accepted",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontFamily: "Poppins",
-                                      color: Colors.grey,
-                                    )
+                                const SizedBox(height: 10,),
+                                Form(
+                                  key: _formKey,
+                                  child: Column(
+                                    children: [
+
+                                      const SizedBox(height: 10),
+
+                                      // Emergency Contact Name
+                                      const Padding(
+                                        padding: EdgeInsets.only(left: 18),
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text("Plate Number",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.black,
+                                                  fontFamily: "Poppins",
+                                                  fontWeight: FontWeight.w500,
+                                                )),
+                                            Text(" (Required)",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.orangeAccent,
+                                                  fontFamily: "Poppins",
+                                                  fontWeight: FontWeight.w500,
+                                                )),
+                                          ],
+                                        ),
+                                      ),
+
+                                      CustomTextField(
+                                          data: Icons.numbers_rounded,
+                                          controller: plateNumberController,
+                                          hintText: "",
+                                          isObsecure: false,
+                                          keyboardType: TextInputType.text,
+                                          textCapitalization: TextCapitalization.sentences,
+                                          redBorder: _isPlateNumberInvalid,
+                                          noLeftMargin: false,
+                                          noRightMargin: false,
+                                          onChanged:(value) {
+                                            setState(() {
+                                              changesSaved = false;
+                                              isCompleted = false;
+                                              isButtonPressedInVehicleInfo = false;
+                                              _isPlateNumberInvalid = false;
+                                            });
+                                          }
+                                      ),
+                                      const Row(
+                                        children: [
+                                          Padding(
+                                            padding: EdgeInsets.only(left: 18),
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(height: 2),
+                                                Text("MV Numbers are accepted",
+                                                    style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontFamily: "Poppins",
+                                                      color: Colors.grey,
+                                                    )
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+
+                                      if (_isPlateNumberInvalid == true)
+                                        const Row(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.only(left: 35),
+                                              child: Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  SizedBox(height: 2),
+                                                  Text("Please enter your plate number",
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontFamily: "Poppins",
+                                                        color: Colors.red,
+                                                      )
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
+                                // Submit button
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: ElevatedButton(
+                                          onPressed: isButtonPressedInVehicleInfo ? null : () => _saveUserDataToPrefs(),
+                                          // Register button styling
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: isButtonPressedInVehicleInfo ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
+                                            padding: const EdgeInsets.symmetric(vertical: 10),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(12.0),
+                                            ),
+                                            elevation: 4, // Elevation for the shadow
+                                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
+                                          ),
+                                          child: Text(
+                                            isButtonPressedInVehicleInfo ? "Saved" : "Save",
+                                            style: TextStyle(
+                                              color: isButtonPressedInVehicleInfo ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
+                                              fontFamily: "Poppins",
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-
-                      if (_isPlateNumberInvalid == true)
-                        const Row(
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(left: 35),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: 2),
-                                  Text("Please enter your plate number",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontFamily: "Poppins",
-                                        color: Colors.red,
-                                      )
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                    ],
+                        )
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                // Submit button
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: isButtonPressedInVehicleInfo ? null : () => _saveUserDataToPrefs(),
-                          // Register button styling
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: isButtonPressedInVehicleInfo ? Colors.grey : const Color.fromARGB(255, 242, 198, 65),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            elevation: 4, // Elevation for the shadow
-                            shadowColor: Colors.grey.withOpacity(0.3), // Light gray
-                          ),
-                          child: Text(
-                            isButtonPressedInVehicleInfo ? "Saved" : "Save",
-                            style: TextStyle(
-                              color: isButtonPressedInVehicleInfo ? Colors.black54 : const Color.fromARGB(255, 67, 83, 89),
-                              fontFamily: "Poppins",
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      ),
+        )
     );
   }
 }
