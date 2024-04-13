@@ -76,10 +76,7 @@ class _LogInScreenState extends State<LogInScreen> {
     });
     //
     if (currentUser != null) {
-      readDataAndSetDataLocally(currentUser!).then((value) {
-        Navigator.pop(context);
-        Navigator.pushReplacementNamed(context, '/homeScreen');
-      });
+      readDataAndSetDataLocally(currentUser!);
     }
   }
 
@@ -90,7 +87,7 @@ class _LogInScreenState extends State<LogInScreen> {
         .get()
         .then((snapshot) async {
       // Check if snapshot exists and has data
-      if (snapshot.exists && snapshot.data() != null) {
+      if (snapshot.exists) {
         // Access fields safely using null-aware operators
         await sharedPreferences!.setString("uid", currentUser.uid);
         await sharedPreferences!.setString("riderEmail", snapshot.data()!["riderEmail"] ?? "");
@@ -98,6 +95,19 @@ class _LogInScreenState extends State<LogInScreen> {
         await sharedPreferences!.setString("riderAvatarUrl", snapshot.data()!["riderAvatarUrl"] ?? "");
         await sharedPreferences!.setString("contactNumber", snapshot.data()!["contactNumber"] ?? "");
         await sharedPreferences!.setString("residentialAddress",snapshot.data()!["savedResidentialAddress"] ?? "");
+
+        Navigator.pop(context);
+        Navigator.pushReplacementNamed(context, '/homeScreen');
+      } else {
+        firebaseAuth.signOut();
+        Navigator.pop(context);
+        showDialog(
+            context: context,
+            builder: (c) {
+              return const ErrorDialog(
+                message: "No record found.",
+              );
+            });
       }
     });
   }
