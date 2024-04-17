@@ -1,41 +1,91 @@
-import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import '../global/global.dart';
+import '../provider/sign_in_provider.dart';
+import '../utils/next_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  Future getData() async {
+    final sp = context.read<SignInProvider>();
+    sp.getDataFromSharedPreferences();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // change read to watch!!!!
+    final sp = context.watch<SignInProvider>();
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 242, 198, 65),
-          title: Text(sharedPreferences!.getString("firstName")!,
-              style: const TextStyle(
-                  fontSize: 30,
-                  fontFamily: "Poppins",
-                  fontWeight: FontWeight.w800,
-                  color: Color.fromARGB(255, 67, 83, 89))),
-          //Remove the appbar back button
-          automaticallyImplyLeading: false,
-          //appBar elevation/shadow
-          elevation: 2,
-          centerTitle: true
-      ),
       body: Center(
-        child: ElevatedButton(
-          child: const Text(
-            "Logout"
-          ),
-          onPressed: () {
-            firebaseAuth.signOut();
-            Navigator.pushReplacementNamed(context, '/logInScreen');
-          },
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: NetworkImage("${sp.riderAvatar}"),
+              radius: 50,
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Text(
+              "Welcome ${sp.firstName} ${sp.lastName}",
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              "${sp.email}",
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Text(
+              "${sp.uid}",
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("PROVIDER:"),
+                const SizedBox(
+                  width: 5,
+                ),
+                Text("${sp.provider}".toUpperCase(),
+                    style: const TextStyle(color: Colors.red)),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            ElevatedButton(
+                onPressed: () {
+                  sp.userSignOut();
+                  nextScreenReplace(context, '/logInScreen');
+                },
+                child: const Text("SIGNOUT",
+                    style: TextStyle(
+                      color: Colors.white,
+                    )))
+          ],
         ),
       ),
     );

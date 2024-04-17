@@ -1,12 +1,15 @@
 import 'package:animate_do/animate_do.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:eatseasy_riders_app/authentication/register2.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 
 import '../global/global.dart';
+import '../provider/internet_provider.dart';
+import '../provider/sign_in_provider.dart';
+import '../utils/next_screen.dart';
+import '../utils/snack_bar.dart';
 import '../widgets/custom_text_field.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
@@ -22,18 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool changesSaved = false;
   bool isButtonPressed = false;
   bool isContactNumberCompleted = true;
-  String _password = '';
-  bool _hasUpperCase = false;
-  bool _hasLowerCase = false;
-  bool _hasNumber = false;
-  bool _hasEightChar = false;
-  bool _isUserTypingPassword = false;
-  bool _isUserTypingConfirmPassword = false;
   bool _isUserTypingContactNumber = false;
-  bool _isPasswordMatched = false;
-  bool _obscureText = true;
-
-  FocusNode passwordFocusNode = FocusNode();
 
   //form key instance
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -44,8 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController lastNameController = TextEditingController();
   TextEditingController middleInitialController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
+  TextEditingController otpCodeController = TextEditingController();
 
   final List<String> _cities = [
     "Alaminos (Pangasinan)", "Angeles", "Antipolo (Rizal)", "Bacolod", "Bacoor (Cavite)", "Bago (Negros Occidental)",
@@ -122,66 +113,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }).toList();
   }
 
-  void _validatePassword(String value) {
-    setState(() {
-      _password = value;
-      setState(() {
-        _isUserTypingPassword = true; //Track if user is typing
-        _matchPassword();
-      });
-      // Password must have uppercase at least
-      _hasUpperCase = RegExp(r'[A-Z]').hasMatch(_password);
-      // Password must have lowercase at least
-      _hasLowerCase = RegExp(r'[a-z]').hasMatch(_password);
-      // Password must have one number at least
-      _hasNumber = RegExp(r'[0-9]').hasMatch(_password);
-      // Password length should be at least 8 characters
-      if (_password.length >= 8) {
-        setState(() {
-          _hasEightChar = true;
-        });
-      }
-      else {
-        setState(() {
-          _hasEightChar = false;
-        });
-      }
-    });
-  }
-
-  //Check if the passwords are matched
-  void _matchPassword() {
-    if (passwordController.text == confirmPasswordController.text) {
-      if (confirmPasswordController.text.isEmpty) {
-        setState(() {
-          _isPasswordMatched = false;
-        });
-      }
-      else {
-        setState(() {
-          _isPasswordMatched = true;
-        });
-      }
-    }
-    else {
-      setState(() {
-        _isPasswordMatched = false;
-      });
-    }
-  }
-
-  //Check if the password met the validation criteria
-  bool _isPasswordValidated() {
-    if (_hasUpperCase == true &&
-        _hasLowerCase == true &&
-        _hasNumber == true &&
-        _hasEightChar == true){
-
-      return true;
-    }
-
-    return false;
-  }
 
   bool _isCityControllerInvalid = false;
   bool _isServiceTypeEmpty = false;
@@ -189,8 +120,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLastNameControllerInvalid = false;
   bool _isEmailControllerInvalid = false;
   bool _isContactNumberControllerInvalid = false;
-  bool _isPasswordControllerInvalid = false;
-  bool _isConfirmPasswordControllerInvalid = false;
   bool _isFormComplete = true;
 
   //Check if the required fields are all filled
@@ -222,18 +151,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (contactNumberController.text.isEmpty) {
       setState(() {
         _isContactNumberControllerInvalid = true;
-        _isFormComplete = false;
-      });
-    }
-    if (passwordController.text.isEmpty) {
-      setState(() {
-        _isPasswordControllerInvalid = true;
-        _isFormComplete = false;
-      });
-    }
-    if (confirmPasswordController.text.isEmpty) {
-      setState(() {
-        _isConfirmPasswordControllerInvalid = true;
         _isFormComplete = false;
       });
     }
@@ -269,67 +186,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _validateTextFields();
     //Check if the form is completed
     if (_isFormComplete) {
-      //Check if the password met the validation criteria
-      if (_isPasswordValidated()) {
-        //Check if the passwords are matched
-        if(_isPasswordMatched) {
-          //Check if the format of email is valid
-          if(isValidEmail(email)) {
-            //Check if the contact no. is complete
-            if (isContactNumberCompleted) {
-              //show loading screen after submitting
-              showDialog(
-                  context: context,
-                  builder: (c) {
-                    return const LoadingDialog(
-                      message: "Submitting", isRegisterPage: false,
-                    );
-                  });
+      //Check if the email met the validation
+      if(isValidEmail(email)) {
+        //Check if the contact no. is complete
+        if (isContactNumberCompleted) {
+          //show loading screen after submitting
+          showDialog(
+              context: context,
+              builder: (c) {
+                return const LoadingDialog(
+                  message: "Submitting", isRegisterPage: false,
+                );
+              });
 
-              // Save user data to Prefs
-              saveDataToPrefs();
+          // Save user data to Prefs
+          login(context, contactNumberController.text.trim());
 
-            }
-            else {
-              showDialog(
-                  context: context,
-                  builder: (c) {
-                    return const ErrorDialog(
-                      message: "Invalid contact number. Please try again.",
-                    );
-                  });
-            }
-          }
-          else {
-            //Display "invalid email" if its invalid format
-            setState(() {
-              _isEmailControllerInvalid = true;
-            });
-            showDialog(
-                context: context,
-                builder: (c) {
-                  return const ErrorDialog(
-                    message: "Email format is invalid.",
-                  );
-                });
-          }
         }
         else {
           showDialog(
               context: context,
               builder: (c) {
                 return const ErrorDialog(
-                  message: "Passwords don't match.",
+                  message: "Invalid contact number. Please try again.",
                 );
               });
         }
       }
       else {
+        //Display "invalid email" if its invalid format
+        setState(() {
+          _isEmailControllerInvalid = true;
+        });
         showDialog(
             context: context,
             builder: (c) {
               return const ErrorDialog(
-                message: "Password is invalid.",
+                message: "Email format is invalid.",
               );
             });
       }
@@ -344,108 +237,104 @@ class _RegisterScreenState extends State<RegisterScreen> {
           });
     }
   }
-  void saveDataToPrefs() async {
-    await sharedPreferences?.setString('cityAddress', cityController!);
-    await sharedPreferences?.setString('serviceType', serviceTypeController!);
-    await sharedPreferences?.setString('lastName', lastNameController.text.trim());
-    await sharedPreferences?.setString('suffix', suffixController!);
-    await sharedPreferences?.setString('firstName', firstNameController.text.trim());
-    await sharedPreferences?.setString('M.I.', middleInitialController.text.trim());
-    await sharedPreferences?.setString('contactNumber', contactNumberController.text.trim());
-    await sharedPreferences?.setString('email', emailController.text.trim());
-    await sharedPreferences?.setString('password', passwordController.text.trim());
 
-    navigateToRegisterScreen2();
-  }
+  Future login(BuildContext context, String mobile) async {
+    final sp = context.read<SignInProvider>();
+    final ip = context.read<InternetProvider>();
+    await ip.checkInternetConnection();
 
-  void navigateToRegisterScreen2() {
-    //Stop the loading screen
-    Navigator.pop(context);
-
-    //Navigate to registerScree2
-    Navigator.pushNamed(context, '/registerScreen2');
-  }
-
-  /*//Authenticate the rider
-  void authenticateVendorAndSignUp() async {
-    User? currentUser;
-    sharedPreferences = await SharedPreferences.getInstance();
-    //Create or authenticate rider email and password to Firestore
-    await firebaseAuth.createUserWithEmailAndPassword(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),
-    ).then((auth) {
-      //Once authenticated, assign the authenticated rider to currentUser variable
-      currentUser = auth.user;
-    }).catchError((error) {
-      Navigator.pop(context);
-      showDialog(
-          context: context,
-          builder: (c) {
-            return ErrorDialog(
-              message: error.message.toString(),
-            );
-          });
-    });
-
-    if (currentUser != null) {
-      // Save user's credentials to SharedPreferences
-      await saveCurrentUserToSharedPreferences(currentUser!);
-      //Set the isButtonPressed to true to disable the button after pressing submit button
-      setState(() {
-        isButtonPressed = !isButtonPressed;
-      });
+    if (ip.hasInternet == false) {
+      openSnackbar(context, "Check your internet connection", Colors.red);
+    } else {
+      if (_formKey.currentState!.validate()) {
+        FirebaseAuth.instance.verifyPhoneNumber(
+            phoneNumber: "+63$mobile",
+            verificationCompleted: (AuthCredential credential) async {
+              await FirebaseAuth.instance.signInWithCredential(credential);
+            },
+            verificationFailed: (FirebaseAuthException e) {
+              openSnackbar(context, e.toString(), Colors.red);
+            },
+            codeSent: (String verificationId, int? forceResendingToken) {
+              showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Enter Code"),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: otpCodeController,
+                            decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.code),
+                                errorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                    const BorderSide(color: Colors.red)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                    const BorderSide(color: Colors.grey)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                    const BorderSide(color: Colors.grey))),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final code = otpCodeController.text.trim();
+                              AuthCredential authCredential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: code);
+                              User user = (await FirebaseAuth.instance.signInWithCredential(authCredential)).user!;
+                              // save the values
+                              sp.phoneNumberUser(
+                                  user,
+                                  cityController,
+                                  serviceTypeController,
+                                  lastNameController.text,
+                                  firstNameController.text,
+                                  suffixController,
+                                  middleInitialController.text,
+                                  contactNumberController.text,
+                                  emailController.text);
+                              // checking whether user exists,
+                              sp.checkUserExists().then((value) async {
+                                if (value == true) {
+                                  Navigator.pop(context);
+                                  // user exists
+                                  showDialog(
+                                      context: context,
+                                      builder: (c) {
+                                        return const ErrorDialog(
+                                          message: "Account already exists.",
+                                        );
+                                      });
+                                } else {
+                                  // user does not exist
+                                  await sp.saveDataToFirestore().then((value) =>
+                                      sp.saveDataToSharedPreferences().then(
+                                              (value) =>
+                                              sp.setSignIn().then((value) {
+                                                nextScreenReplace(context, '/registerScreen2');
+                                              })));
+                                }
+                              });
+                            },
+                            child: const Text("Confirm"),
+                          )
+                        ],
+                      ),
+                    );
+                  });
+            },
+            codeAutoRetrievalTimeout: (String verification) {});
+      }
     }
-
-    //If the rider is authenticated
-    if (currentUser != null) {
-
-      //save rider's credential to Firestore by calling the function
-      await saveDataToFirestore(currentUser!).then((value) {
-        //Stop the loading screen
-        Navigator.pop(context);
-
-        //To prevent the user to go directly to home screen after restarted the app
-        //firebaseAuth.signOut();
-
-        //Going back to Login page to login rider's credentials
-        Route newRoute = MaterialPageRoute(builder: (c) => const RegisterScreen2());
-        Navigator.pushNamed(context, '/registerScreen2');
-      });
-    }
   }
-  //Save currentUser to sharedPreferences
-  Future<void> saveCurrentUserToSharedPreferences(User user) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.setString('currentUserUid', user.uid);
-  }
-
-  //Saves rider information to Firestore
-  Future saveDataToFirestore(User currentUser) async {
-    // Accessing the Firestore collection 'riders' and setting the document with their unique currentUser's UID
-    await FirebaseFirestore.instance.collection("riders").doc(currentUser.uid).set({
-      "riderUID": currentUser.uid, // Storing user's UID
-      "riderEmail": currentUser.email, // Storing user's email
-      "cityAddress": cityController?.toUpperCase(), // Storing city address after trimming leading/trailing whitespace
-      "lastName": lastNameController.text.toUpperCase().trim(), // Storing last name after trimming leading/trailing whitespace
-      "firstName": firstNameController.text.toUpperCase().trim(), // Storing first name after trimming leading/trailing whitespace
-      "M.I.": middleInitialController.text.toUpperCase().trim(), // Storing middle initial after trimming leading/trailing whitespace
-      "suffix": suffixController?.toUpperCase(), // Storing suffix after trimming leading/trailing whitespace
-      "contactNumber": "+63${contactNumberController.text.trim()}", // Storing contact number after trimming leading/trailing whitespace
-      "serviceType": serviceTypeController, //Storing the service type of the rider
-      "status": "pending", // Setting the status to 'pending'
-      "earnings": 0.0, // Initializing earnings as 0.0
-    });
-
-    //Save rider's data locally
-    sharedPreferences = await SharedPreferences.getInstance();
-    await sharedPreferences!.setString("uid", currentUser.uid);
-    await sharedPreferences!.setString("email", currentUser.email.toString());
-    await sharedPreferences!.setString("contactNumber", "+63${contactNumberController.text.trim()}");
-    await sharedPreferences?.setString('email', emailController.text.trim());
-    await sharedPreferences?.setString('password', passwordController.text.trim());
-    await sharedPreferences?.setString('confirmPassword', confirmPasswordController.text.trim());
-  }*/
 
   Future<bool> _onWillPop() async {
     if (!changesSaved) {
@@ -509,9 +398,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         opacity: 0.3
                       ),
                       gradient: LinearGradient(begin: Alignment.topCenter, colors: [
-                        Colors.orange.shade900,
-                        Colors.orange.shade800,
-                        Colors.orange.shade400
+                        Colors.yellow.shade900,
+                        Colors.yellow.shade800,
+                        Colors.yellow.shade400
                       ])),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -553,6 +442,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ],
                         ),
                       ),
+
                       FadeInUp(
                           duration: const Duration(milliseconds: 300),
                           child: Container(
@@ -860,12 +750,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                       ),
                                                     ))
                                                         .toList(),
-                                                    validator: (value) {
-                                                      if (value == null) {
-                                                        return 'Suffix';
-                                                      }
-                                                      return null;
-                                                    },
                                                     onChanged: (value) {
                                                       setState(() {
                                                         changesSaved = false;
@@ -1132,7 +1016,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                               ],
                                             ),
 
-                                          //Password text field
+                                          /*//Password text field
                                           Container(
                                             decoration: BoxDecoration(
                                               color: const Color(0xFFE0E3E7),
@@ -1329,9 +1213,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                                   ),
                                                 ),
                                               ],
-                                            ),
+                                            ),*/
                                         ],
-                                      )),
+                                      )
+                                  ),
 
                                   //spacing
                                   const SizedBox(
@@ -1439,7 +1324,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
 
-  //Logic for password validation notifier
+  /*//Logic for password validation notifier
   Widget _buildValidationRow(String message, bool isValid) {
     return Row(
       children: <Widget>[
@@ -1458,7 +1343,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ],
     );
-  }
+  }*/
+
   void _showPreviewDialog() async {
     showDialog(
       context: context,

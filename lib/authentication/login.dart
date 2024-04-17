@@ -1,11 +1,14 @@
 import 'dart:async';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatseasy_riders_app/widgets/custom_text_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../global/global.dart';
+import 'package:provider/provider.dart';
+import '../provider/internet_provider.dart';
+import '../provider/sign_in_provider.dart';
+import '../utils/next_screen.dart';
+import '../utils/snack_bar.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 
@@ -20,17 +23,73 @@ class _LogInScreenState extends State<LogInScreen> {
   bool isButtonPressed = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  TextEditingController contactNumberController = TextEditingController();
+  TextEditingController otpCodeController = TextEditingController();
+
+  bool _isContactNumberControllerInvalid = false;
+  bool isContactNumberCompleted = true;
+  bool _isUserTypingContactNumber = false;
+  bool _isFormComplete = true;
+
+  //Check if the required fields are all filled
+  void _validateTextFields() {
+    if (contactNumberController.text.isEmpty) {
+      setState(() {
+        _isContactNumberControllerInvalid = true;
+        _isFormComplete = false;
+      });
+    } else {
+      _isFormComplete = true;
+    }
+  }
 
   //Check email and password
-  _formValidation() {
-    isButtonPressed = !isButtonPressed;
-    if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
-      //Login
-      logInNow();
+  _formValidation() async {
+    _validateTextFields();
+    if (contactNumberController.text.isNotEmpty) {
+      if (isContactNumberCompleted) {
+        showDialog(
+            context: context,
+            builder: (c) {
+              return const LoadingDialog(
+                message: "Submitting", isRegisterPage: false,
+              );
+            });
+
+        // Check if the number existing
+        DocumentSnapshot snap = await FirebaseFirestore.instance.collection('riders').doc("+63${contactNumberController.text}").get();
+        if (snap.exists) {
+          print("EXISTING USER");
+          login(context, contactNumberController.text.trim());
+        } else {
+          print("NEW USER");
+          setState(() {
+            _isContactNumberControllerInvalid = true;
+          });
+
+          Navigator.pop(context);
+          // user do not exists
+          showDialog(
+              context: context,
+              builder: (c) {
+                return const ErrorDialog(
+                  message: "Account does not exist.",
+                );
+              });
+        }
+        //Login
+
+      } else {
+        showDialog(
+            context: context,
+            builder: (c) {
+              return const ErrorDialog(
+                message: "Invalid contact number. Please try again.",
+              );
+            });
+      }
     }
-    //If one or both text field are empty display error
+    //If contact number is empty, display error
     else {
       showDialog(
           context: context,
@@ -42,7 +101,89 @@ class _LogInScreenState extends State<LogInScreen> {
     }
   }
 
-  logInNow() async {
+  Future login(BuildContext context, String mobile) async {
+    final sp = context.read<SignInProvider>();
+    final ip = context.read<InternetProvider>();
+    await ip.checkInternetConnection();
+
+    if (ip.hasInternet == false) {
+      openSnackbar(context, "Check your internet connection", Colors.red);
+    } else {
+      if (_formKey.currentState!.validate()) {
+        FirebaseAuth.instance.verifyPhoneNumber(
+            phoneNumber: "+63$mobile",
+            verificationCompleted: (AuthCredential credential) async {
+              await FirebaseAuth.instance.signInWithCredential(credential);
+            },
+            verificationFailed: (FirebaseAuthException e) {
+              openSnackbar(context, e.toString(), Colors.red);
+            },
+            codeSent: (String verificationId, int? forceResendingToken) {
+              showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      title: const Text("Enter Code"),
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TextField(
+                            controller: otpCodeController,
+                            decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.code),
+                                errorBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                    const BorderSide(color: Colors.red)),
+                                enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                    const BorderSide(color: Colors.grey)),
+                                focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide:
+                                    const BorderSide(color: Colors.grey))),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              final code = otpCodeController.text.trim();
+                              AuthCredential authCredential =
+                              PhoneAuthProvider.credential(verificationId: verificationId, smsCode: code);
+                              User user = (await FirebaseAuth.instance
+                                  .signInWithCredential(authCredential))
+                                  .user!;
+
+                              sp.phoneNumberLogin(user);
+
+                              // user exists
+                              await sp
+                                  .getUserDataFromFirestore(sp.uid)
+                                  .then((value) => sp
+                                  .saveDataToSharedPreferences()
+                                  .then((value) =>
+                                  sp.setSignIn().then((value) {
+
+                                    Navigator.pop(context);
+                                    isButtonPressed = !isButtonPressed;
+                                    nextScreenReplace(context, '/homeScreen');
+                                  })));
+                            },
+                            child: const Text("Confirm"),
+                          )
+                        ],
+                      ),
+                    );
+                  });
+            },
+            codeAutoRetrievalTimeout: (String verification) {});
+      }
+    }
+  }
+  /*logInNow() async {
     showDialog(
         context: context,
         builder: (c) {
@@ -55,8 +196,7 @@ class _LogInScreenState extends State<LogInScreen> {
     //Firebase current user
     User? currentUser;
     //Authenticate vendor
-    await firebaseAuth
-        .signInWithEmailAndPassword(
+    await firebaseAuth.signInWithEmailAndPassword(
       email: emailController.text.trim(),
       password: passwordController.text.trim(),
     )
@@ -110,7 +250,7 @@ class _LogInScreenState extends State<LogInScreen> {
             });
       }
     });
-  }
+  }*/
 
   void registrationPage() {
     Navigator.pushNamed(context, '/registerScreen');
@@ -132,15 +272,15 @@ class _LogInScreenState extends State<LogInScreen> {
                       opacity: 0.4
                   ),
                   gradient: LinearGradient(begin: Alignment.topCenter, colors: [
-                    Colors.orange.shade900,
-                    Colors.orange.shade800,
-                    Colors.orange.shade400
+                    Colors.yellow.shade900,
+                    Colors.yellow.shade800,
+                    Colors.yellow.shade400
                   ])),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const SizedBox(
-                    height: 100,
+                    height: 200,
                   ),
                   Padding(
                     padding: const EdgeInsets.all(20),
@@ -170,7 +310,7 @@ class _LogInScreenState extends State<LogInScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 130),
                   Container(
                     decoration: const BoxDecoration(
                         color: Colors.white,
@@ -186,6 +326,9 @@ class _LogInScreenState extends State<LogInScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
+                                const SizedBox(
+                                  height: 10,
+                                ),
                                 FadeInUp(
                                     duration: const Duration(milliseconds: 500),
                                     child: const Text(
@@ -218,34 +361,110 @@ class _LogInScreenState extends State<LogInScreen> {
                           ),
                           FadeInUp(
                               duration: const Duration(milliseconds: 500),
-                              child: Column(
-                                children: <Widget>[
-                                  //Vendor credential inputs
-                                  //Email text field
-                                  CustomTextField(
-                                    data: Icons.email_rounded,
-                                    controller: emailController,
-                                    hintText: "Email",
-                                    isObsecure: false,
-                                    redBorder: false,
-                                    noLeftMargin: false,
-                                    noRightMargin: false,
-                                    keyboardType: TextInputType.text,
-                                  ),
+                              child: //Contact number text field,
+                              Form(
+                                key: _formKey,
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      flex: 2,
+                                      child: CustomTextField(
+                                        data: Icons.phone,
+                                        hintText: "+63",
+                                        isObsecure: false,
+                                        keyboardType: TextInputType.none,
+                                        noLeftMargin: false,
+                                        noRightMargin: true,
+                                        redBorder: false,
+                                        enabled: false,
+                                      ),
+                                    ),
 
-                                  //Password text field
-                                  CustomTextField(
-                                    data: Icons.password_rounded,
-                                    controller: passwordController,
-                                    hintText: "Password",
-                                    isObsecure: true,
-                                    redBorder: false,
-                                    noLeftMargin: false,
-                                    noRightMargin: false,
-                                    keyboardType: TextInputType.text,
+                                    Expanded(
+                                      flex: 5,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFE0E3E7),
+                                          borderRadius: BorderRadius.circular(12),
+                                          border: Border.all(
+                                            color: _isContactNumberControllerInvalid
+                                                ? Colors.red
+                                                : _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
+                                          ),
+                                        ),
+                                        padding: const EdgeInsets.all(4),
+                                        margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                                        child: LayoutBuilder(
+                                          builder: (BuildContext context, BoxConstraints constraints) {
+                                            double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                                            return ConstrainedBox(
+                                              constraints: BoxConstraints(maxWidth: maxWidth),
+                                              child: TextFormField(
+                                                enabled: true,
+                                                controller: contactNumberController,
+                                                obscureText: false,
+                                                cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                                keyboardType: TextInputType.phone,
+                                                decoration: InputDecoration(
+                                                  border: InputBorder.none,
+                                                  focusColor: Theme.of(context).primaryColor,
+                                                ),
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    _isUserTypingContactNumber = true;
+                                                    _isContactNumberControllerInvalid = false;
+                                                  });
+                                                  if (value.length == 10) {
+                                                    setState(() {
+                                                      isContactNumberCompleted = true;
+                                                    });
+                                                  }
+                                                  else {
+                                                    if (contactNumberController.text.isEmpty) {
+                                                      setState(() {
+                                                        _isUserTypingContactNumber = false;
+                                                      });
+                                                    }
+                                                    else {
+                                                      setState(() {
+                                                        isContactNumberCompleted = false;
+                                                      });
+                                                    }
+                                                  }
+                                                },
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ),
+                          //Show "Invalid Contact number"
+                          if ((_isUserTypingContactNumber &&
+                              isContactNumberCompleted == false) || _isContactNumberControllerInvalid)
+                            const Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.only(left: 35),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(height: 2),
+                                      Text("Enter a valid contact number",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontFamily: "Poppins",
+                                            color: Colors.red,
+                                          )
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              )),
+                                ),
+                              ],
+                            ),
                           /*const SizedBox(
                             height: 40,
                           ),
@@ -259,7 +478,7 @@ class _LogInScreenState extends State<LogInScreen> {
                             height: 40,
                           ),*/
                           const SizedBox(
-                            height: 40,
+                            height: 20,
                           ),
                           FadeInUp(
                             duration: const Duration(milliseconds: 500),

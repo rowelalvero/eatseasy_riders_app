@@ -57,8 +57,11 @@ dependencies:
   flutter_screenutil: ^5.9.0
   country_picker: ^2.0.25
   csc_picker: ^0.2.7
+  connectivity_plus: ^2.3.5
+  provider: ^6.1.2
   loading_animation_widget:
   firebase_app_check: ^0.2.2+1
+  pinput: ^4.0.0
 
 dev_dependencies:
   flutter_test:

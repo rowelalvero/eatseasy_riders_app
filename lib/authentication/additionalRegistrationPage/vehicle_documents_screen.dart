@@ -222,9 +222,9 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
                         ),
                         gradient: LinearGradient(
                             begin: Alignment.topCenter, colors: [
-                          Colors.orange.shade900,
-                          Colors.orange.shade800,
-                          Colors.orange.shade400
+                          Colors.yellow.shade900,
+                          Colors.yellow.shade800,
+                          Colors.yellow.shade400
                         ])),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
