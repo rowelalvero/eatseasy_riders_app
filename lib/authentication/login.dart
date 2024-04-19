@@ -260,212 +260,213 @@ class _LogInScreenState extends State<LogInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // Change mainAxisSize to MainAxisSize.min
-          children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                  image: const DecorationImage(
-                      image: AssetImage('images/background.png'), // Replace with your desired image
-                      fit: BoxFit.cover,
-                      opacity: 0.4
-                  ),
-                  gradient: LinearGradient(begin: Alignment.topCenter, colors: [
-                    Colors.yellow.shade900,
-                    Colors.yellow.shade800,
-                    Colors.yellow.shade400
-                  ])),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const SizedBox(
-                    height: 200,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+              image: const DecorationImage(
+                  image: AssetImage('images/background.png'), // Replace with your desired image
+                  fit: BoxFit.cover,
+                  opacity: 0.1
+              ),
+              gradient: LinearGradient(begin: Alignment.topCenter, colors: [
+                Colors.yellow.shade900,
+                Colors.yellow.shade800,
+                Colors.yellow.shade400
+              ])),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              /*const SizedBox(
+                  height: 200,
+                ),*/
+              Expanded(
+                flex: 1,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            FadeInUp(
-                                duration: const Duration(milliseconds: 500),
-                                child: const Text(
-                                  "EatsEasy",
-                                  style: TextStyle(color: Colors.white, fontSize: 65, fontFamily: "Poppins", fontWeight: FontWeight.w700),
-                                )),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            FadeInUp(
-                                duration: const Duration(milliseconds: 500),
-                                child: const Text(
-                                  "rider",
-                                  style: TextStyle(color: Colors.white, fontSize: 33, fontFamily: "Poppins", fontStyle: FontStyle.italic),
-                                )),
-                          ],
-                        )
+                        FadeInUp(
+                            duration: const Duration(milliseconds: 500),
+                            child: const Text(
+                              "EatsEasy",
+                              style: TextStyle(color: Colors.white, fontSize: 65, fontFamily: "Poppins", fontWeight: FontWeight.w700),
+                            )),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        FadeInUp(
+                            duration: const Duration(milliseconds: 500),
+                            child: const Text(
+                              "rider",
+                              style: TextStyle(color: Colors.white, fontSize: 33, fontFamily: "Poppins", fontStyle: FontStyle.italic),
+                            )),
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: 130),
-                  Container(
-                    decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(60),
-                            topRight: Radius.circular(60))),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                FadeInUp(
-                                    duration: const Duration(milliseconds: 500),
-                                    child: const Text(
-                                      "Welcome!",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 40,
-                                          fontFamily: "Poppins",
-                                          fontWeight: FontWeight.w700
-                                      ),
-                                    )),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                FadeInUp(
-                                    duration: const Duration(milliseconds: 500),
-                                    child: const Text(
-                                      "Login with your Rider account to continue",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 15,
-                                          fontFamily: "Poppins"
-                                      ),
-                                    )),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          FadeInUp(
-                              duration: const Duration(milliseconds: 500),
-                              child: //Contact number text field,
-                              Form(
-                                key: _formKey,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      flex: 2,
-                                      child: CustomTextField(
-                                        data: Icons.phone,
-                                        hintText: "+63",
-                                        isObsecure: false,
-                                        keyboardType: TextInputType.none,
-                                        noLeftMargin: false,
-                                        noRightMargin: true,
-                                        redBorder: false,
-                                        enabled: false,
-                                      ),
-                                    ),
+                    )
+                  ],
+                ),
+              ),
 
-                                    Expanded(
-                                      flex: 5,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFE0E3E7),
-                                          borderRadius: BorderRadius.circular(12),
-                                          border: Border.all(
-                                            color: _isContactNumberControllerInvalid
-                                                ? Colors.red
-                                                : _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
-                                          ),
-                                        ),
-                                        padding: const EdgeInsets.all(4),
-                                        margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
-                                        child: LayoutBuilder(
-                                          builder: (BuildContext context, BoxConstraints constraints) {
-                                            double maxWidth = MediaQuery.of(context).size.width * 0.9;
-                                            return ConstrainedBox(
-                                              constraints: BoxConstraints(maxWidth: maxWidth),
-                                              child: TextFormField(
-                                                enabled: true,
-                                                controller: contactNumberController,
-                                                obscureText: false,
-                                                cursorColor: const Color.fromARGB(255, 242, 198, 65),
-                                                keyboardType: TextInputType.phone,
-                                                decoration: InputDecoration(
-                                                  border: InputBorder.none,
-                                                  focusColor: Theme.of(context).primaryColor,
-                                                ),
-                                                onChanged: (value) {
-                                                  setState(() {
-                                                    _isUserTypingContactNumber = true;
-                                                    _isContactNumberControllerInvalid = false;
-                                                  });
-                                                  if (value.length == 10) {
-                                                    setState(() {
-                                                      isContactNumberCompleted = true;
-                                                    });
-                                                  }
-                                                  else {
-                                                    if (contactNumberController.text.isEmpty) {
-                                                      setState(() {
-                                                        _isUserTypingContactNumber = false;
-                                                      });
-                                                    }
-                                                    else {
-                                                      setState(() {
-                                                        isContactNumberCompleted = false;
-                                                      });
-                                                    }
-                                                  }
-                                                },
-                                              ),
-                                            );
-                                          },
-                                        ),
+              /*const SizedBox(height: 130),*/
+              Expanded(
+                flex: 1,
+                child: Container(
+                  height: MediaQuery.of(context).size.height,
+                  decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(60),
+                          topRight: Radius.circular(60))),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: <Widget>[
+                        Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              FadeInUp(
+                                  duration: const Duration(milliseconds: 500),
+                                  child: const Text(
+                                    "Welcome!",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 40,
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w700
+                                    ),
+                                  )),
+                              const SizedBox(
+                                height: 10,
+                              ),
+                              FadeInUp(
+                                  duration: const Duration(milliseconds: 500),
+                                  child: const Text(
+                                    "Login with your Rider account to continue",
+                                    style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                        fontFamily: "Poppins"
+                                    ),
+                                  )),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        FadeInUp(
+                          duration: const Duration(milliseconds: 500),
+                          child: //Contact number text field,
+                          Form(
+                            key: _formKey,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: CustomTextField(
+                                    data: Icons.phone,
+                                    hintText: "+63",
+                                    isObsecure: false,
+                                    keyboardType: TextInputType.none,
+                                    noLeftMargin: false,
+                                    noRightMargin: true,
+                                    redBorder: false,
+                                    enabled: false,
+                                  ),
+                                ),
+
+                                Expanded(
+                                  flex: 5,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE0E3E7),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: _isContactNumberControllerInvalid
+                                            ? Colors.red
+                                            : _isUserTypingContactNumber ? (isContactNumberCompleted ? Colors.green : Colors.red) : Colors.transparent,
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                          ),
-                          //Show "Invalid Contact number"
-                          if ((_isUserTypingContactNumber &&
-                              isContactNumberCompleted == false) || _isContactNumberControllerInvalid)
-                            const Row(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.only(left: 35),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 2),
-                                      Text("Enter a valid contact number",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontFamily: "Poppins",
-                                            color: Colors.red,
-                                          )
-                                      ),
-                                    ],
+                                    padding: const EdgeInsets.all(4),
+                                    margin: const EdgeInsets.only(left: 4.0, right: 18.0, top: 8.0),
+                                    child: LayoutBuilder(
+                                      builder: (BuildContext context, BoxConstraints constraints) {
+                                        double maxWidth = MediaQuery.of(context).size.width * 0.9;
+                                        return ConstrainedBox(
+                                          constraints: BoxConstraints(maxWidth: maxWidth),
+                                          child: TextFormField(
+                                            enabled: true,
+                                            controller: contactNumberController,
+                                            obscureText: false,
+                                            cursorColor: const Color.fromARGB(255, 242, 198, 65),
+                                            keyboardType: TextInputType.phone,
+                                            decoration: InputDecoration(
+                                              border: InputBorder.none,
+                                              focusColor: Theme.of(context).primaryColor,
+                                            ),
+                                            onChanged: (value) {
+                                              setState(() {
+                                                _isUserTypingContactNumber = true;
+                                                _isContactNumberControllerInvalid = false;
+                                              });
+                                              if (value.length == 10) {
+                                                setState(() {
+                                                  isContactNumberCompleted = true;
+                                                });
+                                              }
+                                              else {
+                                                if (contactNumberController.text.isEmpty) {
+                                                  setState(() {
+                                                    _isUserTypingContactNumber = false;
+                                                  });
+                                                }
+                                                else {
+                                                  setState(() {
+                                                    isContactNumberCompleted = false;
+                                                  });
+                                                }
+                                              }
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
-                          /*const SizedBox(
+                          ),
+                        ),
+                        //Show "Invalid Contact number"
+                        if ((_isUserTypingContactNumber &&
+                            isContactNumberCompleted == false) || _isContactNumberControllerInvalid)
+                          const Row(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.only(left: 35),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(height: 2),
+                                    Text("Enter a valid contact number",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontFamily: "Poppins",
+                                          color: Colors.red,
+                                        )
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        /*const SizedBox(
                             height: 40,
                           ),
                           FadeInUp(
@@ -477,131 +478,93 @@ class _LogInScreenState extends State<LogInScreen> {
                           const SizedBox(
                             height: 40,
                           ),*/
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          FadeInUp(
-                            duration: const Duration(milliseconds: 500),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: isButtonPressed
-                                          ? null
-                                          : () => _formValidation(),
-                                      // Register button styling
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: isButtonPressed
-                                            ? Colors.grey
-                                            : const Color.fromARGB(255, 242, 198, 65),
-                                        padding: const EdgeInsets.symmetric(vertical: 10),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12.0),
-                                        ),
-                                        elevation: 4,
-                                        // Elevation for the shadow
-                                        shadowColor: Colors.grey
-                                            .withOpacity(0.3), // Light gray
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        FadeInUp(
+                          duration: const Duration(milliseconds: 500),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: isButtonPressed
+                                        ? null
+                                        : () => _formValidation(),
+                                    // Register button styling
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isButtonPressed
+                                          ? Colors.grey
+                                          : const Color.fromARGB(255, 242, 198, 65),
+                                      padding: const EdgeInsets.symmetric(vertical: 10),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12.0),
                                       ),
-                                      child: Text(
-                                        isButtonPressed ? "Sign In" : "Sign In",
-                                        style: TextStyle(
-                                          color: isButtonPressed
-                                              ? Colors.black54
-                                              : const Color.fromARGB(
-                                              255, 67, 83, 89),
-                                          fontFamily: "Poppins",
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 20,
-                                        ),
+                                      elevation: 4,
+                                      // Elevation for the shadow
+                                      shadowColor: Colors.grey
+                                          .withOpacity(0.3), // Light gray
+                                    ),
+                                    child: Text(
+                                      isButtonPressed ? "Sign In" : "Sign In",
+                                      style: TextStyle(
+                                        color: isButtonPressed
+                                            ? Colors.black54
+                                            : const Color.fromARGB(
+                                            255, 67, 83, 89),
+                                        fontFamily: "Poppins",
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Register Button
+                        FadeInUp(
+                          duration: const Duration(milliseconds: 500),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    "Don't have an account?",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontFamily: "Poppins",
+                                      color: Colors.black54,
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => registrationPage(),
+                                    child: const Text(
+                                      "Register",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontFamily: "Poppins",
+                                        color: Color.fromARGB(255, 242, 198, 65),
                                       ),
                                     ),
                                   ),
                                 ],
-                              ),
-                            ),
+                              )
+                            ],
                           ),
-
-                          // Register Button
-                          FadeInUp(
-                            duration: const Duration(milliseconds: 500),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Text(
-                                      "Don't have an account?",
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontFamily: "Poppins",
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () => registrationPage(),
-                                      child: const Text(
-                                        "Register",
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontFamily: "Poppins",
-                                          color: Color.fromARGB(255, 242, 198, 65),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          )
-                          /*const SizedBox(height: 50,),
-                        FadeInUp(duration: const Duration(milliseconds: 500), child: const Text("Continue with social media", style: TextStyle(color: Colors.grey),)),
-                        const SizedBox(height: 30,),
-                        Row(
-                          children: <Widget>[
-                            Expanded(
-                              child: FadeInUp(duration: const Duration(milliseconds: 500), child: MaterialButton(
-                                onPressed: (){},
-                                height: 50,
-                                color: Colors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                child: const Center(
-                                  child: Text("Facebook", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-                                ),
-                              )),
-                            ),
-                            const SizedBox(width: 30,),
-                            Expanded(
-                              child: FadeInUp(duration: const Duration(milliseconds: 500), child: MaterialButton(
-                                onPressed: () {},
-                                height: 50,
-                                shape: RoundedRectangleBorder(
-
-
- borderRadius: BorderRadius.circular(50),
-
-                                ),
-                                color: Colors.black,
-                                child: const Center(
-                                  child: Text("Github", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
-                                ),
-                              )),
-                            )
-                          ],
-                        )*/
-                        ],
-                      ),
+                        )
+                      ],
                     ),
-                  )
-                ],
-              ),
-            ),
-          ],
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
