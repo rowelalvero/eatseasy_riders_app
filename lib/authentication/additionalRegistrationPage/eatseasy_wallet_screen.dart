@@ -153,7 +153,7 @@ class _EatsEasyPayWalletScreenState extends State<EatsEasyPayWalletScreen> {
                         image: const DecorationImage(
                             image: AssetImage('images/background.png'), // Replace with your desired image
                             fit: BoxFit.cover,
-                            opacity: 0.3
+                            opacity: 0.1
                         ),
                         gradient: LinearGradient(
                             begin: Alignment.topCenter, colors: [
