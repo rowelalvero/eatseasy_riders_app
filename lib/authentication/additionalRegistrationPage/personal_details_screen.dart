@@ -7,8 +7,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
 import '../../global/global.dart';
-import '../imageGetters/rider_profile.dart';
 import '../../widgets/image_picker.dart';
+import '../imageFilePaths/rider_profile.dart';
 
 class PersonalDetailsScreen extends StatefulWidget {
   const PersonalDetailsScreen({Key? key}) : super(key: key);

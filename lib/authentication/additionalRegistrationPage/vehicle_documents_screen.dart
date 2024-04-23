@@ -1,6 +1,4 @@
 import 'dart:io';
-
-import 'package:animate_do/animate_do.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global/global.dart';
 import '../../widgets/error_dialog.dart';
-import '../imageGetters/rider_profile.dart';
+import '../imageFilePaths/rider_profile.dart';
 import '../../widgets/image_picker.dart';
 
 class VehicleDocumentsScreen extends StatefulWidget {
@@ -314,12 +312,6 @@ class _VehicleDocumentsScreenState extends State<VehicleDocumentsScreen> {
                                     ))
 
                                         .toList(),
-                                    validator: (value) {
-                                      if (value == null) {
-                                        return 'Select document';
-                                      }
-                                      return null;
-                                    },
                                     onChanged: (value) {
                                       setState(() {
                                         changesSaved = false;

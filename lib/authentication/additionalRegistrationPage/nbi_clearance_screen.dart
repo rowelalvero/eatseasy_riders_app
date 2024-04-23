@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global/global.dart';
 import '../../widgets/error_dialog.dart';
-import '../imageGetters/rider_profile.dart';
+import '../imageFilePaths/rider_profile.dart';
 import '../../widgets/image_picker.dart';
 
 class NBIClearanceScreen extends StatefulWidget {

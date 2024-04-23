@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../authentication/imageGetters/rider_profile.dart';
+import '../authentication/imageFilePaths/rider_profile.dart';
 import '../authentication/imageUpload/image_upload.dart';
 
 class SignInProvider extends ChangeNotifier {

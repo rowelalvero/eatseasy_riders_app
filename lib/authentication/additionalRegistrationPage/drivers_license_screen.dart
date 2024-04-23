@@ -10,7 +10,7 @@ import '../../global/global.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/error_dialog.dart';
 import '../cameraPage/camera_page.dart';
-import '../imageGetters/rider_profile.dart';
+import '../imageFilePaths/rider_profile.dart';
 
 class DriversLicenseScreen extends StatefulWidget {
   const DriversLicenseScreen({Key? key}) : super(key: key);
@@ -121,45 +121,6 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
     );
   }
 
-  /*_getImage() async {
-    bool? isCamera = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-              child: const Text("Camera"),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: const Text("Gallery "),
-            ),
-          ],
-        ),
-      ),
-    );
-
-    if (isCamera == null) return;
-
-    XFile? file = await ImagePicker()
-        .pickImage(source: isCamera ? ImageSource.camera : ImageSource.gallery);
-    _isFrontImageSelected ? frontLicense = XFile(file!.path): backLicense = XFile(file!.path);
-    setState(() {
-      isButtonPressedDriversLicenseScreen = false;
-      changesSaved = false;
-      isCompleted = false;
-    });
-  }*/
-
   _showLicensePreviewDialog() async {
     showDialog(
       context: context,
@@ -188,8 +149,6 @@ class _DriversLicenseScreenState extends State<DriversLicenseScreen> {
       ),
     );
   }
-
-
 
   Future<void> _removeLicenseImage() async {
     setState(() {

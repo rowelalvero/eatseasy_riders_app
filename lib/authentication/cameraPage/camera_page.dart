@@ -4,8 +4,7 @@ import 'package:camera/camera.dart';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 
-import '../imageGetters/rider_profile.dart';
-
+import '../imageFilePaths/rider_profile.dart';
 
 class CameraWidget extends StatefulWidget {
 

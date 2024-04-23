@@ -1,13 +1,11 @@
 import 'dart:io';
-
-import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global/global.dart';
 import '../../widgets/error_dialog.dart';
-import '../imageGetters/rider_profile.dart';
+import '../imageFilePaths/rider_profile.dart';
 import '../../widgets/image_picker.dart';
 
 class OrCrScreen extends StatefulWidget {

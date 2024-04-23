@@ -4,7 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart' as fStorage;
 import 'package:image/image.dart' as img;
 
 import '../../global/global.dart';
-import '../imageGetters/rider_profile.dart';
+import '../imageFilePaths/rider_profile.dart';
 
 Future<String> uploadImage(String profilePath, String type) async {
   // Retrieve rider email to be a name of a folder

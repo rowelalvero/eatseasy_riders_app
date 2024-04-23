@@ -57,7 +57,7 @@ class _LogInScreenState extends State<LogInScreen> {
             });
 
         // Check if the number existing
-        DocumentSnapshot snap = await FirebaseFirestore.instance.collection('riders').doc("+63${contactNumberController.text}").get();
+        DocumentSnapshot snap = await FirebaseFirestore.instance.collection('riders').doc("+63${contactNumberController.text.trim()}").get();
         if (snap.exists) {
           print("EXISTING USER");
           login(context, contactNumberController.text.trim());
@@ -119,12 +119,13 @@ class _LogInScreenState extends State<LogInScreen> {
               openSnackbar(context, e.toString(), Colors.red);
             },
             codeSent: (String verificationId, int? forceResendingToken) {
+              Navigator.pop(context);
               showDialog(
                   barrierDismissible: false,
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text("Enter Code"),
+                      title: const Text("Enter OTP Code"),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -150,6 +151,13 @@ class _LogInScreenState extends State<LogInScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () async {
+                              showDialog(
+                                  context: context,
+                                  builder: (c) {
+                                    return const LoadingDialog(
+                                      message: "We are signing you in", isRegisterPage: false,
+                                    );
+                                  });
                               final code = otpCodeController.text.trim();
                               AuthCredential authCredential =
                               PhoneAuthProvider.credential(verificationId: verificationId, smsCode: code);
@@ -543,7 +551,7 @@ class _LogInScreenState extends State<LogInScreen> {
                                     ),
                                   ),
                                   TextButton(
-                                    onPressed: () => registrationPage(),
+                                    onPressed: () => nextScreen(context, '/registerScreen2'),
                                     child: const Text(
                                       "Register",
                                       style: TextStyle(

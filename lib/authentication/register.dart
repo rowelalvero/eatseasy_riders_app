@@ -256,12 +256,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               openSnackbar(context, e.toString(), Colors.red);
             },
             codeSent: (String verificationId, int? forceResendingToken) {
+              Navigator.pop(context);
+
               showDialog(
                   barrierDismissible: false,
                   context: context,
                   builder: (context) {
                     return AlertDialog(
-                      title: const Text("Enter Code"),
+                      title: const Text("Enter OTP Code"),
                       content: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -287,6 +289,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () async {
+                              showDialog(
+                                  context: context,
+                                  builder: (c) {
+                                    return const LoadingDialog(
+                                      message: "Loading", isRegisterPage: false,
+                                    );
+                                  });
                               final code = otpCodeController.text.trim();
                               AuthCredential authCredential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: code);
                               User user = (await FirebaseAuth.instance.signInWithCredential(authCredential)).user!;

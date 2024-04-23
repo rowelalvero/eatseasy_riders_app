@@ -10,8 +10,6 @@ import '../utils/next_screen.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 import '../global/global.dart';
-import 'imageGetters/rider_profile.dart';
-import 'imageUpload/image_upload.dart';
 
 class RegisterScreen2 extends StatefulWidget {
   const RegisterScreen2({Key? key}) : super(key: key);
@@ -141,25 +139,25 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     //Create or authenticate rider email and password to Firestore
     sp.checkUserExists().then((value) async {
       if (value == true) {
-        Navigator.pop(context);
         // user exists
-        showDialog(
-            context: context,
-            builder: (c) {
-              return const ErrorDialog(
-                message: "Account already exists.",
-              );
-            });
-
-      } else {
-        // user does not exist
         await sp.saveRegisterDataToFirestore().then((value) =>
             sp.saveDataToSharedPreferences().then(
                     (value) =>
                     sp.setSignIn().then((value) {
                       sp.userSignOut();
+                      Navigator.pop(context);
                       nextScreenReplace(context, '/logInScreen');
                     })));
+
+      } else {
+        // user does not exist
+        showDialog(
+            context: context,
+            builder: (c) {
+              return const ErrorDialog(
+                message: "Account did not exists.",
+              );
+            });
       }
     });
   }
