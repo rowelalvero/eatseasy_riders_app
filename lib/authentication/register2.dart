@@ -10,6 +10,7 @@ import '../utils/next_screen.dart';
 import '../widgets/error_dialog.dart';
 import '../widgets/loading_dialog.dart';
 import '../global/global.dart';
+import '../utils/snack_bar.dart';
 
 class RegisterScreen2 extends StatefulWidget {
   const RegisterScreen2({Key? key}) : super(key: key);
@@ -136,30 +137,35 @@ class _RegisterScreen2State extends State<RegisterScreen2> {
     final ip = context.read<InternetProvider>();
     await ip.checkInternetConnection();
 
-    //Create or authenticate rider email and password to Firestore
-    sp.checkUserExists().then((value) async {
-      if (value == true) {
-        // user exists
-        await sp.saveRegisterDataToFirestore().then((value) =>
-            sp.saveDataToSharedPreferences().then(
-                    (value) =>
-                    sp.setSignIn().then((value) {
-                      sp.userSignOut();
-                      Navigator.pop(context);
-                      nextScreenReplace(context, '/logInScreen');
-                    })));
+    if (ip.hasInternet == false) {
+      Navigator.pop(context);
+      openSnackbar(context, "Check your internet connection", Colors.red);
+    } else {
+      //Create or authenticate rider email and password to Firestore
+      sp.checkUserExists().then((value) async {
+        if (value == true) {
+          // user exists
+          await sp.saveRegisterDataToFirestore().then((value) =>
+              sp.saveDataToSharedPreferences().then(
+                      (value) =>
+                      sp.setSignIn().then((value) {
+                        sp.userSignOut();
+                        Navigator.pop(context);
+                        nextScreenReplace(context, '/logInScreen');
+                      })));
 
-      } else {
-        // user does not exist
-        showDialog(
-            context: context,
-            builder: (c) {
-              return const ErrorDialog(
-                message: "Account did not exists.",
-              );
-            });
-      }
-    });
+        } else {
+          // user does not exist
+          showDialog(
+              context: context,
+              builder: (c) {
+                return const ErrorDialog(
+                  message: "Account did not exists.",
+                );
+              });
+        }
+      });
+    }
   }
 
   Future<bool> _onWillPop() async {

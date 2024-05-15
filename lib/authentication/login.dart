@@ -107,6 +107,7 @@ class _LogInScreenState extends State<LogInScreen> {
     await ip.checkInternetConnection();
 
     if (ip.hasInternet == false) {
+      Navigator.pop(context);
       openSnackbar(context, "Check your internet connection", Colors.red);
     } else {
       if (_formKey.currentState!.validate()) {
@@ -116,6 +117,7 @@ class _LogInScreenState extends State<LogInScreen> {
               await FirebaseAuth.instance.signInWithCredential(credential);
             },
             verificationFailed: (FirebaseAuthException e) {
+              Navigator.pop(context);
               openSnackbar(context, e.toString(), Colors.red);
             },
             codeSent: (String verificationId, int? forceResendingToken) {
@@ -551,7 +553,7 @@ class _LogInScreenState extends State<LogInScreen> {
                                     ),
                                   ),
                                   TextButton(
-                                    onPressed: () => nextScreen(context, '/registerScreen2'),
+                                    onPressed: () => nextScreen(context, '/registerScreen'),
                                     child: const Text(
                                       "Register",
                                       style: TextStyle(

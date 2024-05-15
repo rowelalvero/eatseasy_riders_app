@@ -157,22 +157,36 @@ class SignInProvider extends ChangeNotifier {
 
     //The Rider profile image will upload to Firestorage
     riderImageUrl = await uploadImage(riderProfilePath, riderImageType);
+    riderProfile = null;
+
     //The Front License image will upload to Firestorage
     frontLicenseImageUrl = await uploadImage(frontLicensePath, fLicenseType);
+    frontLicense = null;
+    frontLicenseToBeCropped = null;
+
     //The Back License image will upload to Firestorage
     backLicenseImageUrl = await uploadImage(backLicensePath, bLicenseType);
+    backLicense = null;
+    backLicenseToBeCropped = null;
+
+    // The NBI image will upload to Firestorage
     if (nbiImage != null) {
-      //The NBI Clearance image will upload to Firestorage
-      nbiClearanceImageUrl =
-      await uploadImage(nbiClearancePath, nbiClearanceType);
+      nbiClearanceImageUrl = await uploadImage(nbiClearancePath, nbiClearanceType);
+      nbiImage = null;
     }
+
     //The OR image will upload to Firestorage
     orImageUrl = await uploadImage(orPath, orType);
+    orImage = null;
+
     //The CR image will upload to Firestorage
     crImageUrl = await uploadImage(crPath, crType);
+    crImage = null;
+
+    //The Vehicle Document Type will upload to Firestorage
     if (vehicleDoc != null) {
-      //The Vehicle Document Type will upload to Firestorage
       vehicleDocUrl = await uploadImage(vehicleDocPath, vehicleDocType);
+      vehicleDoc = null;
     }
 
     // Personal Details Screen
@@ -324,8 +338,8 @@ class SignInProvider extends ChangeNotifier {
   }
 
   Future clearStoredData() async {
-    final SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    sharedPreferences.clear();
+    sharedPreferences = await SharedPreferences.getInstance();
+    sharedPreferences?.clear();
   }
 
   void phoneNumberUser(User user, city, service, lastname, firstname, suffix, middleIn, contactNo, email) {

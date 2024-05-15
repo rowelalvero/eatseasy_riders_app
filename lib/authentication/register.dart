@@ -244,6 +244,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     await ip.checkInternetConnection();
 
     if (ip.hasInternet == false) {
+      Navigator.pop(context);
       openSnackbar(context, "Check your internet connection", Colors.red);
     } else {
       if (_formKey.currentState!.validate()) {
@@ -253,6 +254,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               await FirebaseAuth.instance.signInWithCredential(credential);
             },
             verificationFailed: (FirebaseAuthException e) {
+              Navigator.pop(context);
               openSnackbar(context, e.toString(), Colors.red);
             },
             codeSent: (String verificationId, int? forceResendingToken) {
