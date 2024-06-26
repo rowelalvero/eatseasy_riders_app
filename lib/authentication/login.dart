@@ -169,18 +169,32 @@ class _LogInScreenState extends State<LogInScreen> {
 
                               sp.phoneNumberLogin(user);
 
-                              // user exists
-                              await sp
-                                  .getUserDataFromFirestore(sp.uid)
-                                  .then((value) => sp
-                                  .saveDataToSharedPreferences()
-                                  .then((value) =>
-                                  sp.setSignIn().then((value) {
+                              if (await sp.checkUserApproved()) {
+                                // user exists
+                                await sp
+                                    .getUserDataFromFirestore(sp.uid)
+                                    .then((value) => sp
+                                    .saveDataToSharedPreferences()
+                                    .then((value) =>
+                                    sp.setSignIn().then((value) {
 
-                                    Navigator.pop(context);
-                                    isButtonPressed = !isButtonPressed;
-                                    nextScreenReplace(context, '/homeScreen');
-                                  })));
+                                      Navigator.pop(context);
+                                      isButtonPressed = !isButtonPressed;
+                                      nextScreenReplace(context, '/homeScreen');
+                                    })));
+                              }
+                              else {
+                                Navigator.pop(context);
+                                // user is restricted to login
+                                showDialog(
+                                    context: context,
+                                    builder: (c) {
+                                      return const ErrorDialog(
+                                        message: "Account is restricted.",
+                                      );
+                                    });
+                              }
+
                             },
                             child: const Text("Confirm"),
                           )

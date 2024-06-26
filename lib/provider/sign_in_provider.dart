@@ -315,6 +315,18 @@ class SignInProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // check if user is approved
+  Future<bool> checkUserApproved() async{
+    DocumentSnapshot snap = await FirebaseFirestore.instance.collection('users').doc(_uid).get();
+    if ((snap.data() as Map<String, dynamic>)["status"] == "approved") {
+      print("APPROVED USER");
+      return true;
+    } else {
+      print("BANNED USER");
+      return false;
+    }
+  }
+
   // checkUser exists or not in cloudfirestore
   Future<bool> checkUserExists() async {
     DocumentSnapshot snap = await FirebaseFirestore.instance.collection('riders').doc(_uid).get();
