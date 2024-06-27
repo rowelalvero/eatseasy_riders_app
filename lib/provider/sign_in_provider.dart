@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eatseasy_riders_app/global/global.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../authentication/imageFilePaths/rider_profile.dart';
@@ -10,6 +12,9 @@ import '../authentication/imageUpload/image_upload.dart';
 class SignInProvider extends ChangeNotifier {
   // instance of firebaseauth, facebook and google
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+  List<Placemark>? placeMarks;
+  Position? position;
 
   bool _isSignedIn = false;
   bool get isSignedIn => _isSignedIn;
@@ -337,6 +342,27 @@ class SignInProvider extends ChangeNotifier {
       print("NEW USER");
       return false;
     }
+  }
+
+  Future getLocation() async {
+    //request permission
+    await Geolocator.requestPermission();
+
+    Position? newPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    position = newPosition;
+    // Get the address from the coordinates
+    List<Placemark> placemarks = await placemarkFromCoordinates(
+        newPosition.latitude, newPosition.longitude);
+
+    placeMarks = placemarks;
+
+    /*// Display the address
+    Placemark placemark = placemarks[0];
+    _userAddress = '${placemark.subThoroughfare}, ${placemark.thoroughfare}, ${placemark.subLocality}, ${placemark.subLocality}, ${placemark.locality}, ${placemark.subAdministrativeArea}, ${placemark.administrativeArea}, ${placemark.postalCode}, ${placemark.country}';
+    _city = '${placemark.locality}';
+    _country = '${placemark.country}';*/
+    notifyListeners();
   }
 
   // signout

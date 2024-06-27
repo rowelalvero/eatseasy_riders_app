@@ -169,8 +169,8 @@ class _LogInScreenState extends State<LogInScreen> {
 
                               sp.phoneNumberLogin(user);
 
+                              // user exists
                               if (await sp.checkUserApproved()) {
-                                // user exists
                                 await sp
                                     .getUserDataFromFirestore(sp.uid)
                                     .then((value) => sp
@@ -194,7 +194,6 @@ class _LogInScreenState extends State<LogInScreen> {
                                       );
                                     });
                               }
-
                             },
                             child: const Text("Confirm"),
                           )
