@@ -117,7 +117,7 @@ class SignInProvider extends ChangeNotifier {
       "firstName": _firstName?.trim(), // Storing first name after trimming leading/trailing whitespace
       "middleIn": _middleInitial?.trim(), // Storing middle initial after trimming leading/trailing whitespace
       "suffix": _suffix, // Storing suffix after trimming leading/trailing whitespace
-      "contactNumber": "+63${_phoneNumber?.trim()}", // Storing contact number after trimming leading/trailing whitespace
+      "phoneNumber": "+63${_phoneNumber?.trim()}", // Storing contact number after trimming leading/trailing whitespace
       "serviceType": _serviceType, //Storing the service type of the rider
       "status": "pending", // Setting the status to 'pending'
       "earnings": 0.0, // Initializing earnings as 0.0
@@ -297,7 +297,7 @@ class SignInProvider extends ChangeNotifier {
     await s.setString("lastName", _lastName!);
     await s.setString("suffix", _suffix!);
     await s.setString("middleInitial", _middleInitial!);
-    await s.setString("contactNumber", "+63$_phoneNumber");
+    await s.setString("phoneNumber", "+63$_phoneNumber");
     await s.setString('email', _email!);
     notifyListeners();
   }

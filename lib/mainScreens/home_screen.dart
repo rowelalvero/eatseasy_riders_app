@@ -10,6 +10,7 @@ import '../assistantMethods/get_current_location.dart';
 import '../authentication/login.dart';
 import '../global/global.dart';
 import '../provider/sign_in_provider.dart';
+import '../widgets/app_drawer.dart';
 import 'new_orders_screen.dart';
 
 
@@ -185,20 +186,37 @@ class _HomeScreenState extends State<HomeScreen>
                 Colors.yellow.shade600
               ])),
         ),
-        title: const Text(
-          //"Welcome " + sharedPreferences!.getString("name")!,
-          "Welcome ",
-          style: TextStyle(
+        leading: Builder(
+          builder: (BuildContext context) {
+            return Padding(
+              padding: const EdgeInsets.only(left: 8.0), // Adjust the left padding as needed
+              child: IconButton(
+                icon: const Icon(
+                  Icons.menu,
+                  size: 26, // Change the size of the icon as needed
+                ),
+                color: Colors.white,
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              ),
+            );
+          },
+        ),
+        title: Text(
+          "Welcome, ${sharedPreferences!.getString("firstName")!}!",
+          style: const TextStyle(
             fontSize: 25.0,
-            color: Colors.black,
+            color: Colors.white,
             fontFamily: "Poppins",
             letterSpacing: 2,
-            fontWeight: FontWeight.w600
+            fontWeight: FontWeight.w500
           ),
         ),
-        centerTitle: true,
         automaticallyImplyLeading: false,
+
       ),
+      drawer: AppDrawer(),
       body: Container(
         padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 1),
         child: GridView.count(

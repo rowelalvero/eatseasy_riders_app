@@ -15,24 +15,63 @@ class EarningsScreen extends StatefulWidget
 class _EarningsScreenState extends State<EarningsScreen>
 {
   @override
-  Widget build(BuildContext context)
-  {
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      appBar: AppBar(
+        leading: Builder(
+          builder: (BuildContext context) {
+            return Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                ),
+                color: Colors.black,
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            );
+          },
+        ),
+        title: const Text(
+          'Total earnings',
+          style: TextStyle(
+            fontSize: 24,
+            color: Colors.black,
+            fontFamily: "Poppins",
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        automaticallyImplyLeading: true,
+      ),
       body: SafeArea(
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-
-              Text(
-                getCurrency() + previousRiderEarnings,
-                style: const TextStyle(
-                    fontSize: 80,
-                    color: Colors.white,
-                    fontFamily: "Poppins"
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    getCurrency(),
+                    style: const TextStyle(
+                        fontSize: 80,
+                        color: Colors.black,
+                    ),
+                  ),
+                  Text(
+                    previousRiderEarnings,
+                    style: const TextStyle(
+                        fontSize: 80,
+                        color: Colors.black,
+                        fontFamily: "Poppins"
+                    ),
+                  ),
+                ],
               ),
+
+
 
               const Text(
                 "Total Earnings",
@@ -48,7 +87,7 @@ class _EarningsScreenState extends State<EarningsScreen>
                 height: 20,
                 width: 200,
                 child: Divider(
-                  color: Colors.white,
+                  color: Colors.black,
                   thickness: 1.5,
                 ),
               ),
@@ -66,13 +105,13 @@ class _EarningsScreenState extends State<EarningsScreen>
                   child: ListTile(
                     leading: Icon(
                       Icons.arrow_back,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                     title: Text(
                       "Back",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                       ),
@@ -80,7 +119,6 @@ class _EarningsScreenState extends State<EarningsScreen>
                   ),
                 ),
               ),
-
             ],
           ),
         ),

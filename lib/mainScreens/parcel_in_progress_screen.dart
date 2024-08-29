@@ -38,7 +38,7 @@ class _ParcelInProgressScreenState extends State<ParcelInProgressScreen> {
           },
         ),
         title: const Text(
-          'New Orders',
+          'Parcels in progress',
           style: TextStyle(
             fontSize: 24,
             color: Colors.black,
