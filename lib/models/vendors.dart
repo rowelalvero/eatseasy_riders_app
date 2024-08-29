@@ -14,7 +14,7 @@ class Vendors {
   });
 
   Vendors.fromJson(Map<String, dynamic>json) {
-    vendorsUID = json["vendorUID"];
+    vendorsUID = json["uid"];
     vendorName = json["businessName"];
     vendorsAvatar = json["vendorAvatarUrl"];
     vendorsEmail = json["email"];
@@ -23,7 +23,7 @@ class Vendors {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data["vendorUID"] = this.vendorsUID;
+    data["uid"] = this.vendorsUID;
     data["businessName"] = this.vendorName;
     data["vendorAvatarUrl"] = this.vendorsAvatar;
     data["email"] = this.vendorsEmail;

@@ -145,6 +145,8 @@ class _HomeScreenState extends State<HomeScreen>
   getRiderPreviousEarnings()
   {
     final sp = context.read<SignInProvider>();
+    print("hehe");
+    print(sp.uid);
     FirebaseFirestore.instance
         .collection("riders")
         .doc(sp.uid)

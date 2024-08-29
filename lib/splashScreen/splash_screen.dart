@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:animate_do/animate_do.dart';
 import 'package:eatseasy_riders_app/global/global.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../provider/sign_in_provider.dart';
 
 class MySplashScreen extends StatefulWidget {
   const MySplashScreen({super.key});
@@ -14,11 +17,29 @@ class _MySplashScreenState extends State<MySplashScreen> {
   startTimer() {
     //Splash Screen wait 4 seconds
     Timer(const Duration(seconds: 4), () async {
+      final sp = context.read<SignInProvider>();
 
       //If the vendor already Logged in send them directly to the Home screen
-      if (firebaseAuth.currentUser != null) {
-        Navigator.pushReplacementNamed(context, '/homeScreen');
+        final currentUser = firebaseAuth.currentUser;
+        if (currentUser != null) {
+        print(currentUser.phoneNumber);
+        print("sasasa");
+        await sp
+            .getDataFromSharedPreferences()
+            .then((value) => sp
+            .getUserDataFromFirestore(sp.uid)
+            .then((value) => sp
+            .saveDataToSharedPreferences()
+            .then((value) =>
+            sp.setSignIn().then((value) {
+
+              Navigator.pushReplacementNamed(context, '/homeScreen');
+            }))));
+        /*if (await sp.checkUserApproved()) {
+
+        }*/
       }
+
       //If vendor is not logged in send them to Authentication and LogIn screen
       else {
         Navigator.pushReplacementNamed(context, '/logInScreen');
@@ -40,26 +61,26 @@ class _MySplashScreenState extends State<MySplashScreen> {
     return Material(
       child: Container(
         color: const Color.fromARGB(255, 242, 198, 65),
-        child: Center(
+        child: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                        Text(
                           "EatsEasy",
                           style: TextStyle(color: Colors.white, fontSize: 65, fontFamily: "Poppins", fontWeight: FontWeight.w700),
                         ),
-                        const SizedBox(
+                        SizedBox(
                           height: 10,
                         ),
-                        const Text(
+                        Text(
                           "rider",
                           style: TextStyle(color: Colors.white, fontSize: 33, fontFamily: "Poppins", fontStyle: FontStyle.italic),
                         )

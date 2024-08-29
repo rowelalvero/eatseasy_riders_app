@@ -78,7 +78,6 @@ class _LogInScreenState extends State<LogInScreen> {
               });
         }
         //Login
-
       } else {
         showDialog(
             context: context,

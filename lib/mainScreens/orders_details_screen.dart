@@ -31,7 +31,7 @@ class _OrdersDetailsScreenState extends State<OrdersDetailsScreen> {
     {
       orderStatus = DocumentSnapshot.data()!["status"].toString();
       orderByUser = DocumentSnapshot.data()!["orderBy"].toString();
-      vendorId = DocumentSnapshot.data()!["vendorUID"].toString();
+      vendorId = DocumentSnapshot.data()!["uid"].toString();
     });
   }
 

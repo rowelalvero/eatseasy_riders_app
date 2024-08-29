@@ -39,9 +39,11 @@ class _ParcelDeliveringScreenState extends State<ParcelDeliveringScreen>
 
   confirmParcelHasBeenDelivered(getOrderId, vendorId, purchaserId, purchaserAddress, purchaserLat, purchaserLng)
   {
-    print("sssssssssssssssssssss"+previousRiderEarnings);
-    double prevRiderEarnings = double.parse(previousRiderEarnings);
-    double perParcelDeliveryFee= double.parse(perParcelDeliveryAmount);
+
+    print("hehe $previousRiderEarnings");
+    double prevRiderEarnings = double.parse(previousRiderEarnings == '' ? '0.00' : previousRiderEarnings);
+    double perParcelDeliveryFee = double.parse(perParcelDeliveryAmount == '' ? '0.00' : perParcelDeliveryAmount);
+
     String riderNewTotalEarningAmount = (prevRiderEarnings + perParcelDeliveryFee).toString();
 
     final sp = context.read<SignInProvider>();
@@ -97,7 +99,7 @@ class _ParcelDeliveringScreenState extends State<ParcelDeliveringScreen>
         .then((snap)
     {
       orderTotalAmount = snap.data()!["totalAmount"].toString();
-      widget.vendorId = snap.data()!["vendorUID"].toString();
+      widget.vendorId = snap.data()!["uid"].toString();
     }).then((value)
     {
       getVendorData();

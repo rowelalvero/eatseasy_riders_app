@@ -322,7 +322,7 @@ class SignInProvider extends ChangeNotifier {
 
   // check if user is approved
   Future<bool> checkUserApproved() async{
-    DocumentSnapshot snap = await FirebaseFirestore.instance.collection('users').doc(_uid).get();
+    DocumentSnapshot snap = await FirebaseFirestore.instance.collection('riders').doc(_uid).get();
     if ((snap.data() as Map<String, dynamic>)["status"] == "approved") {
       print("APPROVED USER");
       return true;

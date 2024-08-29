@@ -23,7 +23,7 @@ class Menus {
 
   Menus.fromJson(Map<String, dynamic> json) {
     menuID = json["menuID"];
-    vendorUID = json["vendorUID"];
+    vendorUID = json["uid"];
     menuTitle = json["menuTitle"];
     menuDescription = json["menuDescription"];
     //menuPrice = json["menuPrice"];
@@ -35,7 +35,7 @@ class Menus {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
     data["menuID"] = menuID;
-    data["vendorUID"] = vendorUID;
+    data["uid"] = vendorUID;
     data["menuTitle"] = menuTitle;
     data["menuDescription"] = menuDescription;
     //data["menuPrice"] = menuPrice;
