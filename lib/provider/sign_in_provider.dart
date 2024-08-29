@@ -56,8 +56,8 @@ class SignInProvider extends ChangeNotifier {
   String? _middleInitial;
   String? get middleInitial => _middleInitial;
 
-  String? _contactNum;
-  String? get contactNum => _contactNum;
+  String? _phoneNumber;
+  String? get contactNum => _phoneNumber;
 
   String? _email;
   String? get email => _email;
@@ -95,7 +95,7 @@ class SignInProvider extends ChangeNotifier {
               _lastName = snapshot['lastName'],
               _suffix = snapshot['suffix'],
               _middleInitial = snapshot['middleIn'],
-              _contactNum = snapshot['contactNumber'],
+              _phoneNumber = snapshot['phoneNumber'],
               _email = snapshot['email'],
               _imageUrl = snapshot['image_url'],
               _provider = snapshot['provider'],
@@ -117,7 +117,7 @@ class SignInProvider extends ChangeNotifier {
       "firstName": _firstName?.trim(), // Storing first name after trimming leading/trailing whitespace
       "middleIn": _middleInitial?.trim(), // Storing middle initial after trimming leading/trailing whitespace
       "suffix": _suffix, // Storing suffix after trimming leading/trailing whitespace
-      "contactNumber": "+63${_contactNum?.trim()}", // Storing contact number after trimming leading/trailing whitespace
+      "contactNumber": "+63${_phoneNumber?.trim()}", // Storing contact number after trimming leading/trailing whitespace
       "serviceType": _serviceType, //Storing the service type of the rider
       "status": "pending", // Setting the status to 'pending'
       "earnings": 0.0, // Initializing earnings as 0.0
@@ -297,7 +297,7 @@ class SignInProvider extends ChangeNotifier {
     await s.setString("lastName", _lastName!);
     await s.setString("suffix", _suffix!);
     await s.setString("middleInitial", _middleInitial!);
-    await s.setString("contactNumber", "+63$_contactNum");
+    await s.setString("contactNumber", "+63$_phoneNumber");
     await s.setString('email', _email!);
     notifyListeners();
   }
@@ -315,7 +315,7 @@ class SignInProvider extends ChangeNotifier {
     _lastName = s.getString('lastName');
     _suffix = s.getString('suffix');
     _middleInitial = s.getString('middleInitial');
-    _contactNum = s.getString('contactNumber');
+    _phoneNumber = s.getString('phoneNumber');
     _email = s.getString('email');
     notifyListeners();
   }
@@ -380,7 +380,7 @@ class SignInProvider extends ChangeNotifier {
     sharedPreferences?.clear();
   }
 
-  void phoneNumberUser(User user, city, service, lastname, firstname, suffix, middleIn, contactNo, email) {
+  void phoneNumberUser(User user, city, service, lastname, firstname, suffix, middleIn, phoneNumber, email) {
     _city = city;
     _serviceType = service;
     _firstName = firstname;
@@ -388,8 +388,8 @@ class SignInProvider extends ChangeNotifier {
     _suffix = suffix;
     _middleInitial = middleIn;
     _email = email;
-    _contactNum = contactNo;
-    _uid = user.phoneNumber;
+    _phoneNumber = phoneNumber;
+    _uid = user.uid;
     if (_riderAvatar == null) {
       _imageUrl =
       "https://winaero.com/blog/wp-content/uploads/2017/12/User-icon-256-blue.png";
@@ -399,6 +399,7 @@ class SignInProvider extends ChangeNotifier {
   }
 
   void phoneNumberLogin(User user) {
-    _uid = user.phoneNumber;
+    _uid = user.uid;
+    _phoneNumber = user.phoneNumber;
   }
 }

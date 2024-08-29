@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -251,15 +252,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
         FirebaseAuth.instance.verifyPhoneNumber(
             phoneNumber: "+63$mobile",
             verificationCompleted: (AuthCredential credential) async {
-              await FirebaseAuth.instance.signInWithCredential(credential);
+              try {
+                // Sign in automatically when verification is completed
+                UserCredential userCredential =
+                await FirebaseAuth.instance.signInWithCredential(credential);
+
+                // After sign-in, check if user exists in Firestore
+                await _checkUserInFirestore(context, userCredential.user!, sp);
+              } catch (e) {
+                Navigator.pop(context);
+                openSnackbar(context, e.toString(), Colors.red);
+              }
             },
             verificationFailed: (FirebaseAuthException e) {
               Navigator.pop(context);
-              openSnackbar(context, e.toString(), Colors.red);
+              openSnackbar(context, e.message ?? "Verification failed", Colors.red);
             },
             codeSent: (String verificationId, int? forceResendingToken) {
               Navigator.pop(context);
-
               showDialog(
                   barrierDismissible: false,
                   context: context,
@@ -302,38 +312,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               AuthCredential authCredential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: code);
                               User user = (await FirebaseAuth.instance.signInWithCredential(authCredential)).user!;
                               // save the values
-                              sp.phoneNumberUser(
-                                  user,
-                                  cityController,
-                                  serviceTypeController,
-                                  lastNameController.text,
-                                  firstNameController.text,
-                                  suffixController,
-                                  middleInitialController.text,
-                                  contactNumberController.text,
-                                  emailController.text);
-                              // checking whether user exists,
-                              sp.checkUserExists().then((value) async {
-                                if (value == true) {
-                                  Navigator.pop(context);
-                                  // user exists
-                                  showDialog(
-                                      context: context,
-                                      builder: (c) {
-                                        return const ErrorDialog(
-                                          message: "Account already exists.",
-                                        );
-                                      });
-                                } else {
-                                  // user does not exist
-                                  await sp.saveDataToFirestore().then((value) =>
-                                      sp.saveDataToSharedPreferences().then(
-                                              (value) =>
-                                              sp.setSignIn().then((value) {
-                                                nextScreenReplace(context, '/registerScreen2');
-                                              })));
-                                }
-                              });
+                              try {
+                                // Manually sign in the user
+                                UserCredential userCredential =
+                                await FirebaseAuth.instance.signInWithCredential(authCredential);
+
+                                sp.phoneNumberUser(
+                                    user,
+                                    cityController,
+                                    serviceTypeController,
+                                    lastNameController.text,
+                                    firstNameController.text,
+                                    suffixController,
+                                    middleInitialController.text,
+                                    contactNumberController.text,
+                                    emailController.text
+                                );
+
+                                // After sign-in, Check if user exists in Firestore
+                                await _checkUserInFirestore(
+                                    context, userCredential.user!, sp);
+
+                              } catch(e) {
+                                Navigator.pop(context); // Close loading dialog
+                                openSnackbar(context, e.toString(), Colors.red);
+                              }
                             },
                             child: const Text("Confirm"),
                           )
@@ -344,6 +347,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
             },
             codeAutoRetrievalTimeout: (String verification) {});
       }
+    }
+  }
+
+  // checking whether user exists,
+  Future<void> _checkUserInFirestore(
+      BuildContext context, User user, SignInProvider sp) async {
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    try {
+      DocumentSnapshot userDoc =
+      await _firestore.collection('riders').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        // User exists in Firestore
+        Navigator.pop(context);
+        // user exists
+        showDialog(
+            context: context,
+            builder: (c) {
+              return const ErrorDialog(
+                message: "Account already exists.",
+              );
+            });
+
+      } else {
+        // user does not exist
+        await sp.saveDataToFirestore().then((value) =>
+            sp.saveDataToSharedPreferences().then(
+                    (value) =>
+                    sp.setSignIn().then((value) {
+                      nextScreenReplace(context, '/registerScreen2');
+                    })));
+      }
+    } catch (e) {
+      Navigator.pop(context); // Close any loading or OTP dialogs
+      openSnackbar(context, e.toString(), Colors.red);
     }
   }
 

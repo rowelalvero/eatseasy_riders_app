@@ -56,27 +56,8 @@ class _LogInScreenState extends State<LogInScreen> {
               );
             });
 
-        // Check if the number existing
-        DocumentSnapshot snap = await FirebaseFirestore.instance.collection('riders').doc("+63${contactNumberController.text.trim()}").get();
-        if (snap.exists) {
-          print("EXISTING USER");
-          login(context, contactNumberController.text.trim());
-        } else {
-          print("NEW USER");
-          setState(() {
-            _isContactNumberControllerInvalid = true;
-          });
+        login(context, contactNumberController.text.trim());
 
-          Navigator.pop(context);
-          // user do not exists
-          showDialog(
-              context: context,
-              builder: (c) {
-                return const ErrorDialog(
-                  message: "Account does not exist.",
-                );
-              });
-        }
         //Login
       } else {
         showDialog(
@@ -113,11 +94,22 @@ class _LogInScreenState extends State<LogInScreen> {
         FirebaseAuth.instance.verifyPhoneNumber(
             phoneNumber: "+63$mobile",
             verificationCompleted: (AuthCredential credential) async {
-              await FirebaseAuth.instance.signInWithCredential(credential);
+              try {
+                // Sign in automatically when verification is completed
+                UserCredential userCredential =
+                await FirebaseAuth.instance.signInWithCredential(credential);
+
+                // After sign-in, check if user exists in Firestore
+                await _checkUserInFirestore(context, userCredential.user!, sp);
+              } catch (e) {
+                Navigator.pop(context);
+                Navigator.pop(context);
+                openSnackbar(context, e.toString(), Colors.red);
+              }
             },
             verificationFailed: (FirebaseAuthException e) {
               Navigator.pop(context);
-              openSnackbar(context, e.toString(), Colors.red);
+              openSnackbar(context, e.message ?? "Verification failed", Colors.red);
             },
             codeSent: (String verificationId, int? forceResendingToken) {
               Navigator.pop(context);
@@ -159,39 +151,23 @@ class _LogInScreenState extends State<LogInScreen> {
                                       message: "We are signing you in", isRegisterPage: false,
                                     );
                                   });
+
                               final code = otpCodeController.text.trim();
                               AuthCredential authCredential =
                               PhoneAuthProvider.credential(verificationId: verificationId, smsCode: code);
-                              User user = (await FirebaseAuth.instance
-                                  .signInWithCredential(authCredential))
-                                  .user!;
 
-                              sp.phoneNumberLogin(user);
+                              try {
+                                // Manually sign in the user
+                                UserCredential userCredential =
+                                await FirebaseAuth.instance
+                                    .signInWithCredential(authCredential);
 
-                              // user exists
-                              if (await sp.checkUserApproved()) {
-                                await sp
-                                    .getUserDataFromFirestore(sp.uid)
-                                    .then((value) => sp
-                                    .saveDataToSharedPreferences()
-                                    .then((value) =>
-                                    sp.setSignIn().then((value) {
-
-                                      Navigator.pop(context);
-                                      isButtonPressed = !isButtonPressed;
-                                      nextScreenReplace(context, '/homeScreen');
-                                    })));
-                              }
-                              else {
-                                Navigator.pop(context);
-                                // user is restricted to login
-                                showDialog(
-                                    context: context,
-                                    builder: (c) {
-                                      return const ErrorDialog(
-                                        message: "Account is restricted.",
-                                      );
-                                    });
+                                // After sign-in, check if user exists in Firestore
+                                await _checkUserInFirestore(
+                                    context, userCredential.user!, sp);
+                              } catch (e) {
+                                Navigator.pop(context); // Close loading dialog
+                                openSnackbar(context, e.toString(), Colors.red);
                               }
                             },
                             child: const Text("Confirm"),
@@ -203,6 +179,57 @@ class _LogInScreenState extends State<LogInScreen> {
             },
             codeAutoRetrievalTimeout: (String verification) {});
       }
+    }
+  }
+
+  // Function to check if the user exists in Firestore
+  Future<void> _checkUserInFirestore(
+      BuildContext context, User user, SignInProvider sp) async {
+    final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+    try {
+      DocumentSnapshot userDoc =
+      await _firestore.collection('riders').doc(user.uid).get();
+
+      if (userDoc.exists) {
+        // User exists in Firestore
+        sp.phoneNumberLogin(user);
+
+        if (await sp.checkUserApproved()) {
+          // Fetch and save user data
+          await sp
+              .getUserDataFromFirestore(sp.uid)
+              .then((value) => sp
+              .saveDataToSharedPreferences()
+              .then((value) { sp
+              .setSignIn().then((value) {
+
+            Navigator.pop(context); // Close OTP dialog
+            nextScreenReplace(context, '/homeScreen');
+          });
+          }));
+        } else {
+          // User is restricted
+          Navigator.pop(context); // Close OTP dialog
+          showDialog(
+            context: context,
+            builder: (c) {
+              return const ErrorDialog(
+                message: "Account is restricted.",
+              );
+            },
+          );
+        }
+      } else {
+        // User does not exist in Firestore
+        Navigator.pop(context); // Close OTP dialog
+        Navigator.pop(context);
+        openSnackbar(context, "User not found. Please register.", Colors.red);
+        // Optionally, navigate to the registration screen
+      }
+    } catch (e) {
+      Navigator.pop(context); // Close any loading or OTP dialogs
+      openSnackbar(context, e.toString(), Colors.red);
     }
   }
   /*logInNow() async {
